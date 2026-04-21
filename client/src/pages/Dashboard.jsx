@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import api from '../lib/api';
+import api, { BACKEND_URL } from '../lib/api';
 import { Link } from 'react-router-dom';
 import { Settings, Plus, Image as ImageIcon, MapPin, DollarSign, Trash2, Home } from 'lucide-react';
 
@@ -12,10 +12,17 @@ const Dashboard = () => {
     description: '',
     price: '',
     location: '',
-    imageStr: '', // comma separated links
+    lat: '',
+    lng: '',
+    owner_name: '',
+    phone_number: '',
+    alternate_phone: '',
+    email: '',
     video_url: '',
     ai_model_url: '',
   });
+  const [imageFiles, setImageFiles] = useState([]);
+  const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
 
@@ -39,23 +46,51 @@ const Dashboard = () => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
+  const handleImageChange = (e) => {
+    const files = Array.from(e.target.files);
+    setImageFiles(files);
+    
+    const previews = files.map(file => URL.createObjectURL(file));
+    setImagePreviews(previews);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
     setMessage(null);
     try {
-      const images = formData.imageStr.split(',').map(i => i.trim()).filter(i => i);
+      let uploadedImageUrls = [];
+      
+      // Upload images if any
+      if (imageFiles.length > 0) {
+        const uploadData = new FormData();
+        imageFiles.forEach(file => {
+          uploadData.append('images', file);
+        });
+        
+        const uploadRes = await api.post('/upload', uploadData, {
+          headers: { 'Content-Type': 'multipart/form-data' }
+        });
+        uploadedImageUrls = uploadRes.data.urls;
+      }
+
       const dataToSubmit = {
         ...formData,
         price: Number(formData.price),
-        images,
+        lat: formData.lat ? Number(formData.lat) : undefined,
+        lng: formData.lng ? Number(formData.lng) : undefined,
+        images: uploadedImageUrls,
       };
 
       await api.post('/property', dataToSubmit);
       setMessage('Property created successfully!');
       setFormData({
-        title: '', description: '', price: '', location: '', imageStr: '', video_url: '', ai_model_url: ''
+        title: '', description: '', price: '', location: '', lat: '', lng: '',
+        owner_name: '', phone_number: '', alternate_phone: '', email: '',
+        video_url: '', ai_model_url: ''
       });
+      setImageFiles([]);
+      setImagePreviews([]);
       fetchProperties();
     } catch (err) {
       setMessage('Error creating property.');
@@ -84,7 +119,7 @@ const Dashboard = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Section */}
-        <div className="lg:col-span-1 border border-gray-200 bg-white p-6 rounded-xl shadow-sm h-fit">
+        <div className="lg:col-span-1 border border-gray-200 bg-white p-6 rounded-xl shadow-sm h-fit max-h-[80vh] overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-indigo-500" /> Add New Property
           </h2>
@@ -109,7 +144,7 @@ const Dashboard = () => {
                 </div>
               </div>
               <div className="w-1/2">
-                <label className="block text-sm font-medium text-gray-700">Location</label>
+                <label className="block text-sm font-medium text-gray-700">Location Name</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <MapPin className="h-4 w-4 text-gray-400" />
@@ -118,15 +153,42 @@ const Dashboard = () => {
                 </div>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Image URLs (comma separated)</label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <ImageIcon className="h-4 w-4 text-gray-400" />
-                </div>
-                <input type="text" name="imageStr" value={formData.imageStr} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
+            
+            <div className="flex gap-4">
+              <div className="w-1/2">
+                <label className="block text-sm font-medium text-gray-700">Latitude</label>
+                <input type="number" step="any" name="lat" value={formData.lat} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="e.g. 40.7128" />
+              </div>
+              <div className="w-1/2">
+                <label className="block text-sm font-medium text-gray-700">Longitude</label>
+                <input type="number" step="any" name="lng" value={formData.lng} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="e.g. -74.0060" />
               </div>
             </div>
+
+            <div className="pt-4 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Contact Details</h3>
+              <div className="space-y-3">
+                <input type="text" name="owner_name" value={formData.owner_name} onChange={handleChange} placeholder="Owner Name" className="block w-full border border-gray-300 rounded-md p-2" />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" className="block w-full border border-gray-300 rounded-md p-2" />
+                <div className="flex gap-4">
+                  <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleChange} placeholder="Phone Number" className="block w-full border border-gray-300 rounded-md p-2" />
+                  <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handleChange} placeholder="Alt Phone" className="block w-full border border-gray-300 rounded-md p-2" />
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 border-t border-gray-100">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Property Images</label>
+              <input type="file" multiple accept="image/jpeg, image/png, image/jpg" onChange={handleImageChange} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+              {imagePreviews.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {imagePreviews.map((src, idx) => (
+                    <img key={idx} src={src} alt="Preview" className="w-full h-20 object-cover rounded" />
+                  ))}
+                </div>
+              )}
+            </div>
+            
             <div>
               <label className="block text-sm font-medium text-gray-700">Video URL (optional)</label>
               <input type="url" name="video_url" value={formData.video_url} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
@@ -157,7 +219,7 @@ const Dashboard = () => {
           ) : (
             properties.map(property => (
               <div key={property._id} className="flex bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                <img src={property.images[0] || 'https://via.placeholder.com/150'} alt="Property" className="w-48 h-auto object-cover" />
+                <img src={property.images[0] ? (property.images[0].startsWith('http') ? property.images[0] : `${BACKEND_URL}${property.images[0]}`) : 'https://via.placeholder.com/150'} alt="Property" className="w-48 h-auto object-cover" />
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start">

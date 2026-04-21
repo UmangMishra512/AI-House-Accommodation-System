@@ -1,12 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api from '../lib/api';
+import api, { BACKEND_URL } from '../lib/api';
 import { MapPin, DollarSign, ArrowLeft } from 'lucide-react';
 
 const PropertyDetail = () => {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [contactStatus, setContactStatus] = useState({ loading: false, success: false, error: '' });
+
+  const handleContactSubmit = async (e) => {
+    e.preventDefault();
+    setContactStatus({ loading: true, success: false, error: '' });
+    try {
+      await api.post('/contact', { ...contactForm, property_id: id });
+      setContactStatus({ loading: false, success: true, error: '' });
+      setContactForm({ name: '', email: '', message: '' });
+    } catch (err) {
+      setContactStatus({ loading: false, success: false, error: 'Failed to send message.' });
+    }
+  };
 
   useEffect(() => {
     const fetchProperty = async () => {
@@ -66,9 +80,16 @@ const PropertyDetail = () => {
             {/* Images Grid */}
             {property.images && property.images.length > 0 && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <img src={property.images[0]} alt="Main" className="w-full h-80 object-cover rounded-2xl sm:col-span-2" />
+                <img 
+                  src={property.images[0].startsWith('http') ? property.images[0] : `${BACKEND_URL}${property.images[0]}`} 
+                  alt="Main" className="w-full h-80 object-cover rounded-2xl sm:col-span-2" 
+                />
                 {property.images.slice(1, 3).map((img, idx) => (
-                  <img key={idx} src={img} alt={`Additional ${idx}`} className="w-full h-48 object-cover rounded-2xl" />
+                  <img 
+                    key={idx} 
+                    src={img.startsWith('http') ? img : `${BACKEND_URL}${img}`} 
+                    alt={`Additional ${idx}`} className="w-full h-48 object-cover rounded-2xl" 
+                  />
                 ))}
               </div>
             )}
@@ -95,6 +116,23 @@ const PropertyDetail = () => {
                 </div>
               </div>
             )}
+
+            {/* Map Location */}
+            {property.lat && property.lng && (
+              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm mt-8">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Location Map</h2>
+                <div className="relative w-full overflow-hidden rounded-2xl h-96 bg-gray-100">
+                   <iframe
+                     width="100%"
+                     height="100%"
+                     frameBorder="0"
+                     style={{ border: 0 }}
+                     src={`https://maps.google.com/maps?q=${property.lat},${property.lng}&hl=en&z=14&output=embed`}
+                     allowFullScreen
+                   ></iframe>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Sidebar Area */}
@@ -106,8 +144,17 @@ const PropertyDetail = () => {
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Scan & Share</h3>
                 <p className="text-sm text-gray-500 mb-6">Scan this QR code natively using a smartphone camera to save and share this property.</p>
                 {property.qr_code_url ? (
-                  <div className="flex justify-center p-4 bg-gray-50 rounded-xl">
-                    <img src={property.qr_code_url} alt="Property QR Code" className="w-48 h-48 mix-blend-multiply" />
+                  <div className="flex flex-col items-center">
+                    <div className="flex justify-center p-4 bg-gray-50 rounded-xl mb-4 w-full">
+                      <img src={property.qr_code_url} alt="Property QR Code" className="w-48 h-48 mix-blend-multiply" />
+                    </div>
+                    <a 
+                      href={property.qr_code_url} 
+                      download="property-qr.png"
+                      className="w-full text-center bg-indigo-50 text-indigo-700 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
+                    >
+                      Download QR Code
+                    </a>
                   </div>
                 ) : (
                   <p className="text-gray-400 italic">No QR code available</p>
@@ -120,16 +167,41 @@ const PropertyDetail = () => {
                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Listed by Host</h3>
                    <div className="flex items-center gap-4 mt-4">
                      <div className="h-12 w-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold">
-                       {property.owner_id.name.charAt(0).toUpperCase()}
+                       {(property.owner_name || property.owner_id.name).charAt(0).toUpperCase()}
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">{property.owner_id.name}</p>
-                       <p className="text-sm text-gray-500">{property.owner_id.email}</p>
+                       <p className="text-sm font-medium text-gray-900">{property.owner_name || property.owner_id.name}</p>
+                       <p className="text-sm text-gray-500">{property.email || property.owner_id.email}</p>
                      </div>
                    </div>
-                   <button className="mt-6 w-full bg-indigo-600 text-white py-3 px-4 rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-sm focus:ring-4 focus:ring-indigo-100">
-                     Contact Host
-                   </button>
+                   
+                   <div className="mt-6 flex flex-col gap-3">
+                     {property.phone_number && (
+                       <a href={`tel:${property.phone_number}`} className="w-full flex items-center justify-center bg-white border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
+                         Call Now
+                       </a>
+                     )}
+                     {(property.email || property.owner_id.email) && (
+                       <a href={`mailto:${property.email || property.owner_id.email}`} className="w-full flex items-center justify-center bg-white border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
+                         Email Host
+                       </a>
+                     )}
+                   </div>
+
+                   <hr className="my-6 border-indigo-100" />
+                   
+                   <h4 className="text-md font-semibold text-gray-900 mb-4">Send a Message</h4>
+                   {contactStatus.success && <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm mb-4">Message sent successfully!</div>}
+                   {contactStatus.error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm mb-4">{contactStatus.error}</div>}
+                   
+                   <form onSubmit={handleContactSubmit} className="space-y-3">
+                     <input required type="text" placeholder="Your Name" value={contactForm.name} onChange={(e) => setContactForm({...contactForm, name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
+                     <input required type="email" placeholder="Your Email" value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
+                     <textarea required placeholder="I'm interested in this property..." rows="3" value={contactForm.message} onChange={(e) => setContactForm({...contactForm, message: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"></textarea>
+                     <button disabled={contactStatus.loading} type="submit" className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
+                       {contactStatus.loading ? 'Sending...' : 'Send Message'}
+                     </button>
+                   </form>
                 </div>
               )}
             </div>

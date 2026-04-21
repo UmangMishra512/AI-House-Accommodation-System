@@ -35,13 +35,19 @@ router.get('/:id', async (req, res) => {
 // POST /api/property
 router.post('/', auth, async (req, res) => {
   try {
-    const { title, description, price, location, images, video_url, ai_model_url } = req.body;
+    const { title, description, price, location, lat, lng, images, video_url, ai_model_url, owner_name, phone_number, alternate_phone, email } = req.body;
 
     const newProperty = new Property({
       title,
       description,
       price,
       location,
+      lat,
+      lng,
+      owner_name,
+      phone_number,
+      alternate_phone,
+      email,
       images: images || [],
       video_url,
       ai_model_url,
@@ -63,6 +69,35 @@ router.post('/', auth, async (req, res) => {
     res.json(savedProperty);
   } catch (err) {
     console.error(err.message);
+    res.status(500).send('Server error');
+  }
+});
+
+// PUT /api/property/:id
+router.put('/:id', auth, async (req, res) => {
+  try {
+    const property = await Property.findById(req.params.id);
+
+    if (!property) {
+      return res.status(404).json({ message: 'Property not found' });
+    }
+
+    if (property.owner_id.toString() !== req.user.id) {
+      return res.status(401).json({ message: 'User not authorized' });
+    }
+
+    const updatedProperty = await Property.findByIdAndUpdate(
+      req.params.id,
+      { $set: req.body },
+      { new: true }
+    );
+
+    res.json(updatedProperty);
+  } catch (err) {
+    console.error(err.message);
+    if (err.kind === 'ObjectId') {
+      return res.status(404).json({ message: 'Property not found' });
+    }
     res.status(500).send('Server error');
   }
 });

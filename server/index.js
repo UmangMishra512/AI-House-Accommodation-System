@@ -9,9 +9,17 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+const path = require('path');
+
 // Routes
 app.use('/api/auth', require('./routes/auth'));
 app.use('/api/property', require('./routes/property'));
+app.use('/api/upload', require('./routes/upload'));
+app.use('/api/contact', require('./routes/contact'));
+app.use('/api/admin', require('./routes/admin'));
+
+// Serve uploads statically
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database Connection
 const PORT = process.env.PORT || 5000;
