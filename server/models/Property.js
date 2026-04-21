@@ -38,9 +38,9 @@ const propertySchema = new mongoose.Schema({
   images: [{
     type: String,
   }],
-  video_url: {
+  video_url: [{
     type: String,
-  },
+  }],
   ai_model_url: {
     type: String,
   },

@@ -18,9 +18,11 @@ const Dashboard = () => {
     phone_number: '',
     alternate_phone: '',
     email: '',
-    video_url: '',
     ai_model_url: '',
   });
+  const [videoUrls, setVideoUrls] = useState(['']);
+  const [phoneCode, setPhoneCode] = useState('+91');
+  const [altPhoneCode, setAltPhoneCode] = useState('+91');
   const [imageFiles, setImageFiles] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -79,7 +81,10 @@ const Dashboard = () => {
         price: Number(formData.price),
         lat: formData.lat ? Number(formData.lat) : undefined,
         lng: formData.lng ? Number(formData.lng) : undefined,
+        phone_number: formData.phone_number ? `${phoneCode} ${formData.phone_number}` : '',
+        alternate_phone: formData.alternate_phone ? `${altPhoneCode} ${formData.alternate_phone}` : '',
         images: uploadedImageUrls,
+        video_url: videoUrls.filter(v => v.trim()),
       };
 
       await api.post('/property', dataToSubmit);
@@ -87,8 +92,9 @@ const Dashboard = () => {
       setFormData({
         title: '', description: '', price: '', location: '', lat: '', lng: '',
         owner_name: '', phone_number: '', alternate_phone: '', email: '',
-        video_url: '', ai_model_url: ''
+        ai_model_url: ''
       });
+      setVideoUrls(['']);
       setImageFiles([]);
       setImagePreviews([]);
       fetchProperties();
@@ -170,8 +176,54 @@ const Dashboard = () => {
               <div className="space-y-3">
                 <input type="text" name="owner_name" value={formData.owner_name} onChange={handleChange} placeholder="Owner Name" className="block w-full border border-gray-300 rounded-md p-2" />
                 <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" className="block w-full border border-gray-300 rounded-md p-2" />
-                <div className="flex gap-4">
+                <div className="flex gap-2">
+                  <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} className="border border-gray-300 rounded-md p-2 text-sm w-24">
+                    <option value="+91">🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+86">🇨🇳 +86</option>
+                    <option value="+81">🇯🇵 +81</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+7">🇷🇺 +7</option>
+                    <option value="+55">🇧🇷 +55</option>
+                    <option value="+27">🇿🇦 +27</option>
+                    <option value="+82">🇰🇷 +82</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+34">🇪🇸 +34</option>
+                    <option value="+60">🇲🇾 +60</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+977">🇳🇵 +977</option>
+                    <option value="+94">🇱🇰 +94</option>
+                    <option value="+880">🇧🇩 +880</option>
+                  </select>
                   <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleChange} placeholder="Phone Number" className="block w-full border border-gray-300 rounded-md p-2" />
+                </div>
+                <div className="flex gap-2">
+                  <select value={altPhoneCode} onChange={(e) => setAltPhoneCode(e.target.value)} className="border border-gray-300 rounded-md p-2 text-sm w-24">
+                    <option value="+91">🇮🇳 +91</option>
+                    <option value="+1">🇺🇸 +1</option>
+                    <option value="+44">🇬🇧 +44</option>
+                    <option value="+971">🇦🇪 +971</option>
+                    <option value="+61">🇦🇺 +61</option>
+                    <option value="+86">🇨🇳 +86</option>
+                    <option value="+81">🇯🇵 +81</option>
+                    <option value="+49">🇩🇪 +49</option>
+                    <option value="+33">🇫🇷 +33</option>
+                    <option value="+7">🇷🇺 +7</option>
+                    <option value="+55">🇧🇷 +55</option>
+                    <option value="+27">🇿🇦 +27</option>
+                    <option value="+82">🇰🇷 +82</option>
+                    <option value="+39">🇮🇹 +39</option>
+                    <option value="+34">🇪🇸 +34</option>
+                    <option value="+60">🇲🇾 +60</option>
+                    <option value="+65">🇸🇬 +65</option>
+                    <option value="+977">🇳🇵 +977</option>
+                    <option value="+94">🇱🇰 +94</option>
+                    <option value="+880">🇧🇩 +880</option>
+                  </select>
                   <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handleChange} placeholder="Alt Phone" className="block w-full border border-gray-300 rounded-md p-2" />
                 </div>
               </div>
@@ -189,9 +241,33 @@ const Dashboard = () => {
               )}
             </div>
             
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Video URL (optional)</label>
-              <input type="url" name="video_url" value={formData.video_url} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
+            <div className="pt-4 border-t border-gray-100">
+              <label className="block text-sm font-medium text-gray-700 mb-2">Video URLs</label>
+              <div className="space-y-2">
+                {videoUrls.map((url, idx) => (
+                  <div key={idx} className="flex gap-2">
+                    <input 
+                      type="url" 
+                      value={url} 
+                      onChange={(e) => {
+                        const updated = [...videoUrls];
+                        updated[idx] = e.target.value;
+                        setVideoUrls(updated);
+                      }} 
+                      placeholder={`Video URL ${idx + 1}`}
+                      className="block w-full border border-gray-300 rounded-md p-2" 
+                    />
+                    {videoUrls.length > 1 && (
+                      <button type="button" onClick={() => setVideoUrls(videoUrls.filter((_, i) => i !== idx))} className="text-red-500 hover:text-red-700 px-2">
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    )}
+                  </div>
+                ))}
+                <button type="button" onClick={() => setVideoUrls([...videoUrls, ''])} className="text-sm text-indigo-600 font-medium hover:underline flex items-center gap-1">
+                  <Plus className="w-4 h-4" /> Add another video URL
+                </button>
+              </div>
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700">3D Models Embed URL (e.g. Luma AI)</label>

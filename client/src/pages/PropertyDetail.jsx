@@ -84,7 +84,7 @@ const PropertyDetail = () => {
                   src={property.images[0].startsWith('http') ? property.images[0] : `${BACKEND_URL}${property.images[0]}`} 
                   alt="Main" className="w-full h-80 object-cover rounded-2xl sm:col-span-2" 
                 />
-                {property.images.slice(1, 3).map((img, idx) => (
+                {property.images.slice(1).map((img, idx) => (
                   <img 
                     key={idx} 
                     src={img.startsWith('http') ? img : `${BACKEND_URL}${img}`} 
@@ -102,8 +102,8 @@ const PropertyDetail = () => {
               </div>
             </div>
             
-            {/* Embedded 3D Tour */}
-            {property.ai_model_url && (
+            {/* Embedded 3D Tour (priority) */}
+            {property.ai_model_url ? (
               <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">3D Virtual Tour</h2>
                 <div className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
@@ -115,6 +115,25 @@ const PropertyDetail = () => {
                    ></iframe>
                 </div>
               </div>
+            ) : (
+              /* If no 3D model, show video(s) */
+              property.video_url && property.video_url.length > 0 && property.video_url.some(v => v) && (
+                <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Videos</h2>
+                  <div className="space-y-4">
+                    {property.video_url.filter(v => v).map((vUrl, idx) => (
+                      <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
+                        <iframe
+                          className="absolute top-0 left-0 w-full h-full border-0"
+                          src={vUrl}
+                          allow="autoplay; fullscreen"
+                          allowFullScreen
+                        ></iframe>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )
             )}
 
             {/* Map Location */}
