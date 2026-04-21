@@ -89,7 +89,7 @@ const Profile = () => {
                 <div>
                   <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{property.title}</h3>
                   <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
-                  <p className="text-xl font-bold text-indigo-600 mt-3">${property.price.toLocaleString()}</p>
+                  <p className="text-xl font-bold text-indigo-600 mt-3">₹{property.price.toLocaleString('en-IN')}</p>
                 </div>
                 <div className="mt-6 flex items-center justify-between border-t border-gray-100 pt-4">
                   <button 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import api, { BACKEND_URL } from '../lib/api';
-import { MapPin, DollarSign, ArrowLeft } from 'lucide-react';
+import { MapPin, IndianRupee, ArrowLeft } from 'lucide-react';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -71,8 +71,8 @@ const PropertyDetail = () => {
                   {property.location}
                 </span>
                 <span className="flex items-center text-xl font-bold text-indigo-600">
-                  <DollarSign className="h-5 w-5" />
-                  {property.price.toLocaleString()}
+                  <IndianRupee className="h-5 w-5" />
+                  {property.price.toLocaleString('en-IN')}
                 </span>
               </div>
             </div>

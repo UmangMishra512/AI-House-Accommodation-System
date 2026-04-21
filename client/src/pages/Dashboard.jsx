@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api, { BACKEND_URL } from '../lib/api';
 import { Link } from 'react-router-dom';
-import { Settings, Plus, Image as ImageIcon, MapPin, DollarSign, Trash2, Home } from 'lucide-react';
+import { Settings, Plus, Image as ImageIcon, MapPin, IndianRupee, Trash2, Home } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -135,10 +135,10 @@ const Dashboard = () => {
             </div>
             <div className="flex gap-4">
               <div className="w-1/2">
-                <label className="block text-sm font-medium text-gray-700">Price ($)</label>
+                <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <DollarSign className="h-4 w-4 text-gray-400" />
+                    <IndianRupee className="h-4 w-4 text-gray-400" />
                   </div>
                   <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
                 </div>
@@ -229,7 +229,7 @@ const Dashboard = () => {
                       </button>
                     </div>
                     <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
-                    <p className="text-xl font-bold text-indigo-600 mt-2">${property.price.toLocaleString()}</p>
+                    <p className="text-xl font-bold text-indigo-600 mt-2">₹{property.price.toLocaleString('en-IN')}</p>
                   </div>
                   <div className="mt-4 flex items-center gap-4">
                     <Link to={`/property/${property._id}`} className="text-sm text-indigo-600 font-medium hover:underline">
