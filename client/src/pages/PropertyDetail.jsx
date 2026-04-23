@@ -102,8 +102,30 @@ const PropertyDetail = () => {
               </div>
             </div>
             
-            {/* Embedded 3D Tour (priority) */}
-            {property.ai_model_url ? (
+            {/* AI-Generated 3D Model (highest priority) */}
+            {property.model_3d_url && (
+              <div className="bg-gradient-to-br from-violet-50 to-indigo-50 p-6 rounded-3xl border border-indigo-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                  <span className="bg-gradient-to-r from-violet-600 to-indigo-600 text-transparent bg-clip-text">AI-Generated</span> 3D Model
+                </h2>
+                <div className="relative w-full overflow-hidden rounded-2xl bg-gray-100" style={{ height: '500px' }}>
+                  <model-viewer
+                    src={property.model_3d_url.startsWith('http') ? property.model_3d_url : `${BACKEND_URL}${property.model_3d_url}`}
+                    alt="3D Model of property"
+                    auto-rotate
+                    camera-controls
+                    touch-action="pan-y"
+                    shadow-intensity="1"
+                    environment-image="neutral"
+                    style={{ width: '100%', height: '100%' }}
+                  ></model-viewer>
+                </div>
+                <p className="text-xs text-gray-400 mt-3 text-center">Drag to rotate • Pinch to zoom • Powered by Tripo AI</p>
+              </div>
+            )}
+
+            {/* Embedded 3D Tour (Luma AI / manual embed) */}
+            {!property.model_3d_url && property.ai_model_url && (
               <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">3D Virtual Tour</h2>
                 <div className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
@@ -115,25 +137,25 @@ const PropertyDetail = () => {
                    ></iframe>
                 </div>
               </div>
-            ) : (
-              /* If no 3D model, show video(s) */
-              property.video_url && property.video_url.length > 0 && property.video_url.some(v => v) && (
-                <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                  <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Videos</h2>
-                  <div className="space-y-4">
-                    {property.video_url.filter(v => v).map((vUrl, idx) => (
-                      <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
-                        <iframe
-                          className="absolute top-0 left-0 w-full h-full border-0"
-                          src={vUrl}
-                          allow="autoplay; fullscreen"
-                          allowFullScreen
-                        ></iframe>
-                      </div>
-                    ))}
-                  </div>
+            )}
+
+            {/* If no 3D model at all, show video(s) */}
+            {!property.model_3d_url && !property.ai_model_url && property.video_url && property.video_url.length > 0 && property.video_url.some(v => v) && (
+              <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
+                <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Videos</h2>
+                <div className="space-y-4">
+                  {property.video_url.filter(v => v).map((vUrl, idx) => (
+                    <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
+                      <iframe
+                        className="absolute top-0 left-0 w-full h-full border-0"
+                        src={vUrl}
+                        allow="autoplay; fullscreen"
+                        allowFullScreen
+                      ></iframe>
+                    </div>
+                  ))}
                 </div>
-              )
+              </div>
             )}
 
             {/* Map Location */}

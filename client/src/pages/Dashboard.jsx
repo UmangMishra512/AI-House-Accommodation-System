@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import api, { BACKEND_URL } from '../lib/api';
 import { Link } from 'react-router-dom';
-import { Settings, Plus, Image as ImageIcon, MapPin, IndianRupee, Trash2, Home } from 'lucide-react';
+import { Settings, Plus, Image as ImageIcon, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -27,6 +27,7 @@ const Dashboard = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [tripoStatus, setTripoStatus] = useState({}); // { propertyId: { status, message } }
 
   const fetchProperties = async () => {
     try {
@@ -113,6 +114,49 @@ const Dashboard = () => {
       } catch (err) {
         alert('Error deleting property');
       }
+    }
+  };
+
+  const generate3DModel = async (propertyId, imageUrl) => {
+    const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${BACKEND_URL}${imageUrl}`;
+    
+    setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'starting', message: 'Starting...' } }));
+    
+    try {
+      const genRes = await api.post('/tripo/generate', { imageUrl: fullImageUrl, propertyId });
+      const { taskId } = genRes.data;
+      
+      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'queued', message: 'Queued...' } }));
+      
+      const pollInterval = setInterval(async () => {
+        try {
+          const statusRes = await api.get(`/tripo/status/${taskId}`);
+          const { status, modelUrl, message: statusMsg } = statusRes.data;
+          
+          setTripoStatus(prev => ({ ...prev, [propertyId]: { status, message: statusMsg } }));
+          
+          if (status === 'success' && modelUrl) {
+            clearInterval(pollInterval);
+            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'saving', message: 'Saving model...' } }));
+            await api.post('/tripo/save', { modelUrl, propertyId });
+            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'done', message: '3D model ready!' } }));
+            fetchProperties();
+            setTimeout(() => {
+              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
+            }, 5000);
+          } else if (status === 'failed') {
+            clearInterval(pollInterval);
+            setTimeout(() => {
+              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
+            }, 5000);
+          }
+        } catch (err) {
+          clearInterval(pollInterval);
+          setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: 'Error' } }));
+        }
+      }, 5000);
+    } catch (err) {
+      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: err.response?.data?.message || 'Failed' } }));
     }
   };
 
@@ -307,10 +351,26 @@ const Dashboard = () => {
                     <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
                     <p className="text-xl font-bold text-indigo-600 mt-2">₹{property.price.toLocaleString('en-IN')}</p>
                   </div>
-                  <div className="mt-4 flex items-center gap-4">
+                  <div className="mt-4 flex items-center gap-4 flex-wrap">
                     <Link to={`/property/${property._id}`} className="text-sm text-indigo-600 font-medium hover:underline">
                       View Listing
                     </Link>
+                    {property.images && property.images.length > 0 && !property.model_3d_url && (
+                      <button 
+                        onClick={() => generate3DModel(property._id, property.images[0])}
+                        disabled={tripoStatus[property._id]}
+                        className="text-sm bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-3 py-1.5 rounded-lg font-medium hover:from-violet-700 hover:to-indigo-700 disabled:opacity-60 transition-all flex items-center gap-1.5 shadow-sm"
+                      >
+                        {tripoStatus[property._id] ? (
+                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {tripoStatus[property._id].message}</>
+                        ) : (
+                          <><Sparkles className="w-3.5 h-3.5" /> Generate 3D Model</>
+                        )}
+                      </button>
+                    )}
+                    {property.model_3d_url && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">✓ 3D Model Ready</span>
+                    )}
                     {property.qr_code_url && (
                        <img src={property.qr_code_url} alt="QR Code" className="w-10 h-10 border border-gray-200 rounded" />
                     )}

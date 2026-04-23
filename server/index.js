@@ -17,8 +17,9 @@ app.use('/api/property', require('./routes/property'));
 app.use('/api/upload', require('./routes/upload'));
 app.use('/api/contact', require('./routes/contact'));
 app.use('/api/admin', require('./routes/admin'));
+app.use('/api/tripo', require('./routes/tripo'));
 
-// Serve uploads statically
+// Serve uploads statically (images + 3D models)
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Database Connection

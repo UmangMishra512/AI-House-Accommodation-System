@@ -44,6 +44,9 @@ const propertySchema = new mongoose.Schema({
   ai_model_url: {
     type: String,
   },
+  model_3d_url: {
+    type: String,
+  },
   qr_code_url: {
     type: String,
   },
