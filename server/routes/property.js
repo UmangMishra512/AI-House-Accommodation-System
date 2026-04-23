@@ -57,7 +57,7 @@ router.post('/', auth, async (req, res) => {
     const savedProperty = await newProperty.save();
 
     // Generate QR Code
-    const frontendUrl = process.env.FRONTEND_URL || 'http://localhost:5173';
+    const frontendUrl = process.env.FRONTEND_URL || 'https://house-accomodation.vercel.app';
     const propertyUrl = `${frontendUrl}/property/${savedProperty._id}`;
     
     const qrCodeDataUrl = await QRCode.toDataURL(propertyUrl);
@@ -91,6 +91,14 @@ router.put('/:id', auth, async (req, res) => {
       { $set: req.body },
       { new: true }
     );
+
+    // Regenerate QR Code in case the URL or environment has changed
+    const frontendUrl = process.env.FRONTEND_URL || 'https://house-accomodation.vercel.app';
+    const propertyUrl = `${frontendUrl}/property/${updatedProperty._id}`;
+    const qrCodeDataUrl = await QRCode.toDataURL(propertyUrl);
+    
+    updatedProperty.qr_code_url = qrCodeDataUrl;
+    await updatedProperty.save();
 
     res.json(updatedProperty);
   } catch (err) {
