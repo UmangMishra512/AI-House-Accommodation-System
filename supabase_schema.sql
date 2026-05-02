@@ -195,3 +195,23 @@ ON CONFLICT (id) DO NOTHING;
 
 -- WARNING: After running this script, run the following command replacing with your actual email to make yourself admin:
 -- UPDATE public.users SET role = 'admin' WHERE email = 'YOUR_EMAIL_HERE';
+
+-- Create subscribers table
+CREATE TABLE IF NOT EXISTS public.subscribers (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Enable RLS
+ALTER TABLE public.subscribers ENABLE ROW LEVEL SECURITY;
+
+-- Anyone can insert a subscription
+CREATE POLICY "Anyone can subscribe"
+  ON public.subscribers FOR INSERT
+  WITH CHECK (true);
+
+-- Admins can view subscriptions
+CREATE POLICY "Admins can view subscribers"
+  ON public.subscribers FOR SELECT
+  USING (is_admin());

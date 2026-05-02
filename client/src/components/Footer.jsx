@@ -1,8 +1,51 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Mail, Phone, Heart } from 'lucide-react';
+import { Home, Mail, Phone, Heart, Loader2 } from 'lucide-react';
+import { supabase } from '../lib/supabase';
 
 const Footer = () => {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState('idle'); // idle, loading, success, error
+  const [message, setMessage] = useState('');
+
+  const handleSubscribe = async (e) => {
+    e.preventDefault();
+    if (!email) return;
+
+    setStatus('loading');
+    try {
+      const { error } = await supabase
+        .from('subscribers')
+        .insert([{ email }]);
+
+      if (error) {
+        if (error.code === '23505') { // Unique violation
+          throw new Error('You are already subscribed!');
+        }
+        throw error;
+      }
+
+      setStatus('success');
+      setMessage('Successfully subscribed!');
+      setEmail('');
+      
+      // Reset success message after 3 seconds
+      setTimeout(() => {
+        setStatus('idle');
+        setMessage('');
+      }, 3000);
+    } catch (err) {
+      console.error(err);
+      setStatus('error');
+      setMessage(err.message || 'Failed to subscribe. Please try again.');
+      
+      setTimeout(() => {
+        setStatus('idle');
+        setMessage('');
+      }, 3000);
+    }
+  };
+
   return (
     <footer className="bg-gray-900 text-white pt-16 pb-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -73,16 +116,29 @@ const Footer = () => {
               <li className="flex items-start gap-3 text-gray-400">
                 <div className="bg-indigo-600/10 text-indigo-400 p-4 rounded-xl border border-indigo-500/20 w-full mt-2">
                   <p className="text-sm font-medium">Subscribe to our newsletter for latest listings.</p>
-                  <div className="mt-3 flex gap-2">
+                  <form onSubmit={handleSubscribe} className="mt-3 flex gap-2">
                     <input 
                       type="email" 
-                      placeholder="Email address" 
-                      className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm w-full outline-none focus:border-indigo-500"
+                      placeholder="Email address"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      disabled={status === 'loading'}
+                      className="bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm w-full outline-none focus:border-indigo-500 disabled:opacity-50"
                     />
-                    <button className="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-lg text-sm font-bold transition-all">
-                      Join
+                    <button 
+                      type="submit"
+                      disabled={status === 'loading' || !email}
+                      className="bg-indigo-600 hover:bg-indigo-700 px-3 py-2 rounded-lg text-sm font-bold transition-all disabled:opacity-50 flex items-center justify-center min-w-[60px]"
+                    >
+                      {status === 'loading' ? <Loader2 className="w-4 h-4 animate-spin" /> : 'Join'}
                     </button>
-                  </div>
+                  </form>
+                  {message && (
+                    <p className={`text-xs mt-2 font-medium ${status === 'error' ? 'text-red-400' : 'text-green-400'}`}>
+                      {message}
+                    </p>
+                  )}
                 </div>
               </li>
             </ul>
