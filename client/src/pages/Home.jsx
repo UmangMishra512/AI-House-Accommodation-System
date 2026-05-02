@@ -4,7 +4,7 @@ import { Building, Globe, QrCode } from 'lucide-react';
 
 const Home = () => {
   return (
-    <div className="bg-gray-50 min-h-screen">
+    <div className="bg-gray-50">
       {/* Hero Section */}
       <section className="relative bg-white overflow-hidden">
         <div className="max-w-7xl mx-auto">

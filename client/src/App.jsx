@@ -25,9 +25,9 @@ const ProtectedRoute = ({ children }) => {
 
 const App = () => {
   return (
-    <div className="font-sans antialiased text-gray-900 bg-white min-h-screen">
+    <div className="font-sans antialiased text-gray-900 bg-white min-h-screen flex flex-col">
       <Navbar />
-      <main>
+      <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
