@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { QRCodeSVG } from 'qrcode.react';
-import '@google/model-viewer';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
