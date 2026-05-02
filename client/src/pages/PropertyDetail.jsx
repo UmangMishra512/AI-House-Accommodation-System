@@ -7,7 +7,7 @@ const PropertyDetail = () => {
   const { id } = useParams();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [contactForm, setContactForm] = useState({ name: '', email: '', message: '' });
+  const [contactForm, setContactForm] = useState({ name: '', email: '', phone_number: '', message: '' });
   const [contactStatus, setContactStatus] = useState({ loading: false, success: false, error: '' });
 
   const handleContactSubmit = async (e) => {
@@ -19,7 +19,7 @@ const PropertyDetail = () => {
         .insert([{ ...contactForm, property_id: id }]);
       if (error) throw error;
       setContactStatus({ loading: false, success: true, error: '' });
-      setContactForm({ name: '', email: '', message: '' });
+      setContactForm({ name: '', email: '', phone_number: '', message: '' });
     } catch (err) {
       setContactStatus({ loading: false, success: false, error: 'Failed to send message.' });
     }
@@ -180,16 +180,23 @@ const PropertyDetail = () => {
               <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Videos</h2>
                 <div className="space-y-4">
-                  {property.video_url.filter(v => v).map((vUrl, idx) => (
+                  {property.video_url.filter(v => v).map((vUrl, idx) => {
+                    let embedUrl = vUrl;
+                    if (vUrl.includes('youtube.com/watch?v=')) {
+                      embedUrl = vUrl.replace('youtube.com/watch?v=', 'youtube.com/embed/').split('&')[0];
+                    } else if (vUrl.includes('youtu.be/')) {
+                      embedUrl = vUrl.replace('youtu.be/', 'youtube.com/embed/').split('?')[0];
+                    }
+                    return (
                     <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
                       <iframe
                         className="absolute top-0 left-0 w-full h-full border-0"
-                        src={vUrl}
+                        src={embedUrl}
                         allow="autoplay; fullscreen"
                         allowFullScreen
                       ></iframe>
                     </div>
-                  ))}
+                  )})}
                 </div>
               </div>
             )}
@@ -282,6 +289,7 @@ const PropertyDetail = () => {
                    <form onSubmit={handleContactSubmit} className="space-y-3">
                      <input required type="text" placeholder="Your Name" value={contactForm.name} onChange={(e) => setContactForm({...contactForm, name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
                      <input required type="email" placeholder="Your Email" value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
+                     <input type="tel" placeholder="Your Phone Number (optional)" value={contactForm.phone_number} onChange={(e) => setContactForm({...contactForm, phone_number: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
                      <textarea required placeholder="I'm interested in this property..." rows="3" value={contactForm.message} onChange={(e) => setContactForm({...contactForm, message: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"></textarea>
                      <button disabled={contactStatus.loading} type="submit" className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
                        {contactStatus.loading ? 'Sending...' : 'Send Message'}

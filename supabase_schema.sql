@@ -67,6 +67,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   email TEXT NOT NULL,
+  phone_number TEXT,
   message TEXT NOT NULL,
   created_at TIMESTAMPTZ DEFAULT now()
 );

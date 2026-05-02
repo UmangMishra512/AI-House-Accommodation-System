@@ -621,7 +621,14 @@ const Dashboard = () => {
                     <div className="flex justify-between items-start border-b border-gray-100 pb-3">
                       <div>
                         <h4 className="font-bold text-gray-900">{msg.name}</h4>
-                        <a href={`mailto:${msg.email}`} className="text-sm text-indigo-600 hover:underline">{msg.email}</a>
+                        <div className="flex gap-2 items-center flex-wrap">
+                          <a href={`mailto:${msg.email}`} className="text-sm text-indigo-600 hover:underline">{msg.email}</a>
+                          {msg.phone_number && (
+                            <a href={`tel:${msg.phone_number}`} className="text-sm text-indigo-600 hover:underline border-l border-gray-300 pl-2">
+                              {msg.phone_number}
+                            </a>
+                          )}
+                        </div>
                       </div>
                       <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md font-medium">
                         {format(new Date(msg.created_at), 'MMM dd, h:mm a')}

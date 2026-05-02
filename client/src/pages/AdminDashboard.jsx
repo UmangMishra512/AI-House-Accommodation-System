@@ -224,6 +224,7 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 whitespace-nowrap">
                     <p className="text-sm font-medium text-gray-900">{m.name}</p>
                     <p className="text-xs text-gray-500">{m.email}</p>
+                    {m.phone_number && <p className="text-xs text-gray-500">{m.phone_number}</p>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">{m.property?.title || 'Deleted Property'}</td>
                   <td className="px-6 py-4 text-sm text-gray-500 max-w-[300px] truncate">{m.message}</td>
