@@ -182,17 +182,19 @@ const PropertyDetail = () => {
                 <div className="space-y-4">
                   {property.video_url.filter(v => v).map((vUrl, idx) => {
                     let embedUrl = vUrl;
-                    if (vUrl.includes('youtube.com/watch?v=')) {
-                      embedUrl = vUrl.replace('youtube.com/watch?v=', 'youtube.com/embed/').split('&')[0];
-                    } else if (vUrl.includes('youtu.be/')) {
-                      embedUrl = vUrl.replace('youtu.be/', 'youtube.com/embed/').split('?')[0];
+                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|m\.youtube\.com\/watch\?v=|youtube\.com\/shorts\/)([^#&?]*).*/;
+                    const match = vUrl.match(regExp);
+                    
+                    if (match && match[2].length === 11) {
+                      embedUrl = `https://www.youtube.com/embed/${match[2]}`;
                     }
+                    
                     return (
                     <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
                       <iframe
                         className="absolute top-0 left-0 w-full h-full border-0"
                         src={embedUrl}
-                        allow="autoplay; fullscreen"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                         allowFullScreen
                       ></iframe>
                     </div>
