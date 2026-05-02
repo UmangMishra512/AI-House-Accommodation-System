@@ -1,11 +1,40 @@
-import React, { useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
-import { Home, LogOut, User as UserIcon, PlusSquare, Shield } from 'lucide-react';
+import { supabase } from '../lib/supabase';
+import { Home, LogOut, User as UserIcon, PlusSquare, Shield, Bell } from 'lucide-react';
 
 const Navbar = () => {
-  const { user, logout } = useContext(AuthContext);
+  const { user, isAdmin, logout } = useContext(AuthContext);
   const navigate = useNavigate();
+  const [messageCount, setMessageCount] = useState(0);
+
+  useEffect(() => {
+    if (user) {
+      const fetchMessageCount = async () => {
+        const { count, error } = await supabase
+          .from('contact_messages')
+          .select('*', { count: 'exact', head: true });
+        
+        if (!error && count !== null) {
+          setMessageCount(count);
+        }
+      };
+      
+      fetchMessageCount();
+
+      // Subscribe to new messages
+      const channel = supabase.channel('public:contact_messages')
+        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'contact_messages' }, () => {
+          fetchMessageCount();
+        })
+        .subscribe();
+        
+      return () => {
+        supabase.removeChannel(channel);
+      };
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -28,7 +57,7 @@ const Navbar = () => {
             </Link>
             {user ? (
               <>
-                {user.role === 'admin' && (
+                {isAdmin && (
                   <Link to="/admin" className="flex items-center gap-1 text-gray-600 hover:text-indigo-600 font-medium transition-colors">
                     <Shield className="w-5 h-5" />
                     Admin
@@ -37,6 +66,15 @@ const Navbar = () => {
                 <Link to="/dashboard" className="flex items-center gap-1 text-gray-600 hover:text-indigo-600 font-medium transition-colors">
                   <PlusSquare className="w-5 h-5" />
                   Dashboard
+                </Link>
+                
+                <Link to="/dashboard?tab=queries" className="relative flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
+                  <Bell className="w-5 h-5" />
+                  {messageCount > 0 && (
+                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[16px] h-[16px]">
+                      {messageCount > 99 ? '99+' : messageCount}
+                    </span>
+                  )}
                 </Link>
                 <Link to="/profile" className="flex items-center gap-2 pr-4 border-r border-gray-200 hover:text-indigo-600 transition-colors">
                   <UserIcon className="w-5 h-5 text-gray-500" />

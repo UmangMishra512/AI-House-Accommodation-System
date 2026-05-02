@@ -1,12 +1,14 @@
 import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Link } from 'react-router-dom';
-import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download } from 'lucide-react';
+import { Link, useSearchParams } from 'react-router-dom';
+import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download, Mail, CheckCircle } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { QRCodeCanvas } from 'qrcode.react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import { OpenStreetMapProvider } from 'leaflet-geosearch';
+import { format } from 'date-fns';
 
 // Fix leaflet icon issue in React
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -32,7 +34,12 @@ function LocationMarker({ lat, lng, setPosition }) {
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
+  const [searchParams, setSearchParams] = useSearchParams();
+  const initialTab = searchParams.get('tab') || 'properties';
+  
+  const [activeTab, setActiveTab] = useState(initialTab);
   const [properties, setProperties] = useState([]);
+  const [messages, setMessages] = useState([]);
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -46,6 +53,7 @@ const Dashboard = () => {
     email: '',
     ai_model_url: '',
   });
+  
   const [videoUrls, setVideoUrls] = useState(['']);
   const [phoneCode, setPhoneCode] = useState('+91');
   const [altPhoneCode, setAltPhoneCode] = useState('+91');
@@ -54,6 +62,90 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [generatingTripo, setGeneratingTripo] = useState(null);
+
+  // Location Autocomplete State
+  const [locationSuggestions, setLocationSuggestions] = useState([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const provider = new OpenStreetMapProvider();
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    setActiveTab(initialTab);
+  }, [initialTab]);
+
+  useEffect(() => {
+    // Click outside to close suggestions
+    const handleClickOutside = (event) => {
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setShowSuggestions(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleLocationSearch = async (e) => {
+    const value = e.target.value;
+    setFormData({ ...formData, location: value });
+    
+    if (value.length > 2) {
+      const results = await provider.search({ query: value });
+      setLocationSuggestions(results);
+      setShowSuggestions(true);
+    } else {
+      setLocationSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const selectLocation = (result) => {
+    setFormData({ 
+      ...formData, 
+      location: result.label, 
+      lat: result.y, 
+      lng: result.x 
+    });
+    setShowSuggestions(false);
+  };
+
+  const fetchProperties = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setProperties(data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  const fetchMessages = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('contact_messages')
+        .select('*, property:properties(title)')
+        .order('created_at', { ascending: false });
+        // RLS policy already ensures we only get messages for properties owned by `user.id`
+      
+      if (error) throw error;
+      setMessages(data || []);
+    } catch (err) {
+      console.error(err);
+    }
+  };
+
+  useEffect(() => {
+    if (user) {
+      fetchProperties();
+      fetchMessages();
+    }
+  }, [user]);
 
   const handleGenerate3D = async (propertyId, imageUrl) => {
     try {
@@ -107,32 +199,12 @@ const Dashboard = () => {
     }
   };
 
-  const fetchProperties = async () => {
-    if (!user) return;
-    try {
-      const { data, error } = await supabase
-        .from('properties')
-        .select('*')
-        .eq('owner_id', user.id)
-        .order('created_at', { ascending: false });
-      
-      if (error) throw error;
-      setProperties(data || []);
-    } catch (err) {
-      console.error(err);
-    }
-  };
-
-  useEffect(() => {
-    fetchProperties();
-  }, [user]);
-
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
   };
 
   const handlePhoneChange = (e) => {
-    const value = e.target.value.replace(/\D/g, ''); // Keep only numbers
+    const value = e.target.value.replace(/\D/g, ''); 
     if (value.length <= 10) {
       setFormData({ ...formData, [e.target.name]: value });
     }
@@ -162,7 +234,6 @@ const Dashboard = () => {
     try {
       let uploadedImageUrls = [];
       
-      // Upload images to Supabase Storage
       if (imageFiles.length > 0) {
         for (const file of imageFiles) {
           const fileExt = file.name.split('.').pop();
@@ -212,6 +283,7 @@ const Dashboard = () => {
       setImageFiles([]);
       setImagePreviews([]);
       fetchProperties();
+      setActiveTab('properties');
     } catch (err) {
       console.error(err);
       setMessage(`Error creating property: ${err.message}`);
@@ -243,6 +315,11 @@ const Dashboard = () => {
     document.body.appendChild(downloadLink);
     downloadLink.click();
     document.body.removeChild(downloadLink);
+  };
+
+  const setTab = (tab) => {
+    setActiveTab(tab);
+    setSearchParams({ tab });
   };
 
   return (
@@ -282,17 +359,39 @@ const Dashboard = () => {
                   <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
                 </div>
               </div>
-              <div className="w-1/2">
+              <div className="w-1/2 relative" ref={searchRef}>
                 <label className="block text-sm font-medium text-gray-700">Location Name</label>
                 <div className="mt-1 relative rounded-md shadow-sm">
                   <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                     <MapPin className="h-4 w-4 text-gray-400" />
                   </div>
-                  <input type="text" name="location" required value={formData.location} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
+                  <input 
+                    type="text" 
+                    required 
+                    value={formData.location} 
+                    onChange={handleLocationSearch}
+                    onFocus={() => {if(locationSuggestions.length > 0) setShowSuggestions(true)}}
+                    placeholder="Search location..."
+                    className="block w-full pl-9 border border-gray-300 rounded-md p-2" 
+                  />
                 </div>
-                {formData.location && (
+                {/* Autocomplete Dropdown */}
+                {showSuggestions && locationSuggestions.length > 0 && (
+                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                    {locationSuggestions.map((result, index) => (
+                      <li 
+                        key={index} 
+                        className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0"
+                        onClick={() => selectLocation(result)}
+                      >
+                        {result.label}
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {formData.location && !showSuggestions && (
                   <a 
-                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.location)}`}
+                    href={`https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`}
                     target="_blank"
                     rel="noopener noreferrer" 
                     className="text-xs text-blue-600 hover:underline mt-1 inline-block"
@@ -305,7 +404,7 @@ const Dashboard = () => {
             
             <div className="pt-4 border-t border-gray-100">
               <h3 className="text-sm font-semibold text-gray-900 mb-2">Pin Location on Map</h3>
-              <p className="text-xs text-gray-500 mb-2">Click on the map to accurately place your property.</p>
+              <p className="text-xs text-gray-500 mb-2">Auto-filled via search or click map to adjust.</p>
               <div className="h-48 w-full rounded-md border border-gray-300 overflow-hidden mb-2 z-0">
                 <MapContainer center={[formData.lat, formData.lng]} zoom={4} style={{ height: '100%', width: '100%' }}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
@@ -400,84 +499,150 @@ const Dashboard = () => {
           </form>
         </div>
 
-        {/* Listings Section */}
+        {/* Dynamic Content Section */}
         <div className="lg:col-span-2 space-y-4">
-          <h2 className="text-xl font-semibold mb-4 flex items-center gap-2 text-gray-800">
-            <Home className="w-5 h-5 text-indigo-500" /> My Properties
-          </h2>
-          {properties.length === 0 ? (
-            <div className="text-gray-500 p-8 border border-dashed border-gray-300 rounded-lg text-center bg-gray-50">
-              No properties listed yet. Add one from the left!
-            </div>
-          ) : (
-            properties.map(property => {
-              const propertyUrl = `${window.location.origin}/property/${property.id}`;
-              
-              return (
-              <div key={property.id} className="flex flex-col sm:flex-row bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                <div className="w-full sm:w-48 h-48 sm:h-auto relative bg-gray-100 flex-shrink-0">
-                  {property.ai_model_url ? (
-                    <model-viewer 
-                      src={property.ai_model_url} 
-                      auto-rotate 
-                      camera-controls 
-                      style={{ width: '100%', height: '100%' }}
-                    ></model-viewer>
-                  ) : (
-                    <img src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/150'} alt="Property" className="w-full h-full object-cover" />
-                  )}
-                </div>
-                <div className="p-5 flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="flex justify-between items-start">
-                      <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{property.title}</h3>
-                      <button onClick={() => handleDelete(property.id)} className="text-red-500 hover:text-red-700 p-1">
-                        <Trash2 className="w-5 h-5" />
-                      </button>
-                    </div>
-                    <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
-                    <a 
-                      href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
-                      target="_blank"
-                      rel="noopener noreferrer" 
-                      className="text-xs text-blue-600 hover:underline mt-1 inline-block"
-                    >
-                      View on Google Maps
-                    </a>
-                    <p className="text-xl font-bold text-indigo-600 mt-2">₹{Number(property.price).toLocaleString('en-IN')}</p>
-                  </div>
-                  <div className="mt-4 flex items-center gap-4 flex-wrap">
-                    <Link to={`/property/${property.id}`} className="text-sm text-indigo-600 font-medium hover:underline">
-                      View Listing
-                    </Link>
-                    
-                    <div className="flex items-center gap-2 ml-auto">
-                      <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200" title="High-Res QR generated locally">
-                        <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} style={{ width: '40px', height: '40px' }} />
-                      </div>
-                      
-                      {!property.ai_model_url && property.images && property.images[0] && (
-                        <button 
-                          onClick={() => handleGenerate3D(property.id, property.images[0])}
-                          disabled={generatingTripo === property.id}
-                          className="text-sm border border-purple-200 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg font-medium hover:bg-purple-100 transition-all flex items-center gap-1.5 disabled:opacity-50"
-                        >
-                          {generatingTripo === property.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                          {generatingTripo === property.id ? 'Generating...' : 'Generate 3D Model'}
-                        </button>
-                      )}
+          
+          {/* Tabs Navigation */}
+          <div className="flex gap-4 border-b border-gray-200">
+            <button 
+              onClick={() => setTab('properties')}
+              className={`pb-3 font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'properties' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              <Home className="w-5 h-5" />
+              My Properties
+            </button>
+            <button 
+              onClick={() => setTab('queries')}
+              className={`pb-3 font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'queries' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            >
+              <Mail className="w-5 h-5" />
+              My Queries
+              {messages.length > 0 && (
+                <span className="bg-indigo-100 text-indigo-700 text-xs px-2 py-0.5 rounded-full font-bold">{messages.length}</span>
+              )}
+            </button>
+          </div>
 
-                      <button 
-                        onClick={() => downloadQR(property.id, property.title)}
-                        className="text-sm border border-indigo-200 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-100 transition-all flex items-center gap-1.5"
-                      >
-                        <Download className="w-4 h-4" /> Download High-Res QR
-                      </button>
+          {activeTab === 'properties' && (
+            <div className="space-y-4 pt-4 animate-in fade-in duration-300">
+              {properties.length === 0 ? (
+                <div className="text-gray-500 p-12 border border-dashed border-gray-300 rounded-xl text-center bg-white flex flex-col items-center">
+                  <Home className="w-12 h-12 text-gray-300 mb-3" />
+                  <p className="font-medium text-gray-700">No properties listed yet.</p>
+                  <p className="text-sm">Use the form on the left to add your first property.</p>
+                </div>
+              ) : (
+                properties.map(property => {
+                  const propertyUrl = `${window.location.origin}/property/${property.id}`;
+                  
+                  return (
+                  <div key={property.id} className="flex flex-col xl:flex-row bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="w-full xl:w-56 h-56 xl:h-auto relative bg-gray-100 flex-shrink-0">
+                      {property.ai_model_url ? (
+                        <model-viewer 
+                          src={property.ai_model_url} 
+                          auto-rotate 
+                          camera-controls 
+                          style={{ width: '100%', height: '100%' }}
+                        ></model-viewer>
+                      ) : (
+                        <img src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/150'} alt="Property" className="w-full h-full object-cover" />
+                      )}
+                    </div>
+                    <div className="p-5 flex-1 flex flex-col justify-between">
+                      <div>
+                        <div className="flex justify-between items-start">
+                          <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{property.title}</h3>
+                          <button onClick={() => handleDelete(property.id)} className="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded transition-colors">
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                        <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
+                        <a 
+                          href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
+                          target="_blank"
+                          rel="noopener noreferrer" 
+                          className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                        >
+                          View on Google Maps
+                        </a>
+                        <p className="text-xl font-bold text-indigo-600 mt-2">₹{Number(property.price).toLocaleString('en-IN')}</p>
+                      </div>
+                      <div className="mt-4 flex flex-col sm:flex-row items-start sm:items-end justify-between gap-4">
+                        <Link to={`/property/${property.id}`} className="text-sm text-indigo-600 font-medium hover:underline whitespace-nowrap">
+                          View Listing ↗
+                        </Link>
+                        
+                        <div className="flex flex-wrap items-center gap-3">
+                          {/* INCREASED QR CODE SIZE */}
+                          <div className="bg-gray-50 p-2 rounded-xl border border-gray-200" title="Scan to view on mobile">
+                            <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} style={{ width: '80px', height: '80px' }} />
+                          </div>
+                          
+                          <div className="flex flex-col gap-2">
+                            {!property.ai_model_url && property.images && property.images[0] && (
+                              <button 
+                                onClick={() => handleGenerate3D(property.id, property.images[0])}
+                                disabled={generatingTripo === property.id}
+                                className="text-sm border border-purple-200 bg-purple-50 text-purple-700 px-3 py-2 rounded-lg font-medium hover:bg-purple-100 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                              >
+                                {generatingTripo === property.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                                {generatingTripo === property.id ? 'Generating...' : 'Generate 3D'}
+                              </button>
+                            )}
+
+                            <button 
+                              onClick={() => downloadQR(property.id, property.title)}
+                              className="text-sm border border-indigo-200 bg-indigo-50 text-indigo-700 px-3 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-all flex items-center justify-center gap-1.5"
+                            >
+                              <Download className="w-4 h-4" /> Download QR
+                            </button>
+                          </div>
+                        </div>
+                      </div>
                     </div>
                   </div>
+                )})
+              )}
+            </div>
+          )}
+
+          {activeTab === 'queries' && (
+            <div className="space-y-4 pt-4 animate-in fade-in duration-300">
+              {messages.length === 0 ? (
+                <div className="text-gray-500 p-12 border border-dashed border-gray-300 rounded-xl text-center bg-white flex flex-col items-center">
+                  <CheckCircle className="w-12 h-12 text-green-400 mb-3" />
+                  <p className="font-medium text-gray-700">You're all caught up!</p>
+                  <p className="text-sm">No new inquiries for your properties.</p>
                 </div>
-              </div>
-            )})
+              ) : (
+                messages.map(msg => (
+                  <div key={msg.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-start border-b border-gray-100 pb-3">
+                      <div>
+                        <h4 className="font-bold text-gray-900">{msg.name}</h4>
+                        <a href={`mailto:${msg.email}`} className="text-sm text-indigo-600 hover:underline">{msg.email}</a>
+                      </div>
+                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md font-medium">
+                        {format(new Date(msg.created_at), 'MMM dd, h:mm a')}
+                      </span>
+                    </div>
+                    <div>
+                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Inquiry Regarding</p>
+                      <p className="text-sm font-medium text-gray-800 bg-gray-50 p-2 rounded-md border border-gray-100">{msg.property?.title || 'Deleted Property'}</p>
+                    </div>
+                    <div className="mt-2">
+                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{msg.message}</p>
+                    </div>
+                    <div className="mt-3 pt-3 border-t border-gray-100 flex justify-end">
+                      <a href={`mailto:${msg.email}?subject=Re: Inquiry about ${msg.property?.title}`} className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
+                        Reply via Email
+                      </a>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
           )}
         </div>
       </div>
