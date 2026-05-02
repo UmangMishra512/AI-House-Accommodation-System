@@ -167,6 +167,63 @@ const Dashboard = () => {
     }
   };
 
+  const [tripoStatus, setTripoStatus] = useState({}); // { propertyId: { status, message } }
+
+  const generate3DModel = async (propertyId, imageUrl) => {
+    setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'starting', message: 'Starting...' } }));
+    
+    try {
+      // 1. Call Supabase Edge Function to start the task
+      const { data: startData, error: startError } = await supabase.functions.invoke('tripo-3d', {
+        body: { imageUrl, propertyId }
+      });
+
+      if (startError) throw startError;
+      const { taskId } = startData;
+      
+      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'queued', message: 'Queued...' } }));
+      
+      // 2. Poll the Supabase Edge Function for status
+      const pollInterval = setInterval(async () => {
+        try {
+          const { data: statusData, error: statusError } = await supabase.functions.invoke('tripo-3d', {
+            method: 'GET',
+            queryParams: { taskId, propertyId }
+          });
+
+          if (statusError) throw statusError;
+          const { status, modelUrl } = statusData;
+          
+          setTripoStatus(prev => ({ ...prev, [propertyId]: { status, message: status.charAt(0).toUpperCase() + status.slice(1) + '...' } }));
+          
+          if (status === 'success') {
+            clearInterval(pollInterval);
+            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'done', message: '3D model ready!' } }));
+            fetchProperties(); // Refresh to show the model
+            setTimeout(() => {
+              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
+            }, 5000);
+          } else if (status === 'failed') {
+            clearInterval(pollInterval);
+            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: 'Generation failed' } }));
+            setTimeout(() => {
+              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
+            }, 5000);
+          }
+        } catch (err) {
+          clearInterval(pollInterval);
+          console.error('Polling error:', err);
+        }
+      }, 5000);
+    } catch (err) {
+      console.error('Tripo error:', err);
+      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: 'Failed to start' } }));
+      setTimeout(() => {
+        setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
+      }, 5000);
+    }
+  };
+
   const handleDelete = async (id) => {
     if(window.confirm('Are you sure you want to delete this property?')) {
       try {
@@ -368,6 +425,24 @@ const Dashboard = () => {
                     <Link to={`/property/${property.id}`} className="text-sm text-indigo-600 font-medium hover:underline">
                       View Listing
                     </Link>
+                    
+                    {property.images && property.images.length > 0 && !property.ai_model_url && (
+                      <button 
+                        onClick={() => generate3DModel(property.id, property.images[0])}
+                        disabled={tripoStatus[property.id]}
+                        className="text-sm bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-3 py-1.5 rounded-lg font-medium hover:from-violet-700 hover:to-indigo-700 disabled:opacity-60 transition-all flex items-center gap-1.5 shadow-sm"
+                      >
+                        {tripoStatus[property.id] ? (
+                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {tripoStatus[property.id].message}</>
+                        ) : (
+                          <><Sparkles className="w-3.5 h-3.5" /> Generate 3D Model</>
+                        )}
+                      </button>
+                    )}
+
+                    {property.ai_model_url && (
+                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">✓ 3D Model Ready</span>
+                    )}
                     
                     <div className="flex items-center gap-2 ml-auto">
                       <div className="hidden">
