@@ -1,8 +1,34 @@
-import React, { useState, useEffect, useContext } from 'react';
+import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
-import api, { BACKEND_URL } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
-import { Settings, Plus, Image as ImageIcon, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2 } from 'lucide-react';
+import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download } from 'lucide-react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import { QRCodeSVG } from 'qrcode.react';
+import 'leaflet/dist/leaflet.css';
+import L from 'leaflet';
+
+// Fix leaflet icon issue in React
+import icon from 'leaflet/dist/images/marker-icon.png';
+import iconShadow from 'leaflet/dist/images/marker-shadow.png';
+let DefaultIcon = L.icon({
+    iconUrl: icon,
+    shadowUrl: iconShadow,
+    iconAnchor: [12, 41]
+});
+L.Marker.prototype.options.icon = DefaultIcon;
+
+function LocationMarker({ lat, lng, setPosition }) {
+  useMapEvents({
+    click(e) {
+      setPosition(e.latlng.lat, e.latlng.lng);
+    },
+  });
+
+  return lat && lng ? (
+    <Marker position={[lat, lng]}></Marker>
+  ) : null;
+}
 
 const Dashboard = () => {
   const { user } = useContext(AuthContext);
@@ -12,8 +38,8 @@ const Dashboard = () => {
     description: '',
     price: '',
     location: '',
-    lat: '',
-    lng: '',
+    lat: 20.5937, // Default center on India
+    lng: 78.9629,
     owner_name: '',
     phone_number: '',
     alternate_phone: '',
@@ -27,26 +53,36 @@ const Dashboard = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
-  const [tripoStatus, setTripoStatus] = useState({}); // { propertyId: { status, message } }
 
   const fetchProperties = async () => {
+    if (!user) return;
     try {
-      const res = await api.get('/property');
-      const userProps = res.data.filter(p => p.owner_id && p.owner_id._id === user.id);
-      setProperties(userProps);
+      const { data, error } = await supabase
+        .from('properties')
+        .select('*')
+        .eq('owner_id', user.id)
+        .order('created_at', { ascending: false });
+      
+      if (error) throw error;
+      setProperties(data || []);
     } catch (err) {
       console.error(err);
     }
   };
 
   useEffect(() => {
-    if (user) {
-      fetchProperties();
-    }
+    fetchProperties();
   }, [user]);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handlePhoneChange = (e) => {
+    const value = e.target.value.replace(/\D/g, ''); // Keep only numbers
+    if (value.length <= 10) {
+      setFormData({ ...formData, [e.target.name]: value });
+    }
   };
 
   const handleImageChange = (e) => {
@@ -59,48 +95,73 @@ const Dashboard = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (formData.phone_number.length !== 10) {
+      setMessage('Phone number must be exactly 10 digits.');
+      return;
+    }
+    if (formData.alternate_phone && formData.alternate_phone.length !== 10) {
+      setMessage('Alternate phone number must be exactly 10 digits.');
+      return;
+    }
+
     setLoading(true);
     setMessage(null);
     try {
       let uploadedImageUrls = [];
       
-      // Upload images if any
+      // Upload images to Supabase Storage
       if (imageFiles.length > 0) {
-        const uploadData = new FormData();
-        imageFiles.forEach(file => {
-          uploadData.append('images', file);
-        });
-        
-        const uploadRes = await api.post('/upload', uploadData, {
-          headers: { 'Content-Type': 'multipart/form-data' }
-        });
-        uploadedImageUrls = uploadRes.data.urls;
+        for (const file of imageFiles) {
+          const fileExt = file.name.split('.').pop();
+          const fileName = `${Math.random()}.${fileExt}`;
+          const filePath = `${user.id}/${fileName}`;
+          
+          const { error: uploadError } = await supabase.storage
+            .from('property-images')
+            .upload(filePath, file);
+            
+          if (uploadError) throw uploadError;
+          
+          const { data: { publicUrl } } = supabase.storage
+            .from('property-images')
+            .getPublicUrl(filePath);
+            
+          uploadedImageUrls.push(publicUrl);
+        }
       }
 
       const dataToSubmit = {
-        ...formData,
+        owner_id: user.id,
+        title: formData.title,
+        description: formData.description,
         price: Number(formData.price),
-        lat: formData.lat ? Number(formData.lat) : undefined,
-        lng: formData.lng ? Number(formData.lng) : undefined,
-        phone_number: formData.phone_number ? `${phoneCode} ${formData.phone_number}` : '',
-        alternate_phone: formData.alternate_phone ? `${altPhoneCode} ${formData.alternate_phone}` : '',
+        location: formData.location,
+        lat: Number(formData.lat),
+        lng: Number(formData.lng),
+        owner_name: formData.owner_name,
+        phone_number: `${phoneCode} ${formData.phone_number}`,
+        alternate_phone: formData.alternate_phone ? `${altPhoneCode} ${formData.alternate_phone}` : null,
+        email: formData.email,
         images: uploadedImageUrls,
         video_url: videoUrls.filter(v => v.trim()),
+        ai_model_url: formData.ai_model_url || null
       };
 
-      await api.post('/property', dataToSubmit);
+      const { error } = await supabase.from('properties').insert([dataToSubmit]);
+      if (error) throw error;
+
       setMessage('Property created successfully!');
       setFormData({
-        title: '', description: '', price: '', location: '', lat: '', lng: '',
-        owner_name: '', phone_number: '', alternate_phone: '', email: '',
-        ai_model_url: ''
+        title: '', description: '', price: '', location: '', lat: 20.5937, lng: 78.9629,
+        owner_name: '', phone_number: '', alternate_phone: '', email: '', ai_model_url: ''
       });
       setVideoUrls(['']);
       setImageFiles([]);
       setImagePreviews([]);
       fetchProperties();
     } catch (err) {
-      setMessage('Error creating property.');
+      console.error(err);
+      setMessage(`Error creating property: ${err.message}`);
     } finally {
       setLoading(false);
     }
@@ -109,55 +170,26 @@ const Dashboard = () => {
   const handleDelete = async (id) => {
     if(window.confirm('Are you sure you want to delete this property?')) {
       try {
-        await api.delete(`/property/${id}`);
+        const { error } = await supabase.from('properties').delete().eq('id', id);
+        if (error) throw error;
         fetchProperties();
       } catch (err) {
-        alert('Error deleting property');
+        alert('Error deleting property: ' + err.message);
       }
     }
   };
 
-  const generate3DModel = async (propertyId, imageUrl) => {
-    const fullImageUrl = imageUrl.startsWith('http') ? imageUrl : `${BACKEND_URL}${imageUrl}`;
-    
-    setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'starting', message: 'Starting...' } }));
-    
-    try {
-      const genRes = await api.post('/tripo/generate', { imageUrl: fullImageUrl, propertyId });
-      const { taskId } = genRes.data;
-      
-      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'queued', message: 'Queued...' } }));
-      
-      const pollInterval = setInterval(async () => {
-        try {
-          const statusRes = await api.get(`/tripo/status/${taskId}`);
-          const { status, modelUrl, message: statusMsg } = statusRes.data;
-          
-          setTripoStatus(prev => ({ ...prev, [propertyId]: { status, message: statusMsg } }));
-          
-          if (status === 'success' && modelUrl) {
-            clearInterval(pollInterval);
-            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'saving', message: 'Saving model...' } }));
-            await api.post('/tripo/save', { modelUrl, propertyId });
-            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'done', message: '3D model ready!' } }));
-            fetchProperties();
-            setTimeout(() => {
-              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
-            }, 5000);
-          } else if (status === 'failed') {
-            clearInterval(pollInterval);
-            setTimeout(() => {
-              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
-            }, 5000);
-          }
-        } catch (err) {
-          clearInterval(pollInterval);
-          setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: 'Error' } }));
-        }
-      }, 5000);
-    } catch (err) {
-      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: err.response?.data?.message || 'Failed' } }));
-    }
+  const downloadQR = (propertyId, title) => {
+    const canvas = document.getElementById(`qr-${propertyId}`);
+    const pngUrl = canvas
+      .toDataURL("image/png")
+      .replace("image/png", "image/octet-stream");
+    let downloadLink = document.createElement("a");
+    downloadLink.href = pngUrl;
+    downloadLink.download = `${title.replace(/\s+/g, '_')}_QR.png`;
+    document.body.appendChild(downloadLink);
+    downloadLink.click();
+    document.body.removeChild(downloadLink);
   };
 
   return (
@@ -173,7 +205,11 @@ const Dashboard = () => {
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-indigo-500" /> Add New Property
           </h2>
-          {message && <div className="mb-4 p-3 bg-indigo-50 text-indigo-700 rounded-md text-sm">{message}</div>}
+          {message && (
+            <div className={`mb-4 p-3 rounded-md text-sm ${message.includes('Error') || message.includes('must be') ? 'bg-red-50 text-red-700' : 'bg-green-50 text-green-700'}`}>
+              {message}
+            </div>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-700">Title</label>
@@ -204,14 +240,22 @@ const Dashboard = () => {
               </div>
             </div>
             
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <label className="block text-sm font-medium text-gray-700">Latitude</label>
-                <input type="number" step="any" name="lat" value={formData.lat} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="e.g. 40.7128" />
+            <div className="pt-4 border-t border-gray-100">
+              <h3 className="text-sm font-semibold text-gray-900 mb-2">Pin Location on Map</h3>
+              <p className="text-xs text-gray-500 mb-2">Click on the map to accurately place your property.</p>
+              <div className="h-48 w-full rounded-md border border-gray-300 overflow-hidden mb-2 z-0">
+                <MapContainer center={[formData.lat, formData.lng]} zoom={4} style={{ height: '100%', width: '100%' }}>
+                  <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
+                  <LocationMarker 
+                    lat={formData.lat} 
+                    lng={formData.lng} 
+                    setPosition={(lat, lng) => setFormData({ ...formData, lat, lng })} 
+                  />
+                </MapContainer>
               </div>
-              <div className="w-1/2">
-                <label className="block text-sm font-medium text-gray-700">Longitude</label>
-                <input type="number" step="any" name="lng" value={formData.lng} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder="e.g. -74.0060" />
+              <div className="flex gap-4 text-xs text-gray-500">
+                <div>Lat: {formData.lat.toFixed(4)}</div>
+                <div>Lng: {formData.lng.toFixed(4)}</div>
               </div>
             </div>
 
@@ -225,50 +269,16 @@ const Dashboard = () => {
                     <option value="+91">🇮🇳 +91</option>
                     <option value="+1">🇺🇸 +1</option>
                     <option value="+44">🇬🇧 +44</option>
-                    <option value="+971">🇦🇪 +971</option>
-                    <option value="+61">🇦🇺 +61</option>
-                    <option value="+86">🇨🇳 +86</option>
-                    <option value="+81">🇯🇵 +81</option>
-                    <option value="+49">🇩🇪 +49</option>
-                    <option value="+33">🇫🇷 +33</option>
-                    <option value="+7">🇷🇺 +7</option>
-                    <option value="+55">🇧🇷 +55</option>
-                    <option value="+27">🇿🇦 +27</option>
-                    <option value="+82">🇰🇷 +82</option>
-                    <option value="+39">🇮🇹 +39</option>
-                    <option value="+34">🇪🇸 +34</option>
-                    <option value="+60">🇲🇾 +60</option>
-                    <option value="+65">🇸🇬 +65</option>
-                    <option value="+977">🇳🇵 +977</option>
-                    <option value="+94">🇱🇰 +94</option>
-                    <option value="+880">🇧🇩 +880</option>
                   </select>
-                  <input type="tel" name="phone_number" value={formData.phone_number} onChange={handleChange} placeholder="Phone Number" className="block w-full border border-gray-300 rounded-md p-2" />
+                  <input type="tel" name="phone_number" required value={formData.phone_number} onChange={handlePhoneChange} placeholder="10-digit Phone Number" className="block w-full border border-gray-300 rounded-md p-2" />
                 </div>
                 <div className="flex gap-2">
                   <select value={altPhoneCode} onChange={(e) => setAltPhoneCode(e.target.value)} className="border border-gray-300 rounded-md p-2 text-sm w-24">
                     <option value="+91">🇮🇳 +91</option>
                     <option value="+1">🇺🇸 +1</option>
                     <option value="+44">🇬🇧 +44</option>
-                    <option value="+971">🇦🇪 +971</option>
-                    <option value="+61">🇦🇺 +61</option>
-                    <option value="+86">🇨🇳 +86</option>
-                    <option value="+81">🇯🇵 +81</option>
-                    <option value="+49">🇩🇪 +49</option>
-                    <option value="+33">🇫🇷 +33</option>
-                    <option value="+7">🇷🇺 +7</option>
-                    <option value="+55">🇧🇷 +55</option>
-                    <option value="+27">🇿🇦 +27</option>
-                    <option value="+82">🇰🇷 +82</option>
-                    <option value="+39">🇮🇹 +39</option>
-                    <option value="+34">🇪🇸 +34</option>
-                    <option value="+60">🇲🇾 +60</option>
-                    <option value="+65">🇸🇬 +65</option>
-                    <option value="+977">🇳🇵 +977</option>
-                    <option value="+94">🇱🇰 +94</option>
-                    <option value="+880">🇧🇩 +880</option>
                   </select>
-                  <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handleChange} placeholder="Alt Phone" className="block w-full border border-gray-300 rounded-md p-2" />
+                  <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handlePhoneChange} placeholder="10-digit Alt Phone (optional)" className="block w-full border border-gray-300 rounded-md p-2" />
                 </div>
               </div>
             </div>
@@ -337,47 +347,43 @@ const Dashboard = () => {
               No properties listed yet. Add one from the left!
             </div>
           ) : (
-            properties.map(property => (
-              <div key={property._id} className="flex bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                <img src={property.images[0] ? (property.images[0].startsWith('http') ? property.images[0] : `${BACKEND_URL}${property.images[0]}`) : 'https://via.placeholder.com/150'} alt="Property" className="w-48 h-auto object-cover" />
+            properties.map(property => {
+              const propertyUrl = `${window.location.origin}/property/${property.id}`;
+              
+              return (
+              <div key={property.id} className="flex flex-col sm:flex-row bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                <img src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/150'} alt="Property" className="w-full sm:w-48 h-48 sm:h-auto object-cover" />
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start">
                       <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{property.title}</h3>
-                      <button onClick={() => handleDelete(property._id)} className="text-red-500 hover:text-red-700 p-1">
+                      <button onClick={() => handleDelete(property.id)} className="text-red-500 hover:text-red-700 p-1">
                         <Trash2 className="w-5 h-5" />
                       </button>
                     </div>
                     <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
-                    <p className="text-xl font-bold text-indigo-600 mt-2">₹{property.price.toLocaleString('en-IN')}</p>
+                    <p className="text-xl font-bold text-indigo-600 mt-2">₹{Number(property.price).toLocaleString('en-IN')}</p>
                   </div>
                   <div className="mt-4 flex items-center gap-4 flex-wrap">
-                    <Link to={`/property/${property._id}`} className="text-sm text-indigo-600 font-medium hover:underline">
+                    <Link to={`/property/${property.id}`} className="text-sm text-indigo-600 font-medium hover:underline">
                       View Listing
                     </Link>
-                    {property.images && property.images.length > 0 && !property.model_3d_url && (
+                    
+                    <div className="flex items-center gap-2 ml-auto">
+                      <div className="hidden">
+                        <QRCodeSVG id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} />
+                      </div>
                       <button 
-                        onClick={() => generate3DModel(property._id, property.images[0])}
-                        disabled={tripoStatus[property._id]}
-                        className="text-sm bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-3 py-1.5 rounded-lg font-medium hover:from-violet-700 hover:to-indigo-700 disabled:opacity-60 transition-all flex items-center gap-1.5 shadow-sm"
+                        onClick={() => downloadQR(property.id, property.title)}
+                        className="text-sm border border-indigo-200 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-100 transition-all flex items-center gap-1.5"
                       >
-                        {tripoStatus[property._id] ? (
-                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {tripoStatus[property._id].message}</>
-                        ) : (
-                          <><Sparkles className="w-3.5 h-3.5" /> Generate 3D Model</>
-                        )}
+                        <Download className="w-4 h-4" /> Download High-Res QR
                       </button>
-                    )}
-                    {property.model_3d_url && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">✓ 3D Model Ready</span>
-                    )}
-                    {property.qr_code_url && (
-                       <img src={property.qr_code_url} alt="QR Code" className="w-10 h-10 border border-gray-200 rounded" />
-                    )}
+                    </div>
                   </div>
                 </div>
               </div>
-            ))
+            )})
           )}
         </div>
       </div>

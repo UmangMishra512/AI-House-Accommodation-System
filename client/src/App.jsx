@@ -10,6 +10,7 @@ import PropertyListing from './pages/PropertyListing';
 import PropertyDetail from './pages/PropertyDetail';
 import Profile from './pages/Profile';
 import AdminDashboard from './pages/AdminDashboard';
+import ResetPassword from './pages/ResetPassword';
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -30,6 +31,7 @@ const App = () => {
           <Route path="/" element={<Home />} />
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/reset-password" element={<ResetPassword />} />
           <Route path="/properties" element={<PropertyListing />} />
           <Route path="/property/:id" element={<PropertyDetail />} />
           <Route 

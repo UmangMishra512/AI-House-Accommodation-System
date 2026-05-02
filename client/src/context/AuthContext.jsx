@@ -1,64 +1,67 @@
 import React, { createContext, useState, useEffect } from 'react';
-import api from '../lib/api';
+import { supabase } from '../lib/supabase';
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
+  const [session, setSession] = useState(null);
   const [user, setUser] = useState(null);
-  const [token, setToken] = useState(localStorage.getItem('token') || null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    // If we have a token, we could fetch user profile if backend had an endpoint for it.
-    // For now, we decode or just trust the token / keep it minimal.
-    // Real-world would have `/api/auth/me`
-    if (token) {
-      try {
-        const decoded = JSON.parse(atob(token.split('.')[1]));
-        if (decoded.exp * 1000 < Date.now()) {
-          logout();
-        } else {
-          // Assume user object was stored in localStorage on login
-          const savedUser = localStorage.getItem('user');
-          if (savedUser) {
-            setUser(JSON.parse(savedUser));
-          }
-        }
-      } catch (e) {
-        logout();
-      }
-    }
-    setLoading(false);
-  }, [token]);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+      setUser(session?.user || null);
+      setLoading(false);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+      setUser(session?.user || null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const login = async (email, password) => {
-    const res = await api.post('/auth/login', { email, password });
-    setToken(res.data.token);
-    setUser(res.data.user);
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    return res.data;
+    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+    if (error) throw error;
+    return data;
   };
 
-  const register = async (name, email, password, confirmPassword) => {
-    const res = await api.post('/auth/register', { name, email, password, confirmPassword });
-    setToken(res.data.token);
-    setUser(res.data.user);
-    localStorage.setItem('token', res.data.token);
-    localStorage.setItem('user', JSON.stringify(res.data.user));
-    return res.data;
+  const register = async (name, email, password) => {
+    const { data, error } = await supabase.auth.signUp({
+      email,
+      password,
+      options: {
+        data: { name }
+      }
+    });
+    if (error) throw error;
+    return data;
   };
 
-  const logout = () => {
-    setToken(null);
-    setUser(null);
-    localStorage.removeItem('token');
-    localStorage.removeItem('user');
+  const logout = async () => {
+    await supabase.auth.signOut();
+  };
+
+  const resetPasswordForEmail = async (email) => {
+    const { data, error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: `${window.location.origin}/reset-password`,
+    });
+    if (error) throw error;
+    return data;
+  };
+  
+  const updatePassword = async (newPassword) => {
+    const { data, error } = await supabase.auth.updateUser({ password: newPassword });
+    if (error) throw error;
+    return data;
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, loading, login, register, logout }}>
-      {children}
+    <AuthContext.Provider value={{ user, session, loading, login, register, logout, resetPasswordForEmail, updatePassword }}>
+      {!loading && children}
     </AuthContext.Provider>
   );
 };
