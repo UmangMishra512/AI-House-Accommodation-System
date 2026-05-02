@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { QRCodeSVG } from 'qrcode.react';
+import '@google/model-viewer';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -53,6 +54,59 @@ const Dashboard = () => {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
+  const [generatingTripo, setGeneratingTripo] = useState(null);
+
+  const handleGenerate3D = async (propertyId, imageUrl) => {
+    try {
+      setGeneratingTripo(propertyId);
+      
+      const { data: startData, error: startError } = await supabase.functions.invoke('tripo', {
+        body: { action: 'generate', imageUrl }
+      });
+      
+      if (startError || startData.error) {
+        throw new Error(startError?.message || startData.error);
+      }
+      
+      const taskId = startData.taskId;
+      
+      const poll = setInterval(async () => {
+        const { data: statusData, error: statusError } = await supabase.functions.invoke('tripo', {
+          body: { action: 'status', taskId }
+        });
+        
+        if (statusError || statusData.error) {
+          clearInterval(poll);
+          setGeneratingTripo(null);
+          alert("Error checking 3D model status: " + (statusError?.message || statusData.error));
+          return;
+        }
+        
+        if (statusData.status === 'success') {
+          clearInterval(poll);
+          const { error: updateError } = await supabase
+            .from('properties')
+            .update({ ai_model_url: statusData.modelUrl })
+            .eq('id', propertyId);
+            
+          if (updateError) {
+             alert("Error saving 3D model URL.");
+          } else {
+             fetchProperties();
+          }
+          setGeneratingTripo(null);
+        } else if (statusData.status === 'failed' || statusData.status === 'cancelled') {
+          clearInterval(poll);
+          setGeneratingTripo(null);
+          alert("3D model generation failed on Tripo AI.");
+        }
+      }, 5000);
+      
+    } catch (err) {
+      setGeneratingTripo(null);
+      alert('Error generating 3D model: ' + err.message);
+    }
+  };
 
   const fetchProperties = async () => {
     if (!user) return;
@@ -164,63 +218,6 @@ const Dashboard = () => {
       setMessage(`Error creating property: ${err.message}`);
     } finally {
       setLoading(false);
-    }
-  };
-
-  const [tripoStatus, setTripoStatus] = useState({}); // { propertyId: { status, message } }
-
-  const generate3DModel = async (propertyId, imageUrl) => {
-    setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'starting', message: 'Starting...' } }));
-    
-    try {
-      // 1. Call Supabase Edge Function to start the task
-      const { data: startData, error: startError } = await supabase.functions.invoke('tripo-3d', {
-        body: { imageUrl, propertyId }
-      });
-
-      if (startError) throw startError;
-      const { taskId } = startData;
-      
-      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'queued', message: 'Queued...' } }));
-      
-      // 2. Poll the Supabase Edge Function for status
-      const pollInterval = setInterval(async () => {
-        try {
-          const { data: statusData, error: statusError } = await supabase.functions.invoke('tripo-3d', {
-            method: 'GET',
-            queryParams: { taskId, propertyId }
-          });
-
-          if (statusError) throw statusError;
-          const { status, modelUrl } = statusData;
-          
-          setTripoStatus(prev => ({ ...prev, [propertyId]: { status, message: status.charAt(0).toUpperCase() + status.slice(1) + '...' } }));
-          
-          if (status === 'success') {
-            clearInterval(pollInterval);
-            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'done', message: '3D model ready!' } }));
-            fetchProperties(); // Refresh to show the model
-            setTimeout(() => {
-              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
-            }, 5000);
-          } else if (status === 'failed') {
-            clearInterval(pollInterval);
-            setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: 'Generation failed' } }));
-            setTimeout(() => {
-              setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
-            }, 5000);
-          }
-        } catch (err) {
-          clearInterval(pollInterval);
-          console.error('Polling error:', err);
-        }
-      }, 5000);
-    } catch (err) {
-      console.error('Tripo error:', err);
-      setTripoStatus(prev => ({ ...prev, [propertyId]: { status: 'failed', message: 'Failed to start' } }));
-      setTimeout(() => {
-        setTripoStatus(prev => { const n = {...prev}; delete n[propertyId]; return n; });
-      }, 5000);
     }
   };
 
@@ -409,7 +406,18 @@ const Dashboard = () => {
               
               return (
               <div key={property.id} className="flex flex-col sm:flex-row bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                <img src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/150'} alt="Property" className="w-full sm:w-48 h-48 sm:h-auto object-cover" />
+                <div className="w-full sm:w-48 h-48 sm:h-auto relative bg-gray-100 flex-shrink-0">
+                  {property.ai_model_url ? (
+                    <model-viewer 
+                      src={property.ai_model_url} 
+                      auto-rotate 
+                      camera-controls 
+                      style={{ width: '100%', height: '100%' }}
+                    ></model-viewer>
+                  ) : (
+                    <img src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/150'} alt="Property" className="w-full h-full object-cover" />
+                  )}
+                </div>
                 <div className="p-5 flex-1 flex flex-col justify-between">
                   <div>
                     <div className="flex justify-between items-start">
@@ -426,28 +434,22 @@ const Dashboard = () => {
                       View Listing
                     </Link>
                     
-                    {property.images && property.images.length > 0 && !property.ai_model_url && (
-                      <button 
-                        onClick={() => generate3DModel(property.id, property.images[0])}
-                        disabled={tripoStatus[property.id]}
-                        className="text-sm bg-gradient-to-r from-violet-600 to-indigo-600 text-white px-3 py-1.5 rounded-lg font-medium hover:from-violet-700 hover:to-indigo-700 disabled:opacity-60 transition-all flex items-center gap-1.5 shadow-sm"
-                      >
-                        {tripoStatus[property.id] ? (
-                          <><Loader2 className="w-3.5 h-3.5 animate-spin" /> {tripoStatus[property.id].message}</>
-                        ) : (
-                          <><Sparkles className="w-3.5 h-3.5" /> Generate 3D Model</>
-                        )}
-                      </button>
-                    )}
-
-                    {property.ai_model_url && (
-                      <span className="text-xs bg-green-100 text-green-700 px-2 py-1 rounded-full font-medium">✓ 3D Model Ready</span>
-                    )}
-                    
                     <div className="flex items-center gap-2 ml-auto">
                       <div className="hidden">
                         <QRCodeSVG id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} />
                       </div>
+                      
+                      {!property.ai_model_url && property.images && property.images[0] && (
+                        <button 
+                          onClick={() => handleGenerate3D(property.id, property.images[0])}
+                          disabled={generatingTripo === property.id}
+                          className="text-sm border border-purple-200 bg-purple-50 text-purple-700 px-3 py-1.5 rounded-lg font-medium hover:bg-purple-100 transition-all flex items-center gap-1.5 disabled:opacity-50"
+                        >
+                          {generatingTripo === property.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+                          {generatingTripo === property.id ? 'Generating...' : 'Generate 3D Model'}
+                        </button>
+                      )}
+
                       <button 
                         onClick={() => downloadQR(property.id, property.title)}
                         className="text-sm border border-indigo-200 bg-indigo-50 text-indigo-700 px-3 py-1.5 rounded-lg font-medium hover:bg-indigo-100 transition-all flex items-center gap-1.5"
