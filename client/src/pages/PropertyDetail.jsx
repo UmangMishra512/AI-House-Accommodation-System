@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { MapPin, IndianRupee, ArrowLeft } from 'lucide-react';
+import { MapPin, IndianRupee, ArrowLeft, Share2 } from 'lucide-react';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -22,6 +22,23 @@ const PropertyDetail = () => {
       setContactForm({ name: '', email: '', message: '' });
     } catch (err) {
       setContactStatus({ loading: false, success: false, error: 'Failed to send message.' });
+    }
+  };
+
+  const handleShare = async () => {
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: property?.title || 'Property',
+          text: `Check out this property on AI Accommodate!`,
+          url: window.location.href,
+        });
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      alert('Link copied to clipboard!');
     }
   };
 
@@ -208,13 +225,21 @@ const PropertyDetail = () => {
                     <div className="flex justify-center p-4 bg-gray-50 rounded-xl mb-4 w-full">
                       <img src={property.qr_code_url} alt="Property QR Code" className="w-48 h-48 mix-blend-multiply" />
                     </div>
-                    <a 
-                      href={property.qr_code_url} 
-                      download="property-qr.png"
-                      className="w-full text-center bg-indigo-50 text-indigo-700 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
-                    >
-                      Download QR Code
-                    </a>
+                    <div className="flex gap-2 w-full mt-4">
+                      <button 
+                        onClick={handleShare}
+                        className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                      >
+                        <Share2 className="w-4 h-4" /> Share
+                      </button>
+                      <a 
+                        href={property.qr_code_url} 
+                        download="property-qr.png"
+                        className="flex-1 text-center bg-indigo-50 text-indigo-700 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
+                      >
+                        Download QR
+                      </a>
+                    </div>
                   </div>
                 ) : (
                   <p className="text-gray-400 italic">No QR code available</p>

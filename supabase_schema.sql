@@ -60,3 +60,32 @@ CREATE POLICY "Users can update their own property images"
 CREATE POLICY "Users can delete their own property images"
   ON storage.objects FOR DELETE
   USING ( bucket_id = 'property-images' AND auth.uid() = owner );
+
+-- Create contact_messages table
+CREATE TABLE IF NOT EXISTS contact_messages (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  email TEXT NOT NULL,
+  message TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT now()
+);
+
+-- Set up Row Level Security (RLS)
+ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+
+-- Allow anyone to insert contact messages
+CREATE POLICY "Anyone can insert contact messages"
+  ON contact_messages FOR INSERT
+  WITH CHECK (true);
+
+-- Allow property owners to view messages for their properties
+CREATE POLICY "Property owners can view messages"
+  ON contact_messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM properties
+      WHERE properties.id = contact_messages.property_id
+      AND properties.owner_id = auth.uid()
+    )
+  );
