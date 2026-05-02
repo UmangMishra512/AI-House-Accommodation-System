@@ -88,9 +88,26 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
+  const updateProfile = async (name) => {
+    const { data, error } = await supabase.auth.updateUser({
+      data: { name }
+    });
+    if (error) throw error;
+    setUser(data.user);
+    
+    // Also update the public.users table for consistency
+    await supabase
+      .from('users')
+      .update({ name })
+      .eq('id', data.user.id);
+      
+    return data;
+  };
+
   return (
     <AuthContext.Provider value={{ user, session, loading, login, register, logout, resetPasswordForEmail,
         updatePassword,
+        updateProfile,
         isAdmin
       }}
     >  {!loading && children}
