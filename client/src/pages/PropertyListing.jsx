@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import api, { BACKEND_URL } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import { MapPin, Search } from 'lucide-react';
 
@@ -10,8 +10,13 @@ const PropertyListing = () => {
   useEffect(() => {
     const fetchProperties = async () => {
       try {
-        const res = await api.get('/property');
-        setProperties(res.data);
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .order('created_at', { ascending: false });
+          
+        if (error) throw error;
+        setProperties(data || []);
       } catch (err) {
         console.error(err);
       } finally {
@@ -46,10 +51,10 @@ const PropertyListing = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {properties.map(property => (
-              <Link to={`/property/${property._id}`} key={property._id} className="group flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <Link to={`/property/${property.id}`} key={property.id} className="group flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative h-48 w-full overflow-hidden bg-gray-200">
                   <img
-                    src={property.images[0] ? (property.images[0].startsWith('http') ? property.images[0] : `${BACKEND_URL}${property.images[0]}`) : 'https://via.placeholder.com/400x300'}
+                    src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/400x300'}
                     alt={property.title}
                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                   />
@@ -70,7 +75,7 @@ const PropertyListing = () => {
                   <div className="mt-auto pt-4 flex items-center justify-between">
                     <p className="text-xl font-bold text-gray-900">₹{property.price.toLocaleString('en-IN')}</p>
                     {property.owner_id && (
-                       <p className="text-xs text-gray-400">By {property.owner_id.name.split(' ')[0]}</p>
+                       <p className="text-xs text-gray-400">By {property.owner_name || (property.owner_id && typeof property.owner_id === 'object' ? property.owner_id.name?.split(' ')[0] : 'Host')}</p>
                     )}
                   </div>
                 </div>

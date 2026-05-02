@@ -452,8 +452,8 @@ const Dashboard = () => {
                     </Link>
                     
                     <div className="flex items-center gap-2 ml-auto">
-                      <div className="hidden">
-                        <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} />
+                      <div className="flex items-center gap-2 bg-gray-50 p-1.5 rounded-lg border border-gray-200" title="High-Res QR generated locally">
+                        <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} style={{ width: '40px', height: '40px' }} />
                       </div>
                       
                       {!property.ai_model_url && property.images && property.images[0] && (

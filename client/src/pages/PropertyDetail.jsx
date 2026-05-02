@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import api, { BACKEND_URL } from '../lib/api';
+import { supabase } from '../lib/supabase';
 import { MapPin, IndianRupee, ArrowLeft } from 'lucide-react';
 
 const PropertyDetail = () => {
@@ -14,7 +14,10 @@ const PropertyDetail = () => {
     e.preventDefault();
     setContactStatus({ loading: true, success: false, error: '' });
     try {
-      await api.post('/contact', { ...contactForm, property_id: id });
+      const { error } = await supabase
+        .from('contact_messages')
+        .insert([{ ...contactForm, property_id: id }]);
+      if (error) throw error;
       setContactStatus({ loading: false, success: true, error: '' });
       setContactForm({ name: '', email: '', message: '' });
     } catch (err) {
@@ -25,8 +28,14 @@ const PropertyDetail = () => {
   useEffect(() => {
     const fetchProperty = async () => {
       try {
-        const res = await api.get(`/property/${id}`);
-        setProperty(res.data);
+        const { data, error } = await supabase
+          .from('properties')
+          .select('*')
+          .eq('id', id)
+          .single();
+          
+        if (error) throw error;
+        setProperty(data);
       } catch (err) {
         console.error(err);
       } finally {
@@ -91,13 +100,13 @@ const PropertyDetail = () => {
             {property.images && property.images.length > 0 && (
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <img 
-                  src={property.images[0].startsWith('http') ? property.images[0] : `${BACKEND_URL}${property.images[0]}`} 
+                  src={property.images[0]}
                   alt="Main" className="w-full h-80 object-cover rounded-2xl sm:col-span-2" 
                 />
                 {property.images.slice(1).map((img, idx) => (
                   <img 
                     key={idx} 
-                    src={img.startsWith('http') ? img : `${BACKEND_URL}${img}`} 
+                    src={img}
                     alt={`Additional ${idx}`} className="w-full h-48 object-cover rounded-2xl" 
                   />
                 ))}
@@ -120,7 +129,7 @@ const PropertyDetail = () => {
                 </h2>
                 <div className="relative w-full overflow-hidden rounded-2xl bg-gray-100" style={{ height: '500px' }}>
                   <model-viewer
-                    src={property.model_3d_url.startsWith('http') ? property.model_3d_url : `${BACKEND_URL}${property.model_3d_url}`}
+                    src={property.model_3d_url}
                     alt="3D Model of property"
                     auto-rotate
                     camera-controls
@@ -218,11 +227,11 @@ const PropertyDetail = () => {
                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Listed by Host</h3>
                    <div className="flex items-center gap-4 mt-4">
                      <div className="h-12 w-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold">
-                       {(property.owner_name || property.owner_id.name).charAt(0).toUpperCase()}
+                       {(property.owner_name || (property.owner_id && property.owner_id.name) || 'H').charAt(0).toUpperCase()}
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">{property.owner_name || property.owner_id.name}</p>
-                       <p className="text-sm text-gray-500">{property.email || property.owner_id.email}</p>
+                       <p className="text-sm font-medium text-gray-900">{property.owner_name || (property.owner_id && property.owner_id.name) || 'Host'}</p>
+                       <p className="text-sm text-gray-500">{property.email || (property.owner_id && property.owner_id.email)}</p>
                      </div>
                    </div>
                    
@@ -232,8 +241,8 @@ const PropertyDetail = () => {
                          Call Now
                        </a>
                      )}
-                     {(property.email || property.owner_id.email) && (
-                       <a href={`mailto:${property.email || property.owner_id.email}`} className="w-full flex items-center justify-center bg-white border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
+                     {(property.email || (property.owner_id && property.owner_id.email)) && (
+                       <a href={`mailto:${property.email || (property.owner_id && property.owner_id.email)}`} className="w-full flex items-center justify-center bg-white border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
                          Email Host
                        </a>
                      )}
