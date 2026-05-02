@@ -1,32 +1,37 @@
-import React, { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState, useRef } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
-import { Home, LogOut, User as UserIcon, PlusSquare, Shield, Bell } from 'lucide-react';
+import { Home, LogOut, User as UserIcon, PlusSquare, Shield, Bell, Check, CheckCircle2 } from 'lucide-react';
+import { format } from 'date-fns';
 
 const Navbar = () => {
   const { user, isAdmin, logout } = useContext(AuthContext);
   const navigate = useNavigate();
-  const [messageCount, setMessageCount] = useState(0);
+  const [unreadMessages, setUnreadMessages] = useState([]);
+  const [showNotificationPopup, setShowNotificationPopup] = useState(false);
+  const notificationRef = useRef(null);
 
   useEffect(() => {
     if (user) {
-      const fetchMessageCount = async () => {
-        const { count, error } = await supabase
+      const fetchUnreadMessages = async () => {
+        const { data, error } = await supabase
           .from('contact_messages')
-          .select('*', { count: 'exact', head: true });
+          .select('*, property:properties(title)')
+          .eq('is_read', false)
+          .order('created_at', { ascending: false });
         
-        if (!error && count !== null) {
-          setMessageCount(count);
+        if (!error && data) {
+          setUnreadMessages(data);
         }
       };
       
-      fetchMessageCount();
+      fetchUnreadMessages();
 
       // Subscribe to new messages
       const channel = supabase.channel('public:contact_messages')
-        .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'contact_messages' }, () => {
-          fetchMessageCount();
+        .on('postgres_changes', { event: '*', schema: 'public', table: 'contact_messages' }, () => {
+          fetchUnreadMessages();
         })
         .subscribe();
         
@@ -36,9 +41,45 @@ const Navbar = () => {
     }
   }, [user]);
 
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (notificationRef.current && !notificationRef.current.contains(event.target)) {
+        setShowNotificationPopup(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
   const handleLogout = () => {
     logout();
     navigate('/');
+  };
+
+  const markAsRead = async (messageId) => {
+    try {
+      if (messageId === 'all') {
+        const ids = unreadMessages.map(m => m.id);
+        if(ids.length === 0) return;
+        await supabase.from('contact_messages').update({ is_read: true }).in('id', ids);
+      } else {
+        await supabase.from('contact_messages').update({ is_read: true }).eq('id', messageId);
+      }
+      // Realtime subscription will automatically update the state, but we can optimistically update
+      if (messageId === 'all') {
+        setUnreadMessages([]);
+      } else {
+        setUnreadMessages(prev => prev.filter(m => m.id !== messageId));
+      }
+    } catch (err) {
+      console.error("Error marking as read:", err);
+    }
+  };
+
+  const handleNotificationClick = (msg) => {
+    markAsRead(msg.id);
+    setShowNotificationPopup(false);
+    navigate('/dashboard?tab=queries');
   };
 
   return (
@@ -68,15 +109,76 @@ const Navbar = () => {
                   Dashboard
                 </Link>
                 
-                <Link to="/dashboard?tab=queries" className="relative flex items-center text-gray-600 hover:text-indigo-600 transition-colors">
-                  <Bell className="w-5 h-5" />
-                  {messageCount > 0 && (
-                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[16px] h-[16px]">
-                      {messageCount > 99 ? '99+' : messageCount}
-                    </span>
+                <div className="relative flex items-center" ref={notificationRef}>
+                  <button 
+                    onClick={() => setShowNotificationPopup(!showNotificationPopup)}
+                    className="relative flex items-center text-gray-600 hover:text-indigo-600 transition-colors p-1"
+                  >
+                    <Bell className="w-5 h-5" />
+                    {unreadMessages.length > 0 && (
+                      <span className="absolute top-0 right-0 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full flex items-center justify-center min-w-[16px] h-[16px]">
+                        {unreadMessages.length > 99 ? '99+' : unreadMessages.length}
+                      </span>
+                    )}
+                  </button>
+
+                  {/* Notification Popover */}
+                  {showNotificationPopup && (
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2">
+                      <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+                        <h3 className="font-semibold text-gray-800 text-sm">Notifications</h3>
+                        {unreadMessages.length > 0 && (
+                          <button 
+                            onClick={() => markAsRead('all')}
+                            className="text-xs text-indigo-600 hover:text-indigo-800 font-medium flex items-center gap-1"
+                          >
+                            <Check className="w-3 h-3" /> Mark all as read
+                          </button>
+                        )}
+                      </div>
+                      
+                      <div className="max-h-80 overflow-y-auto">
+                        {unreadMessages.length === 0 ? (
+                          <div className="p-6 text-center text-gray-500 flex flex-col items-center gap-2">
+                            <CheckCircle2 className="w-8 h-8 text-green-400" />
+                            <p className="text-sm">You have no unread notifications.</p>
+                          </div>
+                        ) : (
+                          unreadMessages.map((msg) => (
+                            <div 
+                              key={msg.id} 
+                              onClick={() => handleNotificationClick(msg)}
+                              className="p-3 border-b border-gray-50 hover:bg-indigo-50/50 cursor-pointer transition-colors"
+                            >
+                              <div className="flex justify-between items-start mb-1">
+                                <span className="font-semibold text-sm text-gray-900 truncate pr-2">{msg.name}</span>
+                                <span className="text-[10px] text-indigo-600 font-medium whitespace-nowrap bg-indigo-50 px-1.5 py-0.5 rounded">
+                                  {format(new Date(msg.created_at), 'MMM dd')}
+                                </span>
+                              </div>
+                              <p className="text-xs text-gray-500 line-clamp-1 mb-1">
+                                Inquired about: <span className="font-medium text-gray-700">{msg.property?.title || 'Unknown Property'}</span>
+                              </p>
+                              <p className="text-xs text-gray-600 line-clamp-2">
+                                "{msg.message}"
+                              </p>
+                            </div>
+                          ))
+                        )}
+                      </div>
+                      
+                      <Link 
+                        to="/dashboard?tab=queries" 
+                        onClick={() => setShowNotificationPopup(false)}
+                        className="block w-full text-center p-2 text-xs font-semibold text-indigo-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+                      >
+                        View all queries
+                      </Link>
+                    </div>
                   )}
-                </Link>
-                <Link to="/profile" className="flex items-center gap-2 pr-4 border-r border-gray-200 hover:text-indigo-600 transition-colors">
+                </div>
+
+                <Link to="/profile" className="flex items-center gap-2 pr-4 border-r border-gray-200 hover:text-indigo-600 transition-colors ml-2">
                   <UserIcon className="w-5 h-5 text-gray-500" />
                   <span className="text-sm font-semibold text-gray-700">{user.name}</span>
                 </Link>

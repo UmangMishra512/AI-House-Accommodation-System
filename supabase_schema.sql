@@ -69,6 +69,7 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   email TEXT NOT NULL,
   phone_number TEXT,
   message TEXT NOT NULL,
+  is_read BOOLEAN DEFAULT false,
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
@@ -83,6 +84,28 @@ CREATE POLICY "Anyone can insert contact messages"
 -- Allow property owners to view messages for their properties
 CREATE POLICY "Property owners can view messages"
   ON contact_messages FOR SELECT
+  USING (
+    EXISTS (
+      SELECT 1 FROM properties
+      WHERE properties.id = contact_messages.property_id
+      AND properties.owner_id = auth.uid()
+    )
+  );
+
+-- Allow property owners to update messages for their properties
+CREATE POLICY "Property owners can update messages"
+  ON contact_messages FOR UPDATE
+  USING (
+    EXISTS (
+      SELECT 1 FROM properties
+      WHERE properties.id = contact_messages.property_id
+      AND properties.owner_id = auth.uid()
+    )
+  );
+
+-- Allow property owners to delete messages for their properties
+CREATE POLICY "Property owners can delete messages"
+  ON contact_messages FOR DELETE
   USING (
     EXISTS (
       SELECT 1 FROM properties
