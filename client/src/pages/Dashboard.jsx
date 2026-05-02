@@ -641,7 +641,17 @@ const Dashboard = () => {
                     <div className="mt-2">
                       <p className="text-sm text-gray-700 whitespace-pre-wrap">{msg.message}</p>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-gray-100 flex justify-end">
+                    <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap justify-end gap-2">
+                      {msg.phone_number && (
+                        <>
+                          <a href={`tel:${msg.phone_number}`} className="text-sm bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Call
+                          </a>
+                          <a href={`sms:${msg.phone_number}`} className="text-sm bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                            Text Message
+                          </a>
+                        </>
+                      )}
                       <a href={`mailto:${msg.email}?subject=Re: Inquiry about ${msg.property?.title}`} className="text-sm bg-indigo-600 text-white px-4 py-2 rounded-lg font-medium hover:bg-indigo-700 transition-colors">
                         Reply via Email
                       </a>
