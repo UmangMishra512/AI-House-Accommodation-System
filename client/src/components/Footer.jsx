@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Home, Mail, Phone, Instagram, Twitter, Facebook, Github, Heart } from 'lucide-react';
+import { Home, Mail, Phone, Heart } from 'lucide-react';
 
 const Footer = () => {
   return (
@@ -18,20 +18,6 @@ const Footer = () => {
             <p className="text-gray-400 leading-relaxed">
               Modernizing the way you find and manage your perfect home. Experience the future of property rentals with AI-powered features and a seamless host-customer interaction.
             </p>
-            <div className="flex gap-4">
-              <a href="#" className="p-2 bg-gray-800 rounded-lg text-gray-400 hover:text-white hover:bg-indigo-600 transition-all">
-                <Twitter className="h-5 w-5" />
-              </a>
-              <a href="#" className="p-2 bg-gray-800 rounded-lg text-gray-400 hover:text-white hover:bg-indigo-600 transition-all">
-                <Instagram className="h-5 w-5" />
-              </a>
-              <a href="#" className="p-2 bg-gray-800 rounded-lg text-gray-400 hover:text-white hover:bg-indigo-600 transition-all">
-                <Facebook className="h-5 w-5" />
-              </a>
-              <a href="#" className="p-2 bg-gray-800 rounded-lg text-gray-400 hover:text-white hover:bg-indigo-600 transition-all">
-                <Github className="h-5 w-5" />
-              </a>
-            </div>
           </div>
 
           {/* Quick Links */}

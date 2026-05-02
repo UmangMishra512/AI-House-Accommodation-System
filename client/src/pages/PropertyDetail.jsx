@@ -229,30 +229,30 @@ const PropertyDetail = () => {
               <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8 text-center hidden md:block">
                 <h3 className="text-lg font-semibold text-gray-900 mb-2">Scan & Share</h3>
                 <p className="text-sm text-gray-500 mb-6">Scan this QR code natively using a smartphone camera to save and share this property.</p>
-                {property.qr_code_url ? (
-                  <div className="flex flex-col items-center">
-                    <div className="flex justify-center p-4 bg-gray-50 rounded-xl mb-4 w-full">
-                      <img src={property.qr_code_url} alt="Property QR Code" className="w-48 h-48 mix-blend-multiply" />
-                    </div>
-                    <div className="flex gap-2 w-full mt-4">
-                      <button 
-                        onClick={handleShare}
-                        className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
-                      >
-                        <Share2 className="w-4 h-4" /> Share
-                      </button>
-                      <a 
-                        href={property.qr_code_url} 
-                        download="property-qr.png"
-                        className="flex-1 text-center bg-indigo-50 text-indigo-700 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
-                      >
-                        Download QR
-                      </a>
-                    </div>
+                <div className="flex flex-col items-center">
+                  <div className="flex justify-center p-4 bg-gray-50 rounded-xl mb-4 w-full">
+                    <img 
+                      src={property.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.href)}`} 
+                      alt="Property QR Code" 
+                      className="w-48 h-48 mix-blend-multiply" 
+                    />
                   </div>
-                ) : (
-                  <p className="text-gray-400 italic">No QR code available</p>
-                )}
+                  <div className="flex gap-2 w-full mt-4">
+                    <button 
+                      onClick={handleShare}
+                      className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                    >
+                      <Share2 className="w-4 h-4" /> Share
+                    </button>
+                    <a 
+                      href={property.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.href)}`} 
+                      download="property-qr.png"
+                      className="flex-1 text-center bg-indigo-50 text-indigo-700 py-2 rounded-lg font-medium hover:bg-indigo-100 transition-colors"
+                    >
+                      Download QR
+                    </a>
+                  </div>
+                </div>
               </div>
 
               {/* Contact/Owner Card */}
