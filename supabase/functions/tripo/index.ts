@@ -24,13 +24,20 @@ serve(async (req) => {
 
       // 1. Fetch image from the provided URL
       const imageResponse = await fetch(imageUrl);
-      if (!imageResponse.ok) throw new Error("Failed to download image from URL");
+      if (!imageResponse.ok) {
+        const errText = await imageResponse.text();
+        throw new Error(`Failed to download image from URL: ${imageResponse.status} ${errText}`);
+      }
       
-      const blob = await imageResponse.blob();
+      const arrayBuffer = await imageResponse.arrayBuffer();
+      const contentType = imageResponse.headers.get('content-type') || 'image/jpeg';
+      
+      // Use File instead of Blob so Deno FormData correctly sets filename and content-type
+      const file = new File([arrayBuffer], "image.jpg", { type: contentType });
       
       // 2. Upload to Tripo
       const formData = new FormData();
-      formData.append('file', blob, 'image.jpg');
+      formData.append('file', file);
       
       const uploadRes = await fetch('https://api.tripo3d.ai/v2/openapi/upload', {
         method: 'POST',
@@ -41,6 +48,8 @@ serve(async (req) => {
       });
       
       const uploadData = await uploadRes.json();
+      console.log("Upload Data:", JSON.stringify(uploadData));
+      
       if (uploadData.code !== 0) {
         throw new Error("Upload failed: " + JSON.stringify(uploadData));
       }
@@ -63,6 +72,8 @@ serve(async (req) => {
       });
       
       const taskData = await taskRes.json();
+      console.log("Task Data:", JSON.stringify(taskData));
+      
       if (taskData.code !== 0) {
          throw new Error("Task creation failed: " + JSON.stringify(taskData));
       }

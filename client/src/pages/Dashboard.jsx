@@ -4,7 +4,7 @@ import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
 import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
-import { QRCodeSVG } from 'qrcode.react';
+import { QRCodeCanvas } from 'qrcode.react';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
@@ -290,6 +290,16 @@ const Dashboard = () => {
                   </div>
                   <input type="text" name="location" required value={formData.location} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
                 </div>
+                {formData.location && (
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(formData.location)}`}
+                    target="_blank"
+                    rel="noopener noreferrer" 
+                    className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                  >
+                    Verify on Google Maps
+                  </a>
+                )}
               </div>
             </div>
             
@@ -426,6 +436,14 @@ const Dashboard = () => {
                       </button>
                     </div>
                     <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer" 
+                      className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                    >
+                      View on Google Maps
+                    </a>
                     <p className="text-xl font-bold text-indigo-600 mt-2">₹{Number(property.price).toLocaleString('en-IN')}</p>
                   </div>
                   <div className="mt-4 flex items-center gap-4 flex-wrap">
@@ -435,7 +453,7 @@ const Dashboard = () => {
                     
                     <div className="flex items-center gap-2 ml-auto">
                       <div className="hidden">
-                        <QRCodeSVG id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} />
+                        <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} />
                       </div>
                       
                       {!property.ai_model_url && property.images && property.images[0] && (

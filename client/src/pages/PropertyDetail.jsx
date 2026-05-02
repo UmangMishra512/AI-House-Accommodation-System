@@ -68,7 +68,17 @@ const PropertyDetail = () => {
               <div className="mt-4 flex items-center gap-6 text-gray-500">
                 <span className="flex items-center text-lg">
                   <MapPin className="mr-1.5 h-5 w-5 text-gray-400" />
-                  {property.location}
+                  <div className="flex flex-col">
+                    <span>{property.location}</span>
+                    <a 
+                      href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
+                      target="_blank"
+                      rel="noopener noreferrer" 
+                      className="text-sm text-blue-600 hover:underline inline-block mt-0.5"
+                    >
+                      View on Google Maps
+                    </a>
+                  </div>
                 </span>
                 <span className="flex items-center text-xl font-bold text-indigo-600">
                   <IndianRupee className="h-5 w-5" />
