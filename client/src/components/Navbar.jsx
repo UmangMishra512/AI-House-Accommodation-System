@@ -130,14 +130,7 @@ const Navbar = () => {
           </div>
 
           {/* Desktop Nav */}
-          <div className="hidden md:flex items-center gap-4">
-            <button
-              onClick={toggleTheme}
-              className="p-2 rounded-full text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
-              aria-label="Toggle Dark Mode"
-            >
-              {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
-            </button>
+          <div className="hidden md:flex items-center gap-6">
             <NavLink to="/properties">Listing</NavLink>
             {user ? (
               <>
@@ -222,15 +215,32 @@ const Navbar = () => {
                   </div>
                   <span className="text-sm font-semibold text-gray-700">{user.name}</span>
                 </Link>
-                <button
-                  onClick={handleLogout}
-                  className="flex items-center gap-1 text-red-500 hover:text-red-700 font-medium transition-colors text-sm"
-                >
-                  <LogOut className="w-4 h-4" /> Logout
-                </button>
+                <div className="flex items-center gap-2 pl-2 border-l border-gray-100 dark:border-gray-800 ml-1">
+                  <button
+                    onClick={toggleTheme}
+                    className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-all border border-gray-100 dark:border-gray-700"
+                    title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                  >
+                    {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                  </button>
+
+                  <button
+                    onClick={handleLogout}
+                    className="flex items-center gap-1.5 text-red-500 hover:text-red-700 font-semibold transition-colors text-sm ml-2"
+                  >
+                    <LogOut className="w-4 h-4" /> Logout
+                  </button>
+                </div>
               </>
             ) : (
               <div className="flex items-center gap-3">
+                <button
+                  onClick={toggleTheme}
+                  className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-all border border-gray-100 dark:border-gray-700 mr-2"
+                  title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
+                >
+                  {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                </button>
                 <Link to="/login" className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
                   Login
                 </Link>
