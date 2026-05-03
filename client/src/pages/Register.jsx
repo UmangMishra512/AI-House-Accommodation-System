@@ -7,7 +7,7 @@ const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
-  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
@@ -18,8 +18,15 @@ const Register = () => {
       return;
     }
     try {
-      await register(name, email, password);
-      navigate('/dashboard');
+      const data = await register(name, email, password);
+      // Supabase returns a session if auto-login is enabled. 
+      // If email confirmation is required, session will be null.
+      if (!data.session) {
+        setSuccess(true);
+        setError(null);
+      } else {
+        navigate('/dashboard');
+      }
     } catch (err) {
       console.error('Registration error:', err);
       setError(err.message || 'Registration failed (Check console for details)');
@@ -32,7 +39,20 @@ const Register = () => {
         <div>
           <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">Create your account</h2>
         </div>
-        {error && <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm text-center">{error}</div>}
+        
+        {success ? (
+          <div className="bg-green-50 text-green-700 p-4 rounded-md text-sm text-center border border-green-200">
+            <h3 className="font-bold mb-1">Registration Successful!</h3>
+            <p>Please check your email inbox for a confirmation link to activate your account. You will be able to log in after verifying your email.</p>
+            <div className="mt-4">
+              <Link to="/login" className="text-indigo-600 font-medium hover:text-indigo-800">
+                Go to Login
+              </Link>
+            </div>
+          </div>
+        ) : (
+          <>
+            {error && <div className="bg-red-50 text-red-500 p-3 rounded-md text-sm text-center">{error}</div>}
         <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
           <div className="rounded-md shadow-sm -space-y-px">
             <div>
@@ -97,6 +117,8 @@ const Register = () => {
             </Link>
           </div>
         </form>
+          </>
+        )}
       </div>
     </div>
   );
