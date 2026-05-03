@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import { MapPin, IndianRupee, ArrowLeft, Share2 } from 'lucide-react';
+import { MapPin, IndianRupee, ArrowLeft, Share2, MessageCircle, Send, Loader2, Sparkles, X } from 'lucide-react';
 
 const PropertyDetail = () => {
   const { id } = useParams();
@@ -9,6 +9,12 @@ const PropertyDetail = () => {
   const [loading, setLoading] = useState(true);
   const [contactForm, setContactForm] = useState({ name: '', email: '', phone_number: '', message: '' });
   const [contactStatus, setContactStatus] = useState({ loading: false, success: false, error: '' });
+
+  // AI Chat State
+  const [chatOpen, setChatOpen] = useState(false);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatInput, setChatInput] = useState('');
+  const [chatLoading, setChatLoading] = useState(false);
 
   const handleContactSubmit = async (e) => {
     e.preventDefault();
@@ -296,6 +302,132 @@ const PropertyDetail = () => {
                     </a>
                   </div>
                 </div>
+              </div>
+
+              {/* AI Chat Widget */}
+              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+                <button
+                  onClick={() => setChatOpen(!chatOpen)}
+                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                      <Sparkles className="w-4 h-4 text-white" />
+                    </div>
+                    <div className="text-left">
+                      <h3 className="text-sm font-semibold text-gray-900">Ask AI about this property</h3>
+                      <p className="text-xs text-gray-500">Get instant answers</p>
+                    </div>
+                  </div>
+                  <MessageCircle className={`w-5 h-5 text-gray-400 transition-transform ${chatOpen ? 'rotate-180' : ''}`} />
+                </button>
+
+                {chatOpen && (
+                  <div className="border-t border-gray-100">
+                    {/* Chat Messages */}
+                    <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                      {chatMessages.length === 0 && (
+                        <div className="text-center py-6">
+                          <Sparkles className="w-8 h-8 text-indigo-300 mx-auto mb-2" />
+                          <p className="text-xs text-gray-500 mb-3">Ask me anything about this property!</p>
+                          <div className="flex flex-wrap gap-1.5 justify-center">
+                            {['Is there parking?', "What's nearby?", 'Pet policy?', 'Furnishing details?'].map(q => (
+                              <button
+                                key={q}
+                                onClick={() => {
+                                  setChatInput(q);
+                                  // Auto-send
+                                  const sendQ = async () => {
+                                    setChatMessages(prev => [...prev, { role: 'user', text: q }]);
+                                    setChatLoading(true);
+                                    try {
+                                      const { data, error } = await supabase.functions.invoke('property-chat', {
+                                        body: { propertyId: id, question: q }
+                                      });
+                                      if (error) throw error;
+                                      setChatMessages(prev => [...prev, { role: 'ai', text: data?.answer || 'No response.' }]);
+                                    } catch (err) {
+                                      setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I could not process that. ' + err.message }]);
+                                    } finally {
+                                      setChatLoading(false);
+                                      setChatInput('');
+                                    }
+                                  };
+                                  sendQ();
+                                }}
+                                className="text-[11px] px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                              >
+                                {q}
+                              </button>
+                            ))}
+                          </div>
+                        </div>
+                      )}
+                      {chatMessages.map((msg, i) => (
+                        <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                          <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
+                            msg.role === 'user'
+                              ? 'bg-indigo-600 text-white rounded-br-md'
+                              : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm'
+                          }`}>
+                            {msg.text}
+                          </div>
+                        </div>
+                      ))}
+                      {chatLoading && (
+                        <div className="flex justify-start">
+                          <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-2 shadow-sm">
+                            <div className="flex gap-1">
+                              <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                              <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                              <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                            </div>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Chat Input */}
+                    <form
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        if (!chatInput.trim() || chatLoading) return;
+                        const question = chatInput.trim();
+                        setChatMessages(prev => [...prev, { role: 'user', text: question }]);
+                        setChatInput('');
+                        setChatLoading(true);
+                        try {
+                          const { data, error } = await supabase.functions.invoke('property-chat', {
+                            body: { propertyId: id, question }
+                          });
+                          if (error) throw error;
+                          setChatMessages(prev => [...prev, { role: 'ai', text: data?.answer || 'No response.' }]);
+                        } catch (err) {
+                          setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I could not process that. ' + err.message }]);
+                        } finally {
+                          setChatLoading(false);
+                        }
+                      }}
+                      className="flex items-center gap-2 p-3 border-t border-gray-100 bg-white"
+                    >
+                      <input
+                        type="text"
+                        value={chatInput}
+                        onChange={(e) => setChatInput(e.target.value)}
+                        placeholder="Ask about this property..."
+                        className="flex-1 text-sm px-3 py-2 rounded-lg border border-gray-200 focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none"
+                        disabled={chatLoading}
+                      />
+                      <button
+                        type="submit"
+                        disabled={chatLoading || !chatInput.trim()}
+                        className="p-2 rounded-lg bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:opacity-50"
+                      >
+                        <Send className="w-4 h-4" />
+                      </button>
+                    </form>
+                  </div>
+                )}
               </div>
 
               {/* Contact/Owner Card */}

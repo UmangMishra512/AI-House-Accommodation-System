@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download, Mail, CheckCircle, Link2 } from 'lucide-react';
+import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download, Mail, CheckCircle, Link2, Wand2, BarChart3, Image as ImageIcon, Zap } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { QRCodeCanvas } from 'qrcode.react';
 import 'leaflet/dist/leaflet.css';
@@ -62,6 +62,13 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [generatingTripo, setGeneratingTripo] = useState(null);
+
+  // AI Feature States
+  const [aiDescribing, setAiDescribing] = useState(false);
+  const [priceBenchmark, setPriceBenchmark] = useState(null);
+  const [benchmarkLoading, setBenchmarkLoading] = useState(false);
+  const [enhancingImage, setEnhancingImage] = useState(null);
+  const [imageEnhancements, setImageEnhancements] = useState({});
 
   // OpenStreetMap Location Autocomplete State
   const [locationSuggestions, setLocationSuggestions] = useState([]);
@@ -374,8 +381,15 @@ const Dashboard = () => {
         ai_model_url: formData.ai_model_url || null
       };
 
-      const { error } = await supabase.from('properties').insert([dataToSubmit]);
+      const { data: insertedData, error } = await supabase.from('properties').insert([dataToSubmit]).select('id').single();
       if (error) throw error;
+
+      // Generate embedding for semantic search (fire and forget)
+      if (insertedData?.id) {
+        supabase.functions.invoke('generate-embedding', {
+          body: { propertyId: insertedData.id }
+        }).catch(err => console.warn('Embedding generation skipped:', err));
+      }
 
       setMessage('Property created successfully!');
       setFormData({
@@ -385,6 +399,8 @@ const Dashboard = () => {
       setVideoUrls(['']);
       setImageFiles([]);
       setImagePreviews([]);
+      setPriceBenchmark(null);
+      setImageEnhancements({});
       fetchProperties();
       setActiveTab('properties');
     } catch (err) {
@@ -449,17 +465,114 @@ const Dashboard = () => {
               <input type="text" name="title" required value={formData.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Description</label>
-              <textarea name="description" required value={formData.description} onChange={handleChange} rows="3" className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
+              <div className="flex justify-between items-end mb-1">
+                <label className="block text-sm font-medium text-gray-700">Description</label>
+                {imagePreviews.length > 0 && (
+                  <button
+                    type="button"
+                    disabled={aiDescribing}
+                    onClick={async () => {
+                      setAiDescribing(true);
+                      try {
+                        // Upload images first if not already uploaded, or use previews as data URIs
+                        const imageUrls = [];
+                        for (const file of imageFiles.slice(0, 3)) {
+                          const fileExt = file.name.split('.').pop();
+                          const fileName = `temp_${Math.random()}.${fileExt}`;
+                          const filePath = `${user.id}/${fileName}`;
+                          const { error: uploadError } = await supabase.storage.from('property-images').upload(filePath, file);
+                          if (!uploadError) {
+                            const { data: { publicUrl } } = supabase.storage.from('property-images').getPublicUrl(filePath);
+                            imageUrls.push(publicUrl);
+                          }
+                        }
+                        if (imageUrls.length === 0) throw new Error('Could not upload images');
+                        const { data, error } = await supabase.functions.invoke('ai-describe', {
+                          body: { imageUrls }
+                        });
+                        if (error) throw error;
+                        if (data?.description) {
+                          setFormData(prev => ({ ...prev, description: data.description }));
+                          setMessage('✨ AI description generated! Feel free to edit it.');
+                          setTimeout(() => setMessage(null), 4000);
+                        }
+                      } catch (err) {
+                        console.error(err);
+                        setMessage('AI description failed: ' + err.message);
+                        setTimeout(() => setMessage(null), 4000);
+                      } finally {
+                        setAiDescribing(false);
+                      }
+                    }}
+                    className="text-xs font-medium flex items-center gap-1 px-3 py-1.5 rounded-md bg-gradient-to-r from-purple-500 to-indigo-500 text-white hover:from-purple-600 hover:to-indigo-600 transition-all disabled:opacity-50 shadow-sm"
+                  >
+                    {aiDescribing ? <Loader2 className="w-3 h-3 animate-spin" /> : <Wand2 className="w-3 h-3" />}
+                    {aiDescribing ? 'Writing...' : '✨ AI Describe'}
+                  </button>
+                )}
+              </div>
+              <textarea name="description" required value={formData.description} onChange={handleChange} rows="3" className="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder={imagePreviews.length > 0 ? 'Upload photos and click "AI Describe" to auto-generate, or type manually...' : 'Describe your property...'} />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+              <div className="flex justify-between items-end mb-1">
+                <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+                {formData.price && formData.lat && formData.location && (
+                  <button
+                    type="button"
+                    disabled={benchmarkLoading}
+                    onClick={async () => {
+                      setBenchmarkLoading(true);
+                      try {
+                        const { data, error } = await supabase.functions.invoke('price-benchmark', {
+                          body: { lat: formData.lat, lng: formData.lng, price: Number(formData.price) }
+                        });
+                        if (error) throw error;
+                        setPriceBenchmark(data);
+                      } catch (err) {
+                        console.error(err);
+                        setMessage('Price check failed: ' + err.message);
+                        setTimeout(() => setMessage(null), 3000);
+                      } finally {
+                        setBenchmarkLoading(false);
+                      }
+                    }}
+                    className="text-xs font-medium flex items-center gap-1 px-3 py-1.5 rounded-md bg-emerald-50 text-emerald-700 hover:bg-emerald-100 border border-emerald-200 transition-all disabled:opacity-50"
+                  >
+                    {benchmarkLoading ? <Loader2 className="w-3 h-3 animate-spin" /> : <BarChart3 className="w-3 h-3" />}
+                    {benchmarkLoading ? 'Checking...' : '📊 Check Price'}
+                  </button>
+                )}
+              </div>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <IndianRupee className="h-4 w-4 text-gray-400" />
                 </div>
                 <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
               </div>
+              {/* Price Benchmark Card */}
+              {priceBenchmark && (
+                <div className="mt-2 p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
+                  {priceBenchmark.avg ? (
+                    <>
+                      <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+                        <span>₹{priceBenchmark.min?.toLocaleString('en-IN')}</span>
+                        <span className="font-semibold text-emerald-700">Avg: ₹{priceBenchmark.avg?.toLocaleString('en-IN')}</span>
+                        <span>₹{priceBenchmark.max?.toLocaleString('en-IN')}</span>
+                      </div>
+                      <div className="w-full h-2 bg-gray-200 rounded-full overflow-hidden">
+                        <div
+                          className="h-full bg-gradient-to-r from-emerald-400 to-teal-500 rounded-full transition-all"
+                          style={{ width: `${Math.min(priceBenchmark.percentile, 100)}%` }}
+                        />
+                      </div>
+                      <p className="text-xs text-gray-500 mt-1">{priceBenchmark.count} nearby listings • Your price is in the {priceBenchmark.percentile}th percentile</p>
+                    </>
+                  ) : null}
+                  <p className="text-xs font-medium text-emerald-800 mt-1 flex items-center gap-1">
+                    <Sparkles className="w-3 h-3" /> {priceBenchmark.aiInsight}
+                  </p>
+                </div>
+              )}
             </div>
             <div className="relative" ref={searchRef}>
               <div className="flex justify-between items-end mb-1">
@@ -575,9 +688,47 @@ const Dashboard = () => {
               <input type="file" multiple accept="image/jpeg, image/png, image/jpg" onChange={handleImageChange} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
               {imagePreviews.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2">
-                  {imagePreviews.map((src, idx) => (
-                    <img key={idx} src={src} alt="Preview" className="w-full h-20 object-cover rounded" />
-                  ))}
+                  {imagePreviews.map((src, idx) => {
+                    const enhancement = imageEnhancements[idx];
+                    const filterStyle = enhancement ? {
+                      filter: `brightness(${enhancement.brightness}) contrast(${enhancement.contrast}) saturate(${enhancement.saturate})${enhancement.warmth > 0 ? ` sepia(${enhancement.warmth / 100})` : ''}`
+                    } : {};
+                    return (
+                      <div key={idx} className="relative group">
+                        <img src={src} alt="Preview" className="w-full h-20 object-cover rounded transition-all duration-300" style={filterStyle} />
+                        <button
+                          type="button"
+                          disabled={enhancingImage === idx}
+                          onClick={async () => {
+                            setEnhancingImage(idx);
+                            try {
+                              // Upload temp image for analysis
+                              const file = imageFiles[idx];
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `enhance_${Math.random()}.${fileExt}`;
+                              const filePath = `${user.id}/${fileName}`;
+                              await supabase.storage.from('property-images').upload(filePath, file);
+                              const { data: { publicUrl } } = supabase.storage.from('property-images').getPublicUrl(filePath);
+                              const { data, error } = await supabase.functions.invoke('ai-enhance', {
+                                body: { imageUrl: publicUrl }
+                              });
+                              if (error) throw error;
+                              setImageEnhancements(prev => ({ ...prev, [idx]: data }));
+                            } catch (err) {
+                              console.error(err);
+                            } finally {
+                              setEnhancingImage(null);
+                            }
+                          }}
+                          className="absolute bottom-1 right-1 bg-white/90 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 disabled:opacity-50"
+                          title="AI Enhance"
+                        >
+                          {enhancingImage === idx ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Zap className="w-2.5 h-2.5" />}
+                          {enhancement ? `${enhancement.quality_score}/100` : 'Enhance'}
+                        </button>
+                      </div>
+                    );
+                  })}
                 </div>
               )}
             </div>
