@@ -100,18 +100,34 @@ const Dashboard = () => {
   };
 
   const handleGoogleMapsLinkPaste = async (e) => {
-    const link = e.target.value;
-    if (!link) return;
+    let linkToParse = e.target.value;
+    if (!linkToParse) return;
 
     try {
       let lat, lng;
+      let extractedPlaceName = null;
       
+      if (linkToParse.includes("maps.app.goo.gl") || linkToParse.includes("goo.gl/maps") || linkToParse.includes("share.google")) {
+        // Use custom Supabase edge function to resolve the short URL redirect
+        setMessage("Resolving short link...");
+        
+        const { data, error } = await supabase.functions.invoke('resolve-url', {
+          body: { url: linkToParse }
+        });
+        
+        if (error) throw error;
+        
+        if (data?.finalUrl) {
+          linkToParse = data.finalUrl;
+        }
+      }
+
       // Pattern 1: @lat,lng
-      const atMatch = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      const atMatch = linkToParse.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
       // Pattern 2: !3dlat!4dlng (often in Place URLs)
-      const bangMatch = link.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+      const bangMatch = linkToParse.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
       // Pattern 3: query=lat,lng
-      const queryMatch = link.match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
+      const queryMatch = linkToParse.match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
 
       if (atMatch) {
         lat = parseFloat(atMatch[1]);
@@ -122,24 +138,13 @@ const Dashboard = () => {
       } else if (queryMatch) {
         lat = parseFloat(queryMatch[1]);
         lng = parseFloat(queryMatch[2]);
-      } else if (link.includes("maps.app.goo.gl") || link.includes("goo.gl/maps") || link.includes("share.google")) {
-        // Use custom Supabase edge function to resolve the short URL redirect
-        setMessage("Resolving short link...");
-        
-        const { data, error } = await supabase.functions.invoke('resolve-url', {
-          body: { url: link }
-        });
-        
-        if (error) throw error;
-        
-        const expandedUrl = data?.finalUrl;
-        
-        if (expandedUrl) {
-          const atMatchExp = expandedUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || expandedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-          if (atMatchExp) {
-            lat = parseFloat(atMatchExp[1]);
-            lng = parseFloat(atMatchExp[2]);
-          }
+      } else {
+        // Fallback: Check if the expanded URL is a search query that contains the place name
+        try {
+          const urlObj = new URL(linkToParse);
+          extractedPlaceName = urlObj.searchParams.get('q') || urlObj.searchParams.get('query');
+        } catch (e) {
+          // ignore invalid url
         }
       }
 
@@ -159,9 +164,21 @@ const Dashboard = () => {
         
         setMessage("Location imported successfully from Google Maps!");
         e.target.value = ''; // clear input
-        
-        // Clear message after 3 seconds
         setTimeout(() => setMessage(null), 3000);
+      } else if (extractedPlaceName) {
+        setMessage(`Searching for "${extractedPlaceName}"...`);
+        const results = await provider.search({ query: extractedPlaceName });
+        if (results && results.length > 0) {
+          lat = results[0].y;
+          lng = results[0].x;
+          setFormData(prev => ({ ...prev, lat, lng, location: results[0].label }));
+          setMessage("Location imported successfully from Google Maps search!");
+          e.target.value = ''; // clear input
+          setTimeout(() => setMessage(null), 3000);
+        } else {
+          setMessage("Could not find coordinates for that place. Try a different link.");
+          setTimeout(() => setMessage(null), 3000);
+        }
       } else {
         setMessage("Could not extract coordinates. Try pasting a full Google Maps link.");
         setTimeout(() => setMessage(null), 3000);
