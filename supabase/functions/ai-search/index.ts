@@ -22,15 +22,16 @@ Deno.serve(async (req: Request) => {
     const { query } = await req.json();
     if (!query) throw new Error("query is required");
 
-    // Generate embedding for the search query
+    // Generate embedding for the search query using gemini-embedding-001
     const embResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/text-embedding-004:embedContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-embedding-001:embedContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          model: "models/text-embedding-004",
+          model: "models/gemini-embedding-001",
           content: { parts: [{ text: query }] },
+          outputDimensionality: 768,
         }),
       }
     );
