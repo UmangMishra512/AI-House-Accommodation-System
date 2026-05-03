@@ -122,14 +122,17 @@ const Dashboard = () => {
       } else if (queryMatch) {
         lat = parseFloat(queryMatch[1]);
         lng = parseFloat(queryMatch[2]);
-      } else if (link.includes("maps.app.goo.gl") || link.includes("goo.gl/maps")) {
-        // Try allorigins proxy to expand the short URL
+      } else if (link.includes("maps.app.goo.gl") || link.includes("goo.gl/maps") || link.includes("share.google")) {
+        // Use custom Supabase edge function to resolve the short URL redirect
         setMessage("Resolving short link...");
-        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(link)}`);
-        const data = await response.json();
         
-        // allorigins returns the final URL in 'url' field
-        const expandedUrl = data.url || data.contents;
+        const { data, error } = await supabase.functions.invoke('resolve-url', {
+          body: { url: link }
+        });
+        
+        if (error) throw error;
+        
+        const expandedUrl = data?.finalUrl;
         
         if (expandedUrl) {
           const atMatchExp = expandedUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || expandedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
