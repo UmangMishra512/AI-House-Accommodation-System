@@ -105,10 +105,10 @@ const Dashboard = () => {
 
     try {
       let lat, lng;
-      let extractedPlaceName = null;
+      let serverLat = null, serverLng = null;
       
+      // Step 1: If it's a short/share link, resolve it via edge function
       if (linkToParse.includes("maps.app.goo.gl") || linkToParse.includes("goo.gl/maps") || linkToParse.includes("share.google")) {
-        // Use custom Supabase edge function to resolve the short URL redirect
         setMessage("Resolving short link...");
         
         const { data, error } = await supabase.functions.invoke('resolve-url', {
@@ -117,16 +117,20 @@ const Dashboard = () => {
         
         if (error) throw error;
         
+        // The edge function also scrapes the HTML for coordinates
+        if (data?.lat && data?.lng) {
+          serverLat = data.lat;
+          serverLng = data.lng;
+        }
+        
         if (data?.finalUrl) {
           linkToParse = data.finalUrl;
         }
       }
 
-      // Pattern 1: @lat,lng
+      // Step 2: Try to extract coordinates from the URL itself
       const atMatch = linkToParse.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
-      // Pattern 2: !3dlat!4dlng (often in Place URLs)
       const bangMatch = linkToParse.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
-      // Pattern 3: query=lat,lng
       const queryMatch = linkToParse.match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
 
       if (atMatch) {
@@ -138,14 +142,12 @@ const Dashboard = () => {
       } else if (queryMatch) {
         lat = parseFloat(queryMatch[1]);
         lng = parseFloat(queryMatch[2]);
-      } else {
-        // Fallback: Check if the expanded URL is a search query that contains the place name
-        try {
-          const urlObj = new URL(linkToParse);
-          extractedPlaceName = urlObj.searchParams.get('q') || urlObj.searchParams.get('query');
-        } catch (e) {
-          // ignore invalid url
-        }
+      }
+
+      // Step 3: Use server-scraped coordinates if URL parsing found nothing
+      if (!lat && !lng && serverLat && serverLng) {
+        lat = serverLat;
+        lng = serverLng;
       }
 
       if (lat && lng) {
@@ -163,25 +165,11 @@ const Dashboard = () => {
         }
         
         setMessage("Location imported successfully from Google Maps!");
-        e.target.value = ''; // clear input
+        e.target.value = '';
         setTimeout(() => setMessage(null), 3000);
-      } else if (extractedPlaceName) {
-        setMessage(`Searching for "${extractedPlaceName}"...`);
-        const results = await provider.search({ query: extractedPlaceName });
-        if (results && results.length > 0) {
-          lat = results[0].y;
-          lng = results[0].x;
-          setFormData(prev => ({ ...prev, lat, lng, location: results[0].label }));
-          setMessage("Location imported successfully from Google Maps search!");
-          e.target.value = ''; // clear input
-          setTimeout(() => setMessage(null), 3000);
-        } else {
-          setMessage("Could not find coordinates for that place. Try a different link.");
-          setTimeout(() => setMessage(null), 3000);
-        }
       } else {
-        setMessage("Could not extract coordinates. Try pasting a full Google Maps link.");
-        setTimeout(() => setMessage(null), 3000);
+        setMessage("Could not extract location. Please use a full Google Maps link (with @ coordinates in the URL) or search by name above.");
+        setTimeout(() => setMessage(null), 5000);
       }
     } catch (err) {
       console.error(err);
@@ -525,14 +513,14 @@ const Dashboard = () => {
             </div>
             
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Or paste a Google Maps Link to auto-fill location</label>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Or paste a Google Maps link (with @ in URL works best)</label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Link2 className="h-4 w-4 text-gray-400" />
                 </div>
                 <input 
                   type="text" 
-                  placeholder="https://maps.app.goo.gl/..." 
+                  placeholder="https://www.google.com/maps/place/...@lat,lng..." 
                   onChange={handleGoogleMapsLinkPaste}
                   className="block w-full pl-9 border border-gray-300 rounded-md py-1.5 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
                 />
