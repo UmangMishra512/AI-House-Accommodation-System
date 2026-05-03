@@ -9,6 +9,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import { OpenStreetMapProvider } from 'leaflet-geosearch';
 import { format } from 'date-fns';
+import { SearchBox } from '@mapbox/search-js-react';
 
 // Fix leaflet icon issue in React
 import icon from 'leaflet/dist/images/marker-icon.png';
@@ -63,49 +64,32 @@ const Dashboard = () => {
   const [message, setMessage] = useState(null);
   const [generatingTripo, setGeneratingTripo] = useState(null);
 
-  // Location Autocomplete State
-  const [locationSuggestions, setLocationSuggestions] = useState([]);
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const provider = new OpenStreetMapProvider();
-  const searchRef = useRef(null);
+  // Mapbox SearchBox handles Location Autocomplete State internally
 
   useEffect(() => {
     setActiveTab(initialTab);
   }, [initialTab]);
 
-  useEffect(() => {
-    // Click outside to close suggestions
-    const handleClickOutside = (event) => {
-      if (searchRef.current && !searchRef.current.contains(event.target)) {
-        setShowSuggestions(false);
-      }
-    };
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
-
-  const handleLocationSearch = async (e) => {
-    const value = e.target.value;
-    setFormData({ ...formData, location: value });
-    
-    if (value.length > 2) {
-      const results = await provider.search({ query: value });
-      setLocationSuggestions(results);
-      setShowSuggestions(true);
+  const handleCurrentLocation = () => {
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        (position) => {
+          const lat = position.coords.latitude;
+          const lng = position.coords.longitude;
+          setFormData({
+            ...formData,
+            lat,
+            lng,
+            location: 'Current Location (Adjust Pin if needed)'
+          });
+        },
+        (error) => {
+          alert('Unable to retrieve your location. Please check browser permissions.');
+        }
+      );
     } else {
-      setLocationSuggestions([]);
-      setShowSuggestions(false);
+      alert('Geolocation is not supported by your browser');
     }
-  };
-
-  const selectLocation = (result) => {
-    setFormData({ 
-      ...formData, 
-      location: result.label, 
-      lat: result.y, 
-      lng: result.x 
-    });
-    setShowSuggestions(false);
   };
 
   const fetchProperties = async () => {
@@ -359,37 +343,47 @@ const Dashboard = () => {
                   <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
                 </div>
               </div>
-              <div className="w-1/2 relative" ref={searchRef}>
-                <label className="block text-sm font-medium text-gray-700">Location Name</label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.location} 
-                    onChange={handleLocationSearch}
-                    onFocus={() => {if(locationSuggestions.length > 0) setShowSuggestions(true)}}
-                    placeholder="Search location..."
-                    className="block w-full pl-9 border border-gray-300 rounded-md p-2" 
+              <div className="w-1/2 relative">
+                <div className="flex justify-between items-end mb-1">
+                  <label className="block text-sm font-medium text-gray-700">Location Name</label>
+                  <button 
+                    type="button" 
+                    onClick={handleCurrentLocation}
+                    className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-medium bg-indigo-50 px-2 py-1 rounded-md"
+                  >
+                    📍 Use Current Location
+                  </button>
+                </div>
+                <div className="mt-1 relative rounded-md shadow-sm mapbox-search-wrapper">
+                  <SearchBox 
+                    accessToken={import.meta.env.VITE_MAPBOX_TOKEN || "pk.replace_this_with_your_own_mapbox_token_because_github_blocks_the_test_token"}
+                    options={{ country: 'in' }}
+                    value={formData.location}
+                    onChange={(value) => setFormData({ ...formData, location: value })}
+                    onRetrieve={(result) => {
+                      const feat = result.features[0];
+                      if (feat) {
+                        setFormData({
+                          ...formData,
+                          location: feat.properties.full_address || feat.properties.place_formatted || feat.properties.name,
+                          lat: feat.geometry.coordinates[1],
+                          lng: feat.geometry.coordinates[0]
+                        });
+                      }
+                    }}
+                    theme={{
+                      variables: {
+                        fontFamily: 'inherit',
+                        unit: '14px',
+                        padding: '0.5rem 0.75rem',
+                        borderRadius: '0.375rem',
+                        boxShadow: 'none',
+                        border: '1px solid #d1d5db',
+                      }
+                    }}
                   />
                 </div>
-                {/* Autocomplete Dropdown */}
-                {showSuggestions && locationSuggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {locationSuggestions.map((result, index) => (
-                      <li 
-                        key={index} 
-                        className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0"
-                        onClick={() => selectLocation(result)}
-                      >
-                        {result.label}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {formData.location && !showSuggestions && (
+                {formData.location && (
                   <a 
                     href={`https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`}
                     target="_blank"

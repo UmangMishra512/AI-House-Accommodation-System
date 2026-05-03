@@ -203,7 +203,7 @@ const AdminDashboard = () => {
                   <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate">{p.title}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.owner?.name || p.owner_name || 'Unknown'}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.location}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">${p.price}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">₹{p.price?.toLocaleString('en-IN') || p.price}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onClick={() => handleDeleteProperty(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4"/>
