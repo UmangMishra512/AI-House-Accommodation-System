@@ -21,7 +21,7 @@ const AdminDashboard = () => {
       // Because RLS is bypassed by is_admin() function, we can query all these tables
       const [usersRes, propertiesRes, messagesRes] = await Promise.all([
         supabase.from('users').select('*').order('created_at', { ascending: false }),
-        supabase.from('properties').select('*, owner:users!owner_id(name, email)').order('created_at', { ascending: false }),
+        supabase.from('properties').select('*').order('created_at', { ascending: false }),
         supabase.from('contact_messages').select('*, property:properties(title)').order('created_at', { ascending: false })
       ]);
 
