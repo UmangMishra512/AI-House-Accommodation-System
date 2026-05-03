@@ -1,17 +1,20 @@
 import React from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthContext } from './context/AuthContext';
 import Navbar from './components/Navbar';
 import Footer from './components/Footer';
-import Home from './pages/Home';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Dashboard from './pages/Dashboard';
-import PropertyListing from './pages/PropertyListing';
-import PropertyDetail from './pages/PropertyDetail';
-import Profile from './pages/Profile';
-import AdminDashboard from './pages/AdminDashboard';
-import ResetPassword from './pages/ResetPassword';
+import { Suspense, lazy } from 'react';
+
+const Home = lazy(() => import('./pages/Home'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const PropertyListing = lazy(() => import('./pages/PropertyListing'));
+const PropertyDetail = lazy(() => import('./pages/PropertyDetail'));
+const Profile = lazy(() => import('./pages/Profile'));
+const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
+const ResetPassword = lazy(() => import('./pages/ResetPassword'));
+const Compare = lazy(() => import('./pages/Compare'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -24,42 +27,46 @@ const ProtectedRoute = ({ children }) => {
 };
 
 const App = () => {
+  const location = useLocation();
   return (
-    <div className="font-sans antialiased text-gray-900 bg-white min-h-screen flex flex-col">
+    <div className="font-sans antialiased text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
       <Navbar />
-      <main className="flex-grow">
-        <Routes>
-          <Route path="/" element={<Home />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/reset-password" element={<ResetPassword />} />
-          <Route path="/properties" element={<PropertyListing />} />
-          <Route path="/property/:id" element={<PropertyDetail />} />
-          <Route 
-            path="/dashboard" 
-            element={
-              <ProtectedRoute>
-                <Dashboard />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/profile" 
-            element={
-              <ProtectedRoute>
-                <Profile />
-              </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin" 
-            element={
-              <ProtectedRoute>
-                <AdminDashboard />
-              </ProtectedRoute>
-            } 
-          />
-        </Routes>
+      <main key={location.pathname} className="flex-grow animate-fade-in">
+        <Suspense fallback={<div className="flex items-center justify-center h-[50vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/reset-password" element={<ResetPassword />} />
+            <Route path="/properties" element={<PropertyListing />} />
+            <Route path="/property/:id" element={<PropertyDetail />} />
+            <Route path="/compare" element={<Compare />} />
+            <Route 
+              path="/dashboard" 
+              element={
+                <ProtectedRoute>
+                  <Dashboard />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/profile" 
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="/admin" 
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              } 
+            />
+          </Routes>
+        </Suspense>
       </main>
       <Footer />
     </div>
