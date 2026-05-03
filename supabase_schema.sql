@@ -1,5 +1,12 @@
--- Create properties table
-CREATE TABLE properties (
+-- MASTER SCHEMA: AI House Accommodation System
+-- This file contains the complete database state as of May 2026.
+
+-- 1. EXTENSIONS
+CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- 2. PROPERTIES TABLE
+CREATE TABLE IF NOT EXISTS properties (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   owner_id UUID REFERENCES auth.users NOT NULL,
   title TEXT NOT NULL,
@@ -17,51 +24,38 @@ CREATE TABLE properties (
   video_url TEXT[],
   ai_model_url TEXT,
   images JSONB DEFAULT '[]'::jsonb,
+  embedding vector(768),
+  ai_description TEXT,
+  is_premium BOOLEAN DEFAULT FALSE,
+  amenities TEXT[] DEFAULT '{}',
+  status TEXT DEFAULT 'available',
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Set up Row Level Security (RLS)
+-- RLS for properties
 ALTER TABLE properties ENABLE ROW LEVEL SECURITY;
 
--- Create policies
-CREATE POLICY "Public properties are viewable by everyone."
-  ON properties FOR SELECT
-  USING ( true );
+CREATE POLICY "Public properties are viewable by everyone." ON properties FOR SELECT USING (true);
+CREATE POLICY "Users can insert their own properties." ON properties FOR INSERT WITH CHECK (auth.uid() = owner_id);
+CREATE POLICY "Users can update their own properties." ON properties FOR UPDATE USING (auth.uid() = owner_id);
+CREATE POLICY "Users can delete their own properties." ON properties FOR DELETE USING (auth.uid() = owner_id);
 
-CREATE POLICY "Users can insert their own properties."
-  ON properties FOR INSERT
-  WITH CHECK ( auth.uid() = owner_id );
+-- 3. REVIEWS TABLE
+CREATE TABLE IF NOT EXISTS reviews (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
+  user_id UUID REFERENCES auth.users(id) ON DELETE CASCADE,
+  rating INTEGER CHECK (rating >= 1 AND rating <= 5),
+  comment TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
 
-CREATE POLICY "Users can update their own properties."
-  ON properties FOR UPDATE
-  USING ( auth.uid() = owner_id );
+-- RLS for reviews
+ALTER TABLE reviews ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Allow public read access for reviews" ON reviews FOR SELECT USING (true);
+CREATE POLICY "Allow users to insert their own reviews" ON reviews FOR INSERT WITH CHECK (auth.uid() = user_id);
 
-CREATE POLICY "Users can delete their own properties."
-  ON properties FOR DELETE
-  USING ( auth.uid() = owner_id );
-
--- Create a storage bucket for images
-INSERT INTO storage.buckets (id, name, public) VALUES ('property-images', 'property-images', true)
-ON CONFLICT DO NOTHING;
-
--- Storage RLS
-CREATE POLICY "Public access to property images"
-  ON storage.objects FOR SELECT
-  USING ( bucket_id = 'property-images' );
-
-CREATE POLICY "Authenticated users can upload property images"
-  ON storage.objects FOR INSERT
-  WITH CHECK ( bucket_id = 'property-images' AND auth.role() = 'authenticated' );
-
-CREATE POLICY "Users can update their own property images"
-  ON storage.objects FOR UPDATE
-  USING ( bucket_id = 'property-images' AND auth.uid() = owner );
-
-CREATE POLICY "Users can delete their own property images"
-  ON storage.objects FOR DELETE
-  USING ( bucket_id = 'property-images' AND auth.uid() = owner );
-
--- Create contact_messages table
+-- 4. CONTACT MESSAGES
 CREATE TABLE IF NOT EXISTS contact_messages (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   property_id UUID REFERENCES properties(id) ON DELETE CASCADE,
@@ -73,52 +67,13 @@ CREATE TABLE IF NOT EXISTS contact_messages (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Set up Row Level Security (RLS)
 ALTER TABLE contact_messages ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Anyone can insert contact messages" ON contact_messages FOR INSERT WITH CHECK (true);
+CREATE POLICY "Property owners can view messages" ON contact_messages FOR SELECT USING (
+  EXISTS (SELECT 1 FROM properties WHERE properties.id = contact_messages.property_id AND properties.owner_id = auth.uid())
+);
 
--- Allow anyone to insert contact messages
-CREATE POLICY "Anyone can insert contact messages"
-  ON contact_messages FOR INSERT
-  WITH CHECK (true);
-
--- Allow property owners to view messages for their properties
-CREATE POLICY "Property owners can view messages"
-  ON contact_messages FOR SELECT
-  USING (
-    EXISTS (
-      SELECT 1 FROM properties
-      WHERE properties.id = contact_messages.property_id
-      AND properties.owner_id = auth.uid()
-    )
-  );
-
--- Allow property owners to update messages for their properties
-CREATE POLICY "Property owners can update messages"
-  ON contact_messages FOR UPDATE
-  USING (
-    EXISTS (
-      SELECT 1 FROM properties
-      WHERE properties.id = contact_messages.property_id
-      AND properties.owner_id = auth.uid()
-    )
-  );
-
--- Allow property owners to delete messages for their properties
-CREATE POLICY "Property owners can delete messages"
-  ON contact_messages FOR DELETE
-  USING (
-    EXISTS (
-      SELECT 1 FROM properties
-      WHERE properties.id = contact_messages.property_id
-      AND properties.owner_id = auth.uid()
-    )
-  );
-
--- ==========================================
--- ADMIN & USERS SCHEMA UPDATES
--- ==========================================
-
--- Create public users table to sync with auth.users
+-- 5. USERS & ROLES
 CREATE TABLE IF NOT EXISTS public.users (
   id UUID REFERENCES auth.users ON DELETE CASCADE PRIMARY KEY,
   name TEXT,
@@ -127,91 +82,47 @@ CREATE TABLE IF NOT EXISTS public.users (
   created_at TIMESTAMPTZ DEFAULT now()
 );
 
--- Enable RLS
 ALTER TABLE public.users ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Users can read own profile" ON public.users FOR SELECT USING (auth.uid() = id);
 
--- Admins can do everything
-CREATE POLICY "Admins have full access to users"
-  ON public.users
-  USING (
-    EXISTS (
-      SELECT 1 FROM public.users AS u
-      WHERE u.id = auth.uid() AND u.role = 'admin'
-    )
-  );
-
--- Users can read their own profile
-CREATE POLICY "Users can read own profile"
-  ON public.users FOR SELECT
-  USING (auth.uid() = id);
-
--- Trigger to sync auth.users to public.users on signup
-CREATE OR REPLACE FUNCTION public.handle_new_user()
-RETURNS trigger AS $$
+-- 6. AI MATCH FUNCTION
+CREATE OR REPLACE FUNCTION match_properties(
+  query_embedding vector(768),
+  match_threshold float DEFAULT 0.25,
+  match_count int DEFAULT 12
+)
+RETURNS TABLE (
+  id uuid,
+  title text,
+  description text,
+  price numeric,
+  location text,
+  lat numeric,
+  lng numeric,
+  images jsonb,
+  owner_name text,
+  ai_description text,
+  is_premium boolean,
+  amenities text[],
+  status text,
+  similarity float
+)
+LANGUAGE plpgsql
+AS $$
 BEGIN
-  INSERT INTO public.users (id, name, email)
-  VALUES (
-    new.id,
-    new.raw_user_meta_data->>'name',
-    new.email
-  );
-  RETURN new;
+  RETURN QUERY
+  SELECT
+    p.id, p.title, p.description, p.price, p.location, p.lat, p.lng, p.images,
+    p.owner_name, p.ai_description, p.is_premium, p.amenities, p.status,
+    1 - (p.embedding <=> query_embedding) AS similarity
+  FROM properties p
+  WHERE p.embedding IS NOT NULL
+    AND 1 - (p.embedding <=> query_embedding) > match_threshold
+  ORDER BY p.is_premium DESC, p.embedding <=> query_embedding
+  LIMIT match_count;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$$;
 
--- Drop trigger if exists to avoid conflicts
-DROP TRIGGER IF EXISTS on_auth_user_created ON auth.users;
-
-CREATE TRIGGER on_auth_user_created
-  AFTER INSERT ON auth.users
-  FOR EACH ROW EXECUTE PROCEDURE public.handle_new_user();
-
--- Helper function to check if current user is admin
-CREATE OR REPLACE FUNCTION is_admin()
-RETURNS BOOLEAN AS $$
-BEGIN
-  RETURN EXISTS (
-    SELECT 1 FROM public.users
-    WHERE id = auth.uid() AND role = 'admin'
-  );
-END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
-
--- Update Properties RLS to allow admins to manage all properties
-CREATE POLICY "Admins can manage all properties"
-  ON properties
-  USING (is_admin());
-
--- Update Contact Messages RLS to allow admins to view all messages
-CREATE POLICY "Admins can view all contact messages"
-  ON contact_messages FOR SELECT
-  USING (is_admin());
-
--- Sync existing auth.users to public.users (Data Migration)
-INSERT INTO public.users (id, email, name)
-SELECT id, email, raw_user_meta_data->>'name'
-FROM auth.users
-ON CONFLICT (id) DO NOTHING;
-
--- WARNING: After running this script, run the following command replacing with your actual email to make yourself admin:
--- UPDATE public.users SET role = 'admin' WHERE email = 'YOUR_EMAIL_HERE';
-
--- Create subscribers table
-CREATE TABLE IF NOT EXISTS public.subscribers (
-  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-  email TEXT UNIQUE NOT NULL,
-  created_at TIMESTAMPTZ DEFAULT now()
-);
-
--- Enable RLS
-ALTER TABLE public.subscribers ENABLE ROW LEVEL SECURITY;
-
--- Anyone can insert a subscription
-CREATE POLICY "Anyone can subscribe"
-  ON public.subscribers FOR INSERT
-  WITH CHECK (true);
-
--- Admins can view subscriptions
-CREATE POLICY "Admins can view subscribers"
-  ON public.subscribers FOR SELECT
-  USING (is_admin());
+-- 7. PERFORMANCE INDEXES
+CREATE INDEX IF NOT EXISTS properties_embedding_idx ON properties USING hnsw (embedding vector_cosine_ops);
+CREATE INDEX IF NOT EXISTS idx_reviews_property_id ON reviews(property_id);
