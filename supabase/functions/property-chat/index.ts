@@ -92,19 +92,19 @@ RENT NEGOTIATION COACHING RULES:
 - Suggest polite phrases the user can use to negotiate.`;
 
     const geminiResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           contents: [
             { role: "user", parts: [{ text: systemPrompt }] },
-            { role: "model", parts: [{ text: "I understand. I'll answer questions about this specific property using only the information provided." }] },
+            { role: "model", parts: [{ text: "I understand. I am now acting as an expert Rent Negotiation Coach for this specific property. I will provide full, detailed, and polite advice using the data provided." }] },
             { role: "user", parts: [{ text: question }] },
           ],
           generationConfig: {
-            temperature: 0.4,
-            maxOutputTokens: 300,
+            temperature: 0.7,
+            maxOutputTokens: 800,
           },
         }),
       }
