@@ -373,66 +373,64 @@ const Dashboard = () => {
               <label className="block text-sm font-medium text-gray-700">Description</label>
               <textarea name="description" required value={formData.description} onChange={handleChange} rows="3" className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
             </div>
-            <div className="flex gap-4">
-              <div className="w-1/2">
-                <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <IndianRupee className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2" />
+            <div>
+              <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <IndianRupee className="h-4 w-4 text-gray-400" />
                 </div>
+                <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
               </div>
-              <div className="w-1/2 relative" ref={searchRef}>
-                <div className="flex justify-between items-end mb-1">
-                  <label className="block text-sm font-medium text-gray-700">Location Name</label>
-                  <button 
-                    type="button" 
-                    onClick={handleCurrentLocation}
-                    className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-medium bg-indigo-50 px-2 py-1 rounded-md"
-                  >
-                    📍 Use Current Location
-                  </button>
-                </div>
-                <div className="mt-1 relative rounded-md shadow-sm">
-                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                    <MapPin className="h-4 w-4 text-gray-400" />
-                  </div>
-                  <input 
-                    type="text" 
-                    required 
-                    value={formData.location} 
-                    onChange={handleLocationSearch}
-                    onFocus={() => {if(locationSuggestions.length > 0) setShowSuggestions(true)}}
-                    placeholder="Search location..."
-                    className="block w-full pl-9 border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
-                  />
-                </div>
-                {/* Autocomplete Dropdown */}
-                {showSuggestions && locationSuggestions.length > 0 && (
-                  <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
-                    {locationSuggestions.map((result, index) => (
-                      <li 
-                        key={index} 
-                        className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0"
-                        onClick={() => selectLocation(result)}
-                      >
-                        {result.label}
-                      </li>
-                    ))}
-                  </ul>
-                )}
-                {formData.location && !showSuggestions && (
-                  <a 
-                    href={`https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`}
-                    target="_blank"
-                    rel="noopener noreferrer" 
-                    className="text-xs text-blue-600 hover:underline mt-1 inline-block"
-                  >
-                    Verify on Google Maps
-                  </a>
-                )}
+            </div>
+            <div className="relative" ref={searchRef}>
+              <div className="flex justify-between items-end mb-1">
+                <label className="block text-sm font-medium text-gray-700">Location Name</label>
+                <button 
+                  type="button" 
+                  onClick={handleCurrentLocation}
+                  className="text-xs text-indigo-600 hover:text-indigo-800 flex items-center gap-1 font-medium bg-indigo-50 px-3 py-1.5 rounded-md transition-colors"
+                >
+                  📍 Use Current Location
+                </button>
               </div>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <MapPin className="h-4 w-4 text-gray-400" />
+                </div>
+                <input 
+                  type="text" 
+                  required 
+                  value={formData.location} 
+                  onChange={handleLocationSearch}
+                  onFocus={() => {if(locationSuggestions.length > 0) setShowSuggestions(true)}}
+                  placeholder="Search location..."
+                  className="block w-full pl-9 border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+                />
+              </div>
+              {/* Autocomplete Dropdown */}
+              {showSuggestions && locationSuggestions.length > 0 && (
+                <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                  {locationSuggestions.map((result, index) => (
+                    <li 
+                      key={index} 
+                      className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0"
+                      onClick={() => selectLocation(result)}
+                    >
+                      {result.label}
+                    </li>
+                  ))}
+                </ul>
+              )}
+              {formData.location && !showSuggestions && (
+                <a 
+                  href={`https://www.google.com/maps/search/?api=1&query=${formData.lat},${formData.lng}`}
+                  target="_blank"
+                  rel="noopener noreferrer" 
+                  className="text-xs text-blue-600 hover:underline mt-1 inline-block"
+                >
+                  Verify on Google Maps
+                </a>
+              )}
             </div>
             
             <div className="pt-4 border-t border-gray-100">
