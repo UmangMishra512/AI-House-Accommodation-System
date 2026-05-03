@@ -181,27 +181,70 @@ const PropertyDetail = () => {
                 <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Videos</h2>
                 <div className="space-y-4">
                   {property.video_url.filter(v => v).map((vUrl, idx) => {
-                    let embedUrl = vUrl;
-                    const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|m\.youtube\.com\/watch\?v=|youtube\.com\/shorts\/)([^#&?]*).*/;
-                    const match = vUrl.match(regExp);
+                    // YouTube detection
+                    const ytRegExp = /^.*(youtu\.be\/|v\/|u\/\w\/|embed\/|watch\?v=|&v=|m\.youtube\.com\/watch\?v=|youtube\.com\/shorts\/)([^#&?]*).*/;
+                    const ytMatch = vUrl.match(ytRegExp);
                     
-                    if (match && match[2].length === 11) {
-                      embedUrl = `https://www.youtube.com/embed/${match[2]}`;
+                    // Google Drive detection
+                    const driveMatch = vUrl.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+                    
+                    // Direct video file detection
+                    const isDirectVideo = /\.(mp4|webm|ogg|mov)(\?.*)?$/i.test(vUrl);
+
+                    if (ytMatch && ytMatch[2].length === 11) {
+                      // YouTube embed
+                      return (
+                        <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
+                          <iframe
+                            className="absolute top-0 left-0 w-full h-full border-0"
+                            src={`https://www.youtube.com/embed/${ytMatch[2]}`}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        </div>
+                      );
+                    } else if (driveMatch) {
+                      // Google Drive preview embed
+                      const fileId = driveMatch[1];
+                      return (
+                        <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
+                          <iframe
+                            className="absolute top-0 left-0 w-full h-full border-0"
+                            src={`https://drive.google.com/file/d/${fileId}/preview`}
+                            allow="autoplay; encrypted-media"
+                            allowFullScreen
+                          ></iframe>
+                        </div>
+                      );
+                    } else if (isDirectVideo) {
+                      // Direct video file — use HTML5 video player
+                      return (
+                        <div key={idx} className="relative w-full overflow-hidden rounded-2xl">
+                          <video controls className="w-full rounded-2xl" preload="metadata">
+                            <source src={vUrl} />
+                            Your browser does not support the video tag.
+                          </video>
+                        </div>
+                      );
+                    } else {
+                      // Fallback — try iframe embed (works for many platforms)
+                      return (
+                        <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
+                          <iframe
+                            className="absolute top-0 left-0 w-full h-full border-0"
+                            src={vUrl}
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        </div>
+                      );
                     }
-                    
-                    return (
-                    <div key={idx} className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
-                      <iframe
-                        className="absolute top-0 left-0 w-full h-full border-0"
-                        src={embedUrl}
-                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                        allowFullScreen
-                      ></iframe>
-                    </div>
-                  )})}
+                  })}
                 </div>
               </div>
             )}
+
+
 
             {/* Map Location */}
             {property.lat && property.lng && (

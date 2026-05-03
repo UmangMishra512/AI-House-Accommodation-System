@@ -583,7 +583,7 @@ const Dashboard = () => {
             </div>
             
             <div className="pt-4 border-t border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Video URLs</label>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Video URLs <span className="text-xs text-gray-400 font-normal">(YouTube, Google Drive, or direct links)</span></label>
               <div className="space-y-2">
                 {videoUrls.map((url, idx) => (
                   <div key={idx} className="flex gap-2">
@@ -595,7 +595,7 @@ const Dashboard = () => {
                         updated[idx] = e.target.value;
                         setVideoUrls(updated);
                       }} 
-                      placeholder={`Video URL ${idx + 1}`}
+                      placeholder={idx === 0 ? "https://www.youtube.com/watch?v=... or Drive link" : `Video URL ${idx + 1}`}
                       className="block w-full border border-gray-300 rounded-md p-2" 
                     />
                     {videoUrls.length > 1 && (
