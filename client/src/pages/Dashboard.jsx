@@ -2,7 +2,7 @@ import React, { useState, useEffect, useContext, useRef } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Link, useSearchParams } from 'react-router-dom';
-import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download, Mail, CheckCircle } from 'lucide-react';
+import { Settings, Plus, MapPin, IndianRupee, Trash2, Home, Sparkles, Loader2, Download, Mail, CheckCircle, Link2 } from 'lucide-react';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import { QRCodeCanvas } from 'qrcode.react';
 import 'leaflet/dist/leaflet.css';
@@ -96,6 +96,77 @@ const Dashboard = () => {
     } else {
       setLocationSuggestions([]);
       setShowSuggestions(false);
+    }
+  };
+
+  const handleGoogleMapsLinkPaste = async (e) => {
+    const link = e.target.value;
+    if (!link) return;
+
+    try {
+      let lat, lng;
+      
+      // Pattern 1: @lat,lng
+      const atMatch = link.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/);
+      // Pattern 2: !3dlat!4dlng (often in Place URLs)
+      const bangMatch = link.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+      // Pattern 3: query=lat,lng
+      const queryMatch = link.match(/query=(-?\d+\.\d+),(-?\d+\.\d+)/);
+
+      if (atMatch) {
+        lat = parseFloat(atMatch[1]);
+        lng = parseFloat(atMatch[2]);
+      } else if (bangMatch) {
+        lat = parseFloat(bangMatch[1]);
+        lng = parseFloat(bangMatch[2]);
+      } else if (queryMatch) {
+        lat = parseFloat(queryMatch[1]);
+        lng = parseFloat(queryMatch[2]);
+      } else if (link.includes("maps.app.goo.gl") || link.includes("goo.gl/maps")) {
+        // Try allorigins proxy to expand the short URL
+        setMessage("Resolving short link...");
+        const response = await fetch(`https://api.allorigins.win/get?url=${encodeURIComponent(link)}`);
+        const data = await response.json();
+        
+        // allorigins returns the final URL in 'url' field
+        const expandedUrl = data.url || data.contents;
+        
+        if (expandedUrl) {
+          const atMatchExp = expandedUrl.match(/@(-?\d+\.\d+),(-?\d+\.\d+)/) || expandedUrl.match(/!3d(-?\d+\.\d+)!4d(-?\d+\.\d+)/);
+          if (atMatchExp) {
+            lat = parseFloat(atMatchExp[1]);
+            lng = parseFloat(atMatchExp[2]);
+          }
+        }
+      }
+
+      if (lat && lng) {
+        setFormData(prev => ({ ...prev, lat, lng }));
+        setMessage("Coordinates found! Fetching address...");
+        
+        // Reverse geocode to get the address using Nominatim
+        try {
+          const results = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`).then(res => res.json());
+          if (results && results.display_name) {
+            setFormData(prev => ({ ...prev, location: results.display_name }));
+          }
+        } catch (e) {
+          console.error("Reverse geocoding failed", e);
+        }
+        
+        setMessage("Location imported successfully from Google Maps!");
+        e.target.value = ''; // clear input
+        
+        // Clear message after 3 seconds
+        setTimeout(() => setMessage(null), 3000);
+      } else {
+        setMessage("Could not extract coordinates. Try pasting a full Google Maps link.");
+        setTimeout(() => setMessage(null), 3000);
+      }
+    } catch (err) {
+      console.error(err);
+      setMessage("Error parsing Google Maps link.");
+      setTimeout(() => setMessage(null), 3000);
     }
   };
 
@@ -431,6 +502,21 @@ const Dashboard = () => {
                   Verify on Google Maps
                 </a>
               )}
+            </div>
+            
+            <div>
+              <label className="block text-xs font-medium text-gray-500 mb-1">Or paste a Google Maps Link to auto-fill location</label>
+              <div className="relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Link2 className="h-4 w-4 text-gray-400" />
+                </div>
+                <input 
+                  type="text" 
+                  placeholder="https://maps.app.goo.gl/..." 
+                  onChange={handleGoogleMapsLinkPaste}
+                  className="block w-full pl-9 border border-gray-300 rounded-md py-1.5 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
+                />
+              </div>
             </div>
             
             <div className="pt-4 border-t border-gray-100">
