@@ -707,12 +707,12 @@ const Dashboard = () => {
                           <div className="flex flex-col gap-2">
                             {!property.ai_model_url && property.images && property.images[0] && (
                               <button 
-                                onClick={() => handleGenerate3D(property.id, property.images[0])}
-                                disabled={generatingTripo === property.id}
-                                className="text-sm border border-purple-200 bg-purple-50 text-purple-700 px-3 py-2 rounded-lg font-medium hover:bg-purple-100 transition-all flex items-center justify-center gap-1.5 disabled:opacity-50"
+                                disabled
+                                className="text-sm border border-purple-200 bg-purple-50 text-purple-400 px-3 py-2 rounded-lg font-medium cursor-not-allowed opacity-70 flex items-center justify-center gap-1.5"
+                                title="3D model generation coming soon!"
                               >
-                                {generatingTripo === property.id ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
-                                {generatingTripo === property.id ? 'Generating...' : 'Generate 3D'}
+                                <Sparkles className="w-4 h-4" />
+                                3D — Coming Soon
                               </button>
                             )}
 
