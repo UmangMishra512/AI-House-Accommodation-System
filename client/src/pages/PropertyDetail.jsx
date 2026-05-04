@@ -688,8 +688,152 @@ const PropertyDetail = () => {
               </div>
 
               {/* AI Chat Widget */}
-              {isMaximized && <div className="fixed inset-0 z-[90] bg-black/50" onClick={() => setIsMaximized(false)}></div>}
-              <div className={`bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden ${isMaximized ? 'fixed inset-4 md:inset-10 z-[100] flex flex-col shadow-2xl' : ''}`}>
+              {/* AI Chat Widget */}
+              {isMaximized && (
+                <div 
+                  className="fixed inset-0 z-[90] bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 md:p-10" 
+                  onClick={() => setIsMaximized(false)}
+                >
+                  <div 
+                    className="bg-white rounded-2xl shadow-2xl border border-gray-100 overflow-hidden w-full max-w-4xl h-full max-h-[85vh] flex flex-col"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {/* Header duplicated or shared for maximized view */}
+                    <div className="flex items-center justify-between p-6 border-b border-gray-100">
+                      <div className="flex items-center gap-4">
+                        <div className="w-11 h-11 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
+                          <Sparkles className="w-5 h-5 text-white" />
+                        </div>
+                        <div>
+                          <h3 className="text-lg font-bold text-gray-900">AI Property Assistant</h3>
+                          <p className="text-sm text-gray-500">Ask anything about this listing</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <button 
+                          onClick={() => setIsMaximized(false)}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
+                          title="Minimize"
+                        >
+                          <Minimize2 className="w-6 h-6" />
+                        </button>
+                        <button 
+                          onClick={() => { setIsMaximized(false); setChatOpen(false); }}
+                          className="p-2 hover:bg-gray-100 rounded-lg transition-colors text-gray-400 hover:text-gray-600"
+                          title="Close"
+                        >
+                          <X className="w-6 h-6" />
+                        </button>
+                      </div>
+                    </div>
+                    
+                    {/* Chat Content for Maximized View */}
+                    <div className="flex-1 flex flex-col overflow-hidden">
+                      <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-gray-50/50">
+                        {chatMessages.length === 0 ? (
+                          <div className="flex flex-col items-center justify-center h-full text-center space-y-4">
+                            <div className="w-16 h-16 bg-indigo-50 rounded-full flex items-center justify-center">
+                              <Sparkles className="w-8 h-8 text-indigo-400" />
+                            </div>
+                            <div>
+                              <p className="text-gray-600 font-medium">Hello! I'm your AI assistant for this property.</p>
+                              <p className="text-sm text-gray-400">Ask me about the area, amenities, or anything else!</p>
+                            </div>
+                            <div className="flex flex-wrap gap-2 justify-center max-w-lg">
+                              {['Is there parking?', "What's nearby?", 'Pet policy?', 'Furnishing details?'].map(q => (
+                                <button
+                                  key={q}
+                                  onClick={() => {
+                                    setChatInput(q);
+                                    // Manual trigger of form submit behavior
+                                    const form = document.getElementById('ai-chat-form');
+                                    if (form) form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+                                  }}
+                                  className="text-xs px-4 py-2 rounded-full bg-white border border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600 transition-all shadow-sm"
+                                >
+                                  {q}
+                                </button>
+                              ))}
+                            </div>
+                          </div>
+                        ) : (
+                          <>
+                            {chatMessages.map((msg, i) => (
+                              <div key={i} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`max-w-[75%] px-5 py-3 rounded-2xl text-base leading-relaxed ${
+                                  msg.role === 'user'
+                                    ? 'bg-indigo-600 text-white rounded-br-none shadow-md'
+                                    : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none shadow-sm'
+                                }`}>
+                                  {msg.text}
+                                </div>
+                              </div>
+                            ))}
+                            {chatLoading && (
+                              <div className="flex justify-start">
+                                <div className="bg-white border border-gray-100 rounded-2xl rounded-bl-none px-5 py-3 shadow-sm flex gap-1">
+                                  <div className="w-2 h-2 bg-indigo-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
+                                  <div className="w-2 h-2 bg-indigo-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
+                                  <div className="w-2 h-2 bg-indigo-300 rounded-full animate-bounce" style={{ animationDelay: '300ms' }} />
+                                </div>
+                              </div>
+                            )}
+                          </>
+                        )}
+                      </div>
+                      
+                      {/* Input for Maximized View */}
+                      <div className="p-6 bg-white border-t border-gray-100">
+                        <form id="ai-chat-form-max" onSubmit={async (e) => {
+                          e.preventDefault();
+                          if (!chatInput.trim() || chatLoading) return;
+                          const question = chatInput.trim();
+                          const userMsg = { role: 'user', text: question };
+                          const newMsgs = [...chatMessages, userMsg];
+                          setChatMessages(newMsgs);
+                          saveChatHistory(newMsgs);
+                          setChatInput('');
+                          setChatLoading(true);
+                          try {
+                            const { data, error } = await supabase.functions.invoke('property-chat', {
+                              body: { propertyId: id, question }
+                            });
+                            if (error) throw error;
+                            const finalMsgs = [...newMsgs, { role: 'ai', text: data?.answer || 'No response.' }];
+                            setChatMessages(finalMsgs);
+                            saveChatHistory(finalMsgs);
+                          } catch (err) {
+                            const errMsgs = [...newMsgs, { role: 'ai', text: 'Sorry, I could not process that. ' + err.message }];
+                            setChatMessages(errMsgs);
+                            saveChatHistory(errMsgs);
+                          } finally {
+                            setChatLoading(false);
+                          }
+                        }}>
+                          <div className="relative flex items-center gap-3">
+                            <input
+                              type="text"
+                              value={chatInput}
+                              onChange={(e) => setChatInput(e.target.value)}
+                              placeholder="Ask anything about this property..."
+                              className="flex-1 px-6 py-4 bg-gray-50 border-none rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all text-gray-700 text-lg"
+                            />
+                            <button
+                              type="submit"
+                              disabled={!chatInput.trim() || chatLoading}
+                              className="bg-indigo-600 text-white p-4 rounded-xl hover:bg-indigo-700 disabled:opacity-50 transition-colors shadow-lg"
+                            >
+                              <Send className="w-6 h-6" />
+                            </button>
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              <div className={`bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden ${isMaximized ? 'hidden' : ''}`}>
                 <button
                   onClick={() => !isMaximized && setChatOpen(!chatOpen)}
                   className={`w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors ${isMaximized ? 'cursor-default' : 'cursor-pointer'}`}
