@@ -113,7 +113,7 @@ const PropertyDetail = () => {
         // Fetch reviews
         const { data: revData, error: revErr } = await supabase
           .from('reviews')
-          .select('*, profiles:user_id(name)')
+          .select('*, profiles:users!user_id(name)')
           .eq('property_id', id)
           .order('created_at', { ascending: false });
 
@@ -147,7 +147,7 @@ const PropertyDetail = () => {
           rating: reviewForm.rating,
           comment: reviewForm.comment
         }])
-        .select('*, profiles:user_id(name)')
+        .select('*, profiles:users!user_id(name)')
         .single();
 
       if (error) throw error;
