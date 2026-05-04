@@ -8,28 +8,28 @@ const Register = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState(null);
   const { register } = useContext(AuthContext);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setError(null);
     if (password !== confirmPassword) {
       setError('Passwords do not match');
       return;
     }
     try {
-      const data = await register(name, email, password);
-      // Supabase returns a session if auto-login is enabled. 
-      // If email confirmation is required, session will be null.
-      if (!data.session) {
+      const data = await register(email, password, name, 'user');
+      // If email confirmation is required, data.session will be null.
+      if (!data?.session) {
         setSuccess(true);
-        setError(null);
       } else {
         navigate('/dashboard');
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError(err.message || 'Registration failed (Check console for details)');
+      setError(err.message || 'Registration failed');
     }
   };
 

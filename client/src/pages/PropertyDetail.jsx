@@ -97,6 +97,7 @@ const PropertyDetail = () => {
     }
   };
 
+  useEffect(() => {
     const fetchPropertyAndReviews = async () => {
       try {
         const { data: propData, error: propErr } = await supabase

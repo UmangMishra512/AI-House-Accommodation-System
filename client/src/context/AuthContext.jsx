@@ -58,15 +58,30 @@ export const AuthProvider = ({ children }) => {
     return data;
   };
 
-  const register = async (name, email, password) => {
+  const register = async (email, password, name, role = 'user') => {
     const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
-        data: { name }
+        data: { name, role }
       }
     });
     if (error) throw error;
+
+    // Manually insert into public.users if trigger is missing
+    if (data.user) {
+      try {
+        await supabase.from('users').upsert([{
+          id: data.user.id,
+          name,
+          email,
+          role
+        }]);
+      } catch (dbErr) {
+        console.error('Error creating public profile:', dbErr);
+      }
+    }
+    
     return data;
   };
 
