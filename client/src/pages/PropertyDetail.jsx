@@ -3,7 +3,7 @@ import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { AuthContext } from '../context/AuthContext';
-import { MapPin, IndianRupee, ArrowLeft, Share2, MessageCircle, Send, Loader2, Sparkles, X, ChevronLeft, ChevronRight, ZoomIn, Heart, Copy, CheckCircle, Star } from 'lucide-react';
+import { MapPin, IndianRupee, ArrowLeft, Share2, MessageCircle, Send, Loader2, Sparkles, X, ChevronLeft, ChevronRight, ZoomIn, Heart, Copy, CheckCircle, Star, Maximize2, Minimize2 } from 'lucide-react';
 import StarRating from '../components/StarRating';
 import { format } from 'date-fns';
 
@@ -27,9 +27,54 @@ const PropertyDetail = () => {
 
   // AI Chat State
   const [chatOpen, setChatOpen] = useState(false);
+  const [isMaximized, setIsMaximized] = useState(false);
   const [chatMessages, setChatMessages] = useState([]);
   const [chatInput, setChatInput] = useState('');
   const [chatLoading, setChatLoading] = useState(false);
+
+  const saveChatHistory = async (newMessages) => {
+    if (!user) return;
+    try {
+      const { error } = await supabase
+        .from('chat_sessions')
+        .upsert({
+          user_id: user.id,
+          property_id: id,
+          messages: newMessages,
+          updated_at: new Date().toISOString()
+        }, { onConflict: 'user_id,property_id' });
+        
+      if (error) console.error("Error saving chat:", error);
+    } catch (err) {
+      console.error("Error in saveChatHistory:", err);
+    }
+  };
+
+  useEffect(() => {
+    if (chatOpen && user && property) {
+      const loadChatHistory = async () => {
+        try {
+          const { data, error } = await supabase
+            .from('chat_sessions')
+            .select('messages')
+            .eq('user_id', user.id)
+            .eq('property_id', id)
+            .single();
+          
+          if (data && data.messages) {
+            setChatMessages(data.messages);
+          }
+        } catch (err) {
+          if (err.code !== 'PGRST116') { // Ignore row not found
+            console.error("Failed to load chat history:", err);
+          }
+        }
+      };
+      if (chatMessages.length === 0) {
+        loadChatHistory();
+      }
+    }
+  }, [chatOpen, user, property, id]);
 
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
@@ -643,10 +688,11 @@ const PropertyDetail = () => {
               </div>
 
               {/* AI Chat Widget */}
-              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden">
+              {isMaximized && <div className="fixed inset-0 z-[90] bg-black/50" onClick={() => setIsMaximized(false)}></div>}
+              <div className={`bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden ${isMaximized ? 'fixed inset-4 md:inset-10 z-[100] flex flex-col shadow-2xl' : ''}`}>
                 <button
-                  onClick={() => setChatOpen(!chatOpen)}
-                  className="w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors"
+                  onClick={() => !isMaximized && setChatOpen(!chatOpen)}
+                  className={`w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors ${isMaximized ? 'cursor-default' : 'cursor-pointer'}`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
@@ -657,13 +703,23 @@ const PropertyDetail = () => {
                       <p className="text-xs text-gray-500">Get instant answers</p>
                     </div>
                   </div>
-                  <MessageCircle className={`w-5 h-5 text-gray-400 transition-transform ${chatOpen ? 'rotate-180' : ''}`} />
+                  <div className="flex items-center gap-2">
+                    {chatOpen && (
+                      <div 
+                        onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }} 
+                        className="p-1.5 hover:bg-gray-200 rounded cursor-pointer transition-colors"
+                      >
+                        {isMaximized ? <Minimize2 className="w-5 h-5 text-gray-600" /> : <Maximize2 className="w-5 h-5 text-gray-600" />}
+                      </div>
+                    )}
+                    <MessageCircle className={`w-5 h-5 text-gray-400 transition-transform ${chatOpen && !isMaximized ? 'rotate-180' : ''}`} />
+                  </div>
                 </button>
 
                 {chatOpen && (
-                  <div className="border-t border-gray-100">
+                  <div className={`border-t border-gray-100 flex flex-col ${isMaximized ? 'flex-1 overflow-hidden' : ''}`}>
                     {/* Chat Messages */}
-                    <div className="h-64 overflow-y-auto p-4 space-y-3 bg-gray-50">
+                    <div className={`overflow-y-auto p-4 space-y-3 bg-gray-50 ${isMaximized ? 'flex-1 h-full' : 'h-64'}`}>
                       {chatMessages.length === 0 && (
                         <div className="text-center py-6">
                           <Sparkles className="w-8 h-8 text-indigo-300 mx-auto mb-2" />
@@ -676,16 +732,24 @@ const PropertyDetail = () => {
                                   setChatInput(q);
                                   // Auto-send
                                   const sendQ = async () => {
-                                    setChatMessages(prev => [...prev, { role: 'user', text: q }]);
+                                    const userMsg = { role: 'user', text: q };
+                                    const newMsgs = [...chatMessages, userMsg];
+                                    setChatMessages(newMsgs);
+                                    saveChatHistory(newMsgs);
                                     setChatLoading(true);
                                     try {
                                       const { data, error } = await supabase.functions.invoke('property-chat', {
                                         body: { propertyId: id, question: q }
                                       });
                                       if (error) throw error;
-                                      setChatMessages(prev => [...prev, { role: 'ai', text: data?.answer || 'No response.' }]);
+                                      const aiMsg = { role: 'ai', text: data?.answer || 'No response.' };
+                                      const finalMsgs = [...newMsgs, aiMsg];
+                                      setChatMessages(finalMsgs);
+                                      saveChatHistory(finalMsgs);
                                     } catch (err) {
-                                      setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I could not process that. ' + err.message }]);
+                                      const errMsgs = [...newMsgs, { role: 'ai', text: 'Sorry, I could not process that. ' + err.message }];
+                                      setChatMessages(errMsgs);
+                                      saveChatHistory(errMsgs);
                                     } finally {
                                       setChatLoading(false);
                                       setChatInput('');
@@ -731,7 +795,10 @@ const PropertyDetail = () => {
                         e.preventDefault();
                         if (!chatInput.trim() || chatLoading) return;
                         const question = chatInput.trim();
-                        setChatMessages(prev => [...prev, { role: 'user', text: question }]);
+                        const userMsg = { role: 'user', text: question };
+                        const newMsgs = [...chatMessages, userMsg];
+                        setChatMessages(newMsgs);
+                        saveChatHistory(newMsgs);
                         setChatInput('');
                         setChatLoading(true);
                         try {
@@ -739,12 +806,13 @@ const PropertyDetail = () => {
                             body: { propertyId: id, question }
                           });
                           if (error) throw error;
-                          setChatMessages(prev => [...prev, { role: 'ai', text: data?.answer || 'No response.' }]);
+                          const finalMsgs = [...newMsgs, { role: 'ai', text: data?.answer || 'No response.' }];
+                          setChatMessages(finalMsgs);
+                          saveChatHistory(finalMsgs);
                         } catch (err) {
                           console.error('Chat error:', err);
                           let errorMsg = err.message;
                           
-                          // Try to extract a more descriptive message from the function response
                           if (err.context && typeof err.context.json === 'function') {
                             try {
                               const body = await err.context.json();
@@ -754,7 +822,9 @@ const PropertyDetail = () => {
                              errorMsg = "The AI is currently unavailable (Check GEMINI_API_KEY).";
                           }
 
-                          setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I could not process that. ' + errorMsg }]);
+                          const errMsgs = [...newMsgs, { role: 'ai', text: 'Sorry, I could not process that. ' + errorMsg }];
+                          setChatMessages(errMsgs);
+                          saveChatHistory(errMsgs);
                         } finally {
                           setChatLoading(false);
                         }

@@ -2,11 +2,13 @@ import React, { useState, useEffect, useContext } from 'react';
 import { AuthContext } from '../context/AuthContext';
 import { supabase } from '../lib/supabase';
 import { Link } from 'react-router-dom';
-import { User as UserIcon, MapPin, Trash2, Edit, CheckCircle, XCircle, Loader2, Save, X, Plus, Home } from 'lucide-react';
+import { User as UserIcon, MapPin, Trash2, Edit, CheckCircle, XCircle, Loader2, Save, X, Plus, Home, MessageCircle, ArrowLeft } from 'lucide-react';
 
 const Profile = () => {
   const { user, updateProfile } = useContext(AuthContext);
   const [properties, setProperties] = useState([]);
+  const [chatSessions, setChatSessions] = useState([]);
+  const [activeTab, setActiveTab] = useState('properties');
   const [loading, setLoading] = useState(true);
   const [editingProfile, setEditingProfile] = useState(false);
   const [newName, setNewName] = useState(user?.user_metadata?.name || '');
@@ -40,9 +42,36 @@ const Profile = () => {
     }
   };
 
+  const fetchChatSessions = async () => {
+    if (!user) return;
+    try {
+      const { data, error } = await supabase
+        .from('chat_sessions')
+        .select(`
+          id,
+          messages,
+          updated_at,
+          property_id,
+          properties (
+            id,
+            title,
+            images,
+            location
+          )
+        `)
+        .eq('user_id', user.id)
+        .order('updated_at', { ascending: false });
+      if (error) throw error;
+      setChatSessions(data || []);
+    } catch (err) {
+      console.error('Error fetching chat sessions:', err);
+    }
+  };
+
   useEffect(() => {
     if (user) {
       fetchProperties();
+      fetchChatSessions();
       setNewName(user?.user_metadata?.name || '');
     }
   }, [user]);
@@ -204,81 +233,135 @@ const Profile = () => {
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-2xl font-bold text-gray-900">Manage My Properties</h2>
-        <Link 
-          to="/dashboard" 
-          className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
-        >
-          <Plus className="h-5 w-5" /> Add New
-        </Link>
+        <div className="flex border-b border-gray-200 gap-8">
+          <button 
+            onClick={() => setActiveTab('properties')}
+            className={`pb-4 text-lg font-bold border-b-2 transition-colors ${activeTab === 'properties' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          >
+            My Properties
+          </button>
+          <button 
+            onClick={() => setActiveTab('chats')}
+            className={`pb-4 text-lg font-bold border-b-2 transition-colors ${activeTab === 'chats' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+          >
+            My AI Chats
+          </button>
+        </div>
+        
+        {activeTab === 'properties' && (
+          <Link 
+            to="/dashboard" 
+            className="bg-indigo-600 text-white px-5 py-2.5 rounded-xl font-semibold hover:bg-indigo-700 transition-all shadow-md hover:shadow-lg flex items-center gap-2"
+          >
+            <Plus className="h-5 w-5" /> Add New
+          </Link>
+        )}
       </div>
 
-      {properties.length === 0 ? (
-        <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-          <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
-            <Home className="h-8 w-8 text-gray-400" />
-          </div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">No properties listed yet</h3>
-          <p className="text-gray-500 mb-8 max-w-sm mx-auto">Start by adding your first property to reach thousands of potential customers.</p>
-          <Link to="/dashboard" className="bg-white border border-gray-200 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm">
-            Go to Dashboard
-          </Link>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {properties.map(property => (
-            <div key={property.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
-              <div className="relative h-56 overflow-hidden">
-                <img 
-                  src={property.images && property.images[0] ? property.images[0] : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800'} 
-                  alt={property.title} 
-                  className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
-                />
-                <div className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg ${property.status === 'rented' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
-                  {property.status}
-                </div>
-              </div>
-              <div className="p-6 flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-xl font-bold text-gray-900 line-clamp-1 mb-2">{property.title}</h3>
-                  <p className="text-gray-500 flex items-center gap-2 text-sm mb-4">
-                    <MapPin className="w-4 h-4 text-indigo-500"/> {property.location}
-                  </p>
-                  <div className="flex items-center gap-1 text-2xl font-black text-indigo-600">
-                    <span className="text-lg">₹</span>
-                    {property.price.toLocaleString('en-IN')}
-                    <span className="text-sm font-normal text-gray-400 ml-1">/ month</span>
-                  </div>
-                </div>
-                
-                <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-5">
-                  <button 
-                    onClick={() => toggleStatus(property.id, property.status)}
-                    className={`text-sm font-bold flex items-center gap-2 transition-colors ${property.status === 'available' ? 'text-gray-500 hover:text-red-600' : 'text-gray-500 hover:text-green-600'}`}
-                  >
-                    {property.status === 'available' ? <><XCircle className="w-4 h-4"/> Mark Rented</> : <><CheckCircle className="w-4 h-4"/> Mark Available</>}
-                  </button>
-                  <div className="flex gap-2">
-                    <button 
-                      onClick={() => handleEditProperty(property)}
-                      className="p-2.5 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
-                      title="Edit Property"
-                    >
-                      <Edit className="h-5 w-5" />
-                    </button>
-                    <button 
-                      onClick={() => handleDelete(property.id)} 
-                      className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-all"
-                      title="Delete Property"
-                    >
-                      <Trash2 className="h-5 w-5" />
-                    </button>
-                  </div>
-                </div>
-              </div>
+      {activeTab === 'properties' ? (
+        properties.length === 0 ? (
+          <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+            <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Home className="h-8 w-8 text-gray-400" />
             </div>
-          ))}
-        </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">No properties listed yet</h3>
+            <p className="text-gray-500 mb-8 max-w-sm mx-auto">Start by adding your first property to reach thousands of potential customers.</p>
+            <Link to="/dashboard" className="bg-white border border-gray-200 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm">
+              Go to Dashboard
+            </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {properties.map(property => (
+              <div key={property.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                <div className="relative h-56 overflow-hidden">
+                  <img 
+                    src={property.images && property.images[0] ? property.images[0] : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800'} 
+                    alt={property.title} 
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                  />
+                  <div className={`absolute top-4 right-4 px-4 py-1.5 rounded-full text-xs font-bold uppercase tracking-wider shadow-lg ${property.status === 'rented' ? 'bg-red-500 text-white' : 'bg-green-500 text-white'}`}>
+                    {property.status}
+                  </div>
+                </div>
+                <div className="p-6 flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-xl font-bold text-gray-900 line-clamp-1 mb-2">{property.title}</h3>
+                    <p className="text-gray-500 flex items-center gap-2 text-sm mb-4">
+                      <MapPin className="w-4 h-4 text-indigo-500"/> {property.location}
+                    </p>
+                    <div className="flex items-center gap-1 text-2xl font-black text-indigo-600">
+                      <span className="text-lg">₹</span>
+                      {property.price.toLocaleString('en-IN')}
+                      <span className="text-sm font-normal text-gray-400 ml-1">/ month</span>
+                    </div>
+                  </div>
+                  
+                  <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-5">
+                    <button 
+                      onClick={() => toggleStatus(property.id, property.status)}
+                      className={`text-sm font-bold flex items-center gap-2 transition-colors ${property.status === 'available' ? 'text-gray-500 hover:text-red-600' : 'text-gray-500 hover:text-green-600'}`}
+                    >
+                      {property.status === 'available' ? <><XCircle className="w-4 h-4"/> Mark Rented</> : <><CheckCircle className="w-4 h-4"/> Mark Available</>}
+                    </button>
+                    <div className="flex gap-2">
+                      <button 
+                        onClick={() => handleEditProperty(property)}
+                        className="p-2.5 text-indigo-600 hover:bg-indigo-50 rounded-xl transition-all"
+                        title="Edit Property"
+                      >
+                        <Edit className="h-5 w-5" />
+                      </button>
+                      <button 
+                        onClick={() => handleDelete(property.id)} 
+                        className="p-2.5 text-red-500 hover:bg-red-50 rounded-xl transition-all"
+                        title="Delete Property"
+                      >
+                        <Trash2 className="h-5 w-5" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )
+      ) : (
+        chatSessions.length === 0 ? (
+          <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
+             <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+               <MessageCircle className="h-8 w-8 text-indigo-400" />
+             </div>
+             <h3 className="text-xl font-bold text-gray-900 mb-2">No chat history</h3>
+             <p className="text-gray-500 mb-8 max-w-sm mx-auto">You haven't chatted with the AI about any properties yet.</p>
+             <Link to="/properties" className="bg-white border border-gray-200 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm">
+               Explore Properties
+             </Link>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {chatSessions.map(session => (
+              <Link key={session.id} to={`/property/${session.property_id}`} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-lg transition-all flex flex-col transform hover:-translate-y-1">
+                <div className="flex items-center gap-4 mb-4">
+                  <img src={session.properties?.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=150'} alt="Property" className="w-16 h-16 rounded-xl object-cover" />
+                  <div>
+                    <h4 className="font-bold text-gray-900 line-clamp-1">{session.properties?.title || 'Unknown Property'}</h4>
+                    <p className="text-xs text-gray-500 mt-1">Last active: {new Date(session.updated_at).toLocaleDateString()}</p>
+                  </div>
+                </div>
+                <div className="bg-indigo-50/50 rounded-xl p-4 flex-1 text-sm text-gray-700 italic line-clamp-3">
+                   {session.messages && session.messages.length > 0 
+                     ? `"${session.messages[session.messages.length - 1].text}"` 
+                     : 'No messages yet.'}
+                </div>
+                <div className="mt-4 pt-4 border-t border-gray-100 text-indigo-600 font-semibold text-sm flex items-center justify-between">
+                  <span className="bg-indigo-50 px-2.5 py-1 rounded-md">{session.messages?.length || 0} messages</span>
+                  <span className="flex items-center gap-1 hover:text-indigo-800">Continue Chat <ArrowLeft className="w-4 h-4 rotate-180" /></span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        )
       )}
 
       {/* Edit Property Modal */}
