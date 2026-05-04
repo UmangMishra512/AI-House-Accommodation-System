@@ -341,7 +341,12 @@ const Profile = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {chatSessions.map(session => (
-              <Link key={session.id} to={`/property/${session.property_id}`} className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-lg transition-all flex flex-col transform hover:-translate-y-1">
+              <Link 
+                key={session.id} 
+                to={`/property/${session.property_id}`} 
+                state={{ openChat: true, maximizeChat: true }}
+                className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-lg transition-all flex flex-col transform hover:-translate-y-1"
+              >
                 <div className="flex items-center gap-4 mb-4">
                   <img src={session.properties?.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=150'} alt="Property" className="w-16 h-16 rounded-xl object-cover" />
                   <div>

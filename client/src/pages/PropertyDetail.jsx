@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { createPortal } from 'react-dom';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { AuthContext } from '../context/AuthContext';
 import { MapPin, IndianRupee, ArrowLeft, Share2, MessageCircle, Send, Loader2, Sparkles, X, ChevronLeft, ChevronRight, ZoomIn, Heart, Copy, CheckCircle, Star, Maximize2, Minimize2 } from 'lucide-react';
@@ -9,6 +9,7 @@ import { format } from 'date-fns';
 
 const PropertyDetail = () => {
   const { id } = useParams();
+  const location = useLocation();
   const { user } = React.useContext(AuthContext);
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -60,21 +61,29 @@ const PropertyDetail = () => {
             .eq('user_id', user.id)
             .eq('property_id', id)
             .single();
-          
-          if (data && data.messages) {
+
+          if (data?.messages) {
             setChatMessages(data.messages);
           }
         } catch (err) {
-          if (err.code !== 'PGRST116') { // Ignore row not found
-            console.error("Failed to load chat history:", err);
-          }
+          console.error("Error loading chat history:", err);
         }
       };
-      if (chatMessages.length === 0) {
-        loadChatHistory();
-      }
+      loadChatHistory();
     }
   }, [chatOpen, user, property, id]);
+
+  // Handle auto-opening chat from Profile navigation
+  useEffect(() => {
+    if (location.state?.openChat) {
+      setChatOpen(true);
+      if (location.state?.maximizeChat) {
+        setIsMaximized(true);
+      }
+      // Clean up state so it doesn't reopen on refresh
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
 
   // Lightbox state
   const [lightboxOpen, setLightboxOpen] = useState(false);
