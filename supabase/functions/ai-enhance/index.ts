@@ -39,7 +39,7 @@ Return ONLY a valid JSON object with these exact fields (no markdown, no code bl
 Be conservative with adjustments. Only suggest changes if the photo genuinely needs improvement.`;
 
     const geminiResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-flash-latest:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
