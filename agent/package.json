@@ -1,16 +1,33 @@
 {
-  "name": "agent",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
   "author": "",
-  "license": "ISC",
-  "type": "commonjs",
   "dependencies": {
+    "@supabase/supabase-js": "^2.105.3",
+    "node-fetch": "^2.7.0",
     "puppeteer": "^24.42.0"
-  }
+  },
+  "description": "Automated agents for AI House Accommodation System - Property data population and management",
+  "keywords": [
+    "real-estate",
+    "property-automation",
+    "puppeteer",
+    "web-scraping",
+    "data-integration",
+    "ai-embeddings"
+  ],
+  "license": "ISC",
+  "main": "master_agent.js",
+  "name": "ai-house-accommodation-agent",
+  "scripts": {
+    "data": "node master_agent.js data-only",
+    "data-upload": "node master_agent.js data-upload",
+    "enhanced": "node enhanced_agent.js",
+    "google": "node google_search_agent.js",
+    "integrate": "node data_integration_agent.js",
+    "search": "node master_agent.js search-only",
+    "start": "node master_agent.js full",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "upload": "node master_agent.js upload-only"
+  },
+  "type": "commonjs",
+  "version": "2.0.0"
 }

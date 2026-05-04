@@ -1,0 +1,36 @@
+{
+  "total_properties": 9,
+  "by_type": {
+    "apartment": 4,
+    "penthouse": 1,
+    "villa": 1,
+    "independent-house": 1,
+    "commercial": 1,
+    "bungalow": 1
+  },
+  "by_location": {
+    "Khagaul Road": 1,
+    "Bypass Road": 1,
+    "Digha": 1,
+    "Danapur": 1,
+    "Vastu Vihar": 1,
+    "Siddhi Vinayak Enclave": 1,
+    "Ashiana Nagar": 1,
+    "Boring Road": 1,
+    "Patliputra Colony": 1
+  },
+  "price_range": {
+    "min": 3200000,
+    "max": 35000000,
+    "average": 11777777.777777778
+  },
+  "by_bedrooms": {
+    "0": 1,
+    "2": 2,
+    "3": 4,
+    "4": 1,
+    "5": 1
+  },
+  "premium_count": 5,
+  "average_area": 2000
+}

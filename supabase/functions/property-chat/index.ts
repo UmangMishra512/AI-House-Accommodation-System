@@ -108,7 +108,7 @@ RENT NEGOTIATION COACHING RULES:
     };
 
     const geminiResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -119,6 +119,15 @@ RENT NEGOTIATION COACHING RULES:
     if (!geminiResp.ok) {
       const errorData = await geminiResp.json();
       console.error("Gemini API Error:", errorData);
+      
+      if (errorData.error?.message?.includes("quota") || geminiResp.status === 429) {
+        return new Response(JSON.stringify({ 
+          answer: "I'm a bit busy right now (quota limit reached). Please try again in about 60 seconds!" 
+        }), {
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        });
+      }
+      
       throw new Error(errorData.error?.message || `Gemini API returned ${geminiResp.status}`);
     }
 

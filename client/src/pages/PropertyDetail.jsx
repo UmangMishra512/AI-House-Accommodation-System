@@ -23,6 +23,7 @@ const PropertyDetail = () => {
   // AI Neighborhood Insights
   const [neighborhoodInsights, setNeighborhoodInsights] = useState(null);
   const [loadingInsights, setLoadingInsights] = useState(false);
+  const [failedInsights, setFailedInsights] = useState(false);
 
   // AI Chat State
   const [chatOpen, setChatOpen] = useState(false);
@@ -161,7 +162,7 @@ const PropertyDetail = () => {
   };
 
   useEffect(() => {
-    if (property?.location && !neighborhoodInsights && !loadingInsights) {
+    if (property?.location && !neighborhoodInsights && !loadingInsights && !failedInsights) {
       const fetchInsights = async () => {
         setLoadingInsights(true);
         try {
@@ -170,16 +171,19 @@ const PropertyDetail = () => {
           });
           if (!error && data?.insights) {
             setNeighborhoodInsights(data.insights);
+          } else {
+            setFailedInsights(true);
           }
         } catch (err) {
           console.error("Failed to fetch neighborhood insights", err);
+          setFailedInsights(true);
         } finally {
           setLoadingInsights(false);
         }
       };
       fetchInsights();
     }
-  }, [property?.location, neighborhoodInsights, loadingInsights]);
+  }, [property?.location]);
 
   if (loading) {
     return (

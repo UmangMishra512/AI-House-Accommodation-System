@@ -26,7 +26,7 @@ Deno.serve(async (req) => {
     // Call Gemini to get neighborhood insights
     const prompt = `You are a local real estate and neighborhood expert. Provide a concise, engaging summary (max 3 short paragraphs) about the neighborhood and lifestyle for the following location: "${location}". Focus on vibe, connectivity, safety, and typical demographic if known. Make it sound professional yet welcoming.`
 
-    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
+    const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',

@@ -1,0 +1,62 @@
+[
+  {
+    "location": "DDL Atrium Danapur Patna",
+    "lat": 25.6147211,
+    "lng": 85.0563555,
+    "fullAddress": null
+  },
+  {
+    "location": "Nutan Crescent Anisabad Patna",
+    "lat": 25.5808953,
+    "lng": 85.1062637,
+    "fullAddress": null
+  },
+  {
+    "location": "Kumar Capital Greens Digha Patna",
+    "lat": 25.6147427,
+    "lng": 85.1181568,
+    "fullAddress": null
+  },
+  {
+    "location": "Agrani Homes Danapur Patna",
+    "lat": 25.5819995,
+    "lng": 85.0214644,
+    "fullAddress": null
+  },
+  {
+    "location": "Vastu Vihar Danapur Patna",
+    "lat": 25.6147211,
+    "lng": 85.0563555,
+    "fullAddress": null
+  },
+  {
+    "location": "Siddhi Vinayak Enclave Kankarbagh Patna",
+    "lat": 25.5577956,
+    "lng": 85.1444906,
+    "fullAddress": null
+  },
+  {
+    "location": "Ashiana Nagar Patna",
+    "lat": 25.6208511,
+    "lng": 85.0775741,
+    "fullAddress": null
+  },
+  {
+    "location": "Boring Road Patna",
+    "lat": 25.6173655,
+    "lng": 85.1129114,
+    "fullAddress": null
+  },
+  {
+    "location": "Patliputra Colony Patna",
+    "lat": 25.6279471,
+    "lng": 85.1003858,
+    "fullAddress": null
+  },
+  {
+    "location": "Kankarbagh Main Road Patna",
+    "lat": 25.6021653,
+    "lng": 85.1608165,
+    "fullAddress": null
+  }
+]

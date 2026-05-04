@@ -76,7 +76,7 @@ Their price is ${priceDiff > 0 ? priceDiff.toFixed(0) + "% above" : Math.abs(pri
 Give ONE short sentence of pricing advice (max 20 words). Be practical and specific. Use ₹ symbol.`;
 
     const geminiResp = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_KEY}`,
+      `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
