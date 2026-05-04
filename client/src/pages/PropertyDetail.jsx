@@ -737,7 +737,20 @@ const PropertyDetail = () => {
                           if (error) throw error;
                           setChatMessages(prev => [...prev, { role: 'ai', text: data?.answer || 'No response.' }]);
                         } catch (err) {
-                          setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I could not process that. ' + err.message }]);
+                          console.error('Chat error:', err);
+                          let errorMsg = err.message;
+                          
+                          // Try to extract a more descriptive message from the function response
+                          if (err.context && typeof err.context.json === 'function') {
+                            try {
+                              const body = await err.context.json();
+                              if (body.error) errorMsg = body.error;
+                            } catch (e) { /* ignore parse error */ }
+                          } else if (err.status === 400) {
+                             errorMsg = "The AI is currently unavailable (Check GEMINI_API_KEY).";
+                          }
+
+                          setChatMessages(prev => [...prev, { role: 'ai', text: 'Sorry, I could not process that. ' + errorMsg }]);
                         } finally {
                           setChatLoading(false);
                         }

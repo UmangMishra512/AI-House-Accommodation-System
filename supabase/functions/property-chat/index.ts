@@ -44,6 +44,7 @@ PROPERTY DETAILS:
 - Description: ${property.description}
 ${property.ai_description ? `- AI-Generated Details: ${property.ai_description}` : ""}
 - Owner: ${property.owner_name || "Not specified"}
+- Amenities: ${Array.isArray(property.amenities) ? property.amenities.join(", ") : "Not specified"}
 - Phone: ${property.phone_number || "Not specified"}
 - Email: ${property.email || "Not specified"}
 - Coordinates: ${property.lat}, ${property.lng}
@@ -57,15 +58,17 @@ ${property.ai_description ? `- AI-Generated Details: ${property.ai_description}`
           `https://nominatim.openstreetmap.org/reverse?format=json&lat=${property.lat}&lon=${property.lng}&zoom=16&addressdetails=1`,
           { headers: { "User-Agent": "AIAccommodate/1.0" } }
         );
-        const nominatimData = await nominatimResp.json();
-        if (nominatimData.address) {
-          const addr = nominatimData.address;
-          nearbyInfo = `
+        if (nominatimResp.ok) {
+          const nominatimData = await nominatimResp.json();
+          if (nominatimData.address) {
+            const addr = nominatimData.address;
+            nearbyInfo = `
 AREA INFO:
 - Neighborhood: ${addr.suburb || addr.neighbourhood || "N/A"}
 - City: ${addr.city || addr.town || addr.village || "N/A"}
 - State: ${addr.state || "N/A"}
 - Postcode: ${addr.postcode || "N/A"}`;
+          }
         }
       } catch (e) {
         console.error("Nominatim error:", e);
@@ -78,12 +81,12 @@ ${context}
 ${nearbyInfo}
 
 RULES:
-- Answer the tenant's question using ONLY the property information above
+- Answer the tenant's question using ONLY the property information above.
 - If you genuinely don't know something, say "I don't have that information. Please contact the owner directly."
-- Be concise, friendly, and helpful
-- Use ₹ for prices, use Indian context
-- Keep answers to 3-4 sentences max
-- Never make up information not in the property details
+- Be concise, friendly, and helpful.
+- Use ₹ for prices, use Indian context.
+- Keep answers to 3-4 sentences max.
+- Never make up information not in the property details.
 
 RENT NEGOTIATION COACHING RULES:
 - If the user asks for tips on negotiating the rent, evaluating if the rent is fair, or how to talk to the landlord, act as an expert Rent Negotiation Coach.
@@ -91,30 +94,35 @@ RENT NEGOTIATION COACHING RULES:
 - Use the property's price, amenities, and area information to give specific advice.
 - Suggest polite phrases the user can use to negotiate.`;
 
+    const geminiBody = {
+      system_instruction: {
+        parts: [{ text: systemPrompt }]
+      },
+      contents: [
+        { role: "user", parts: [{ text: question }] },
+      ],
+      generationConfig: {
+        temperature: 0.7,
+        maxOutputTokens: 800,
+      },
+    };
+
     const geminiResp = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${GEMINI_KEY}`,
       {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [
-            { role: "user", parts: [{ text: systemPrompt }] },
-            { role: "model", parts: [{ text: "I understand. I am now acting as an expert Rent Negotiation Coach for this specific property. I will provide full, detailed, and polite advice using the data provided." }] },
-            { role: "user", parts: [{ text: question }] },
-          ],
-          generationConfig: {
-            temperature: 0.7,
-            maxOutputTokens: 800,
-          },
-        }),
+        body: JSON.stringify(geminiBody),
       }
     );
 
-    const geminiData = await geminiResp.json();
-
-    if (geminiData.error) {
-      throw new Error(geminiData.error.message || "Gemini API error");
+    if (!geminiResp.ok) {
+      const errorData = await geminiResp.json();
+      console.error("Gemini API Error:", errorData);
+      throw new Error(errorData.error?.message || `Gemini API returned ${geminiResp.status}`);
     }
+
+    const geminiData = await geminiResp.json();
 
     const answer =
       geminiData.candidates?.[0]?.content?.parts?.[0]?.text ||
@@ -124,6 +132,7 @@ RENT NEGOTIATION COACHING RULES:
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
   } catch (err) {
+    console.error("Function Error:", err.message);
     return new Response(JSON.stringify({ error: err.message }), {
       status: 400,
       headers: { ...corsHeaders, "Content-Type": "application/json" },
