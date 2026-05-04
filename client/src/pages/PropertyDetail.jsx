@@ -220,35 +220,42 @@ const PropertyDetail = () => {
 
       {/* Image Lightbox */}
       {lightboxOpen && property.images && createPortal(
-        <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center" onClick={() => setLightboxOpen(false)}>
-          <button className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10" onClick={() => setLightboxOpen(false)}>
-            <X className="w-7 h-7" />
+        <div className="fixed inset-0 z-[9999] bg-black/98" onClick={() => setLightboxOpen(false)}>
+          <button className="absolute top-safe right-4 mt-4 text-white/70 hover:text-white p-2 z-50" onClick={() => setLightboxOpen(false)}>
+            <X className="w-8 h-8" />
           </button>
-          <p className="absolute top-5 left-1/2 -translate-x-1/2 text-white/60 text-sm font-medium">
+          <p className="absolute top-safe left-1/2 -translate-x-1/2 mt-6 text-white/60 text-sm font-medium z-50">
             {lightboxIndex + 1} / {property.images.length}
           </p>
           {property.images.length > 1 && (
             <>
               <button
-                className="absolute left-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
                 onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + property.images.length) % property.images.length); }}
               >
-                <ChevronLeft className="w-6 h-6" />
+                <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
               </button>
               <button
-                className="absolute right-3 top-1/2 -translate-y-1/2 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
                 onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % property.images.length); }}
               >
-                <ChevronRight className="w-6 h-6" />
+                <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
               </button>
             </>
           )}
-          <img
-            src={property.images[lightboxIndex]}
-            alt={`Photo ${lightboxIndex + 1}`}
-            className="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="w-full h-full flex items-center justify-center p-4 md:p-12">
+            {property.images[lightboxIndex] ? (
+              <img
+                src={property.images[lightboxIndex]}
+                alt={`Photo ${lightboxIndex + 1}`}
+                className="max-h-full max-w-full object-contain rounded-lg"
+                onClick={(e) => e.stopPropagation()}
+                loading="eager"
+              />
+            ) : (
+              <div className="text-white/50">Image unavailable</div>
+            )}
+          </div>
         </div>,
         document.body
       )}
