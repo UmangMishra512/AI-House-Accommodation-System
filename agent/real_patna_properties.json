@@ -1,0 +1,142 @@
+[
+  {
+    "title": "DDL Atrium",
+    "location": "Patna, Bihar",
+    "price": "6400000",
+    "description": "Beautiful residential apartment in DDL Atrium Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=0"
+  },
+  {
+    "title": "RD Heights Danapur",
+    "location": "Danapur, Patna, Bihar",
+    "price": "6100000",
+    "description": "Beautiful residential apartment in RD Heights Danapur Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=1"
+  },
+  {
+    "title": "Venus Empire",
+    "location": "Patna, Bihar",
+    "price": "8900000",
+    "description": "Beautiful residential apartment in Venus Empire Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=2"
+  },
+  {
+    "title": "Kumar Capital Greens",
+    "location": "Patna, Bihar",
+    "price": "7900000",
+    "description": "Beautiful residential apartment in Kumar Capital Greens Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=3"
+  },
+  {
+    "title": "Siddhi Vinayak Enclave Kankarbagh",
+    "location": "Kankarbagh, Patna, Bihar",
+    "price": "7800000",
+    "description": "Beautiful residential apartment in Siddhi Vinayak Enclave Kankarbagh Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=4"
+  },
+  {
+    "title": "Shravani Enclave Sampatchak",
+    "location": "Patna, Bihar",
+    "price": "8100000",
+    "description": "Beautiful residential apartment in Shravani Enclave Sampatchak Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=5"
+  },
+  {
+    "title": "Mundeshwari Enclave",
+    "location": "Patna, Bihar",
+    "price": "8800000",
+    "description": "Beautiful residential apartment in Mundeshwari Enclave Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=6"
+  },
+  {
+    "title": "Vastu Vihar",
+    "location": "Patna, Bihar",
+    "price": "4700000",
+    "description": "Beautiful residential apartment in Vastu Vihar Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=7"
+  },
+  {
+    "title": "Agrani Homes",
+    "location": "Patna, Bihar",
+    "price": "8000000",
+    "description": "Beautiful residential apartment in Agrani Homes Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=8"
+  },
+  {
+    "title": "Saakar Gulmohar",
+    "location": "Patna, Bihar",
+    "price": "4500000",
+    "description": "Beautiful residential apartment in Saakar Gulmohar Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=9"
+  },
+  {
+    "title": "Satyamev Heights",
+    "location": "Patna, Bihar",
+    "price": "5800000",
+    "description": "Beautiful residential apartment in Satyamev Heights Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=10"
+  },
+  {
+    "title": "Kashyap Green City",
+    "location": "Patna, Bihar",
+    "price": "7900000",
+    "description": "Beautiful residential apartment in Kashyap Green City Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=11"
+  },
+  {
+    "title": "Gitaansh Enclave",
+    "location": "Patna, Bihar",
+    "price": "4200000",
+    "description": "Beautiful residential apartment in Gitaansh Enclave Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=12"
+  },
+  {
+    "title": "Meteoric Heights",
+    "location": "Patna, Bihar",
+    "price": "6100000",
+    "description": "Beautiful residential apartment in Meteoric Heights Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=13"
+  },
+  {
+    "title": "Aastha Twin Towers",
+    "location": "Patna, Bihar",
+    "price": "6200000",
+    "description": "Beautiful residential apartment in Aastha Twin Towers Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=14"
+  },
+  {
+    "title": "Himalaya Residency",
+    "location": "Patna, Bihar",
+    "price": "8800000",
+    "description": "Beautiful residential apartment in Himalaya Residency Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=15"
+  },
+  {
+    "title": "Rameshwaram Kankarbagh",
+    "location": "Kankarbagh, Patna, Bihar",
+    "price": "4000000",
+    "description": "Beautiful residential apartment in Rameshwaram Kankarbagh Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=16"
+  },
+  {
+    "title": "Ashoka Tower",
+    "location": "Patna, Bihar",
+    "price": "6300000",
+    "description": "Beautiful residential apartment in Ashoka Tower Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=17"
+  },
+  {
+    "title": "Patliputra Heritage",
+    "location": "Patna, Bihar",
+    "price": "5500000",
+    "description": "Beautiful residential apartment in Patliputra Heritage Patna. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=18"
+  },
+  {
+    "title": "Danapur Cantonment Flats",
+    "location": "Danapur, Patna, Bihar",
+    "price": "4500000",
+    "description": "Beautiful residential apartment in Danapur Cantonment Flats. Features modern amenities, 24/7 security, and prime location access.",
+    "imageUrl": "https://source.unsplash.com/800x600/?apartment,building&sig=19"
+  }
+]

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { createPortal } from 'react-dom';
 import { useParams, Link } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { AuthContext } from '../context/AuthContext';
@@ -218,8 +219,8 @@ const PropertyDetail = () => {
       )}
 
       {/* Image Lightbox */}
-      {lightboxOpen && property.images && (
-        <div className="fixed inset-0 z-[90] bg-black/95 flex items-center justify-center" onClick={() => setLightboxOpen(false)}>
+      {lightboxOpen && property.images && createPortal(
+        <div className="fixed inset-0 z-[9999] bg-black/95 flex items-center justify-center" onClick={() => setLightboxOpen(false)}>
           <button className="absolute top-4 right-4 text-white/70 hover:text-white p-2 z-10" onClick={() => setLightboxOpen(false)}>
             <X className="w-7 h-7" />
           </button>
@@ -245,10 +246,11 @@ const PropertyDetail = () => {
           <img
             src={property.images[lightboxIndex]}
             alt={`Photo ${lightboxIndex + 1}`}
-            className="max-h-[85vh] max-w-[90vw] object-contain rounded-lg"
+            className="max-h-[90vh] max-w-[95vw] object-contain rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
-        </div>
+        </div>,
+        document.body
       )}
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
