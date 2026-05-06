@@ -76,9 +76,10 @@ const Compare = () => {
   const features = [
     { label: 'Price', key: 'price', format: (val) => `₹${Number(val).toLocaleString('en-IN')}/mo` },
     { label: 'Location', key: 'location' },
-    { label: 'Bedrooms', key: 'bedrooms' },
-    { label: 'Bathrooms', key: 'bathrooms' },
-    { label: 'Area', key: 'area', format: (val) => val ? `${val} sq ft` : 'N/A' },
+    { label: 'Owner', key: 'owner_name' },
+    { label: 'Contact', key: 'phone_number' },
+    { label: 'Amenities', key: 'amenities', format: (val) => val && val.length > 0 ? val.join(', ') : 'N/A' },
+    { label: 'Premium', key: 'is_premium', format: (val) => val ? '⭐ Yes' : 'No' },
   ];
 
   return (
