@@ -464,6 +464,56 @@ const Dashboard = () => {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
               <input type="text" name="title" required value={formData.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
             </div>
+
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Property Images</label>
+              <input type="file" multiple accept="image/jpeg, image/png, image/jpg" onChange={handleImageChange} className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+              {imagePreviews.length > 0 && (
+                <div className="mt-4 grid grid-cols-3 gap-2">
+                  {imagePreviews.map((src, idx) => {
+                    const enhancement = imageEnhancements[idx];
+                    const filterStyle = enhancement ? {
+                      filter: `brightness(${enhancement.brightness}) contrast(${enhancement.contrast}) saturate(${enhancement.saturate})${enhancement.warmth > 0 ? ` sepia(${enhancement.warmth / 100})` : ''}`
+                    } : {};
+                    return (
+                      <div key={idx} className="relative group">
+                        <img src={src} alt="Preview" className="w-full h-20 object-cover rounded transition-all duration-300" style={filterStyle} />
+                        <button
+                          type="button"
+                          disabled={enhancingImage === idx}
+                          onClick={async () => {
+                            setEnhancingImage(idx);
+                            try {
+                              const file = imageFiles[idx];
+                              const fileExt = file.name.split('.').pop();
+                              const fileName = `enhance_${Math.random()}.${fileExt}`;
+                              const filePath = `${user.id}/${fileName}`;
+                              await supabase.storage.from('property-images').upload(filePath, file);
+                              const { data: { publicUrl } } = supabase.storage.from('property-images').getPublicUrl(filePath);
+                              const { data, error } = await supabase.functions.invoke('ai-enhance', {
+                                body: { imageUrl: publicUrl }
+                              });
+                              if (error) throw error;
+                              setImageEnhancements(prev => ({ ...prev, [idx]: data }));
+                            } catch (err) {
+                              console.error(err);
+                            } finally {
+                              setEnhancingImage(null);
+                            }
+                          }}
+                          className="absolute bottom-1 right-1 bg-white dark:bg-gray-800/90 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 disabled:opacity-50"
+                          title="AI Enhance"
+                        >
+                          {enhancingImage === idx ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Zap className="w-2.5 h-2.5" />}
+                          {enhancement ? `${enhancement.quality_score}/100` : 'Enhance'}
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
             <div>
               <div className="flex justify-between items-end mb-1">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
@@ -681,56 +731,6 @@ const Dashboard = () => {
                   <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handlePhoneChange} placeholder="10-digit Alt Phone (optional)" className="block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
                 </div>
               </div>
-            </div>
-
-            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Property Images</label>
-              <input type="file" multiple accept="image/jpeg, image/png, image/jpg" onChange={handleImageChange} className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
-              {imagePreviews.length > 0 && (
-                <div className="mt-4 grid grid-cols-3 gap-2">
-                  {imagePreviews.map((src, idx) => {
-                    const enhancement = imageEnhancements[idx];
-                    const filterStyle = enhancement ? {
-                      filter: `brightness(${enhancement.brightness}) contrast(${enhancement.contrast}) saturate(${enhancement.saturate})${enhancement.warmth > 0 ? ` sepia(${enhancement.warmth / 100})` : ''}`
-                    } : {};
-                    return (
-                      <div key={idx} className="relative group">
-                        <img src={src} alt="Preview" className="w-full h-20 object-cover rounded transition-all duration-300" style={filterStyle} />
-                        <button
-                          type="button"
-                          disabled={enhancingImage === idx}
-                          onClick={async () => {
-                            setEnhancingImage(idx);
-                            try {
-                              // Upload temp image for analysis
-                              const file = imageFiles[idx];
-                              const fileExt = file.name.split('.').pop();
-                              const fileName = `enhance_${Math.random()}.${fileExt}`;
-                              const filePath = `${user.id}/${fileName}`;
-                              await supabase.storage.from('property-images').upload(filePath, file);
-                              const { data: { publicUrl } } = supabase.storage.from('property-images').getPublicUrl(filePath);
-                              const { data, error } = await supabase.functions.invoke('ai-enhance', {
-                                body: { imageUrl: publicUrl }
-                              });
-                              if (error) throw error;
-                              setImageEnhancements(prev => ({ ...prev, [idx]: data }));
-                            } catch (err) {
-                              console.error(err);
-                            } finally {
-                              setEnhancingImage(null);
-                            }
-                          }}
-                          className="absolute bottom-1 right-1 bg-white dark:bg-gray-800/90 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 disabled:opacity-50"
-                          title="AI Enhance"
-                        >
-                          {enhancingImage === idx ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Zap className="w-2.5 h-2.5" />}
-                          {enhancement ? `${enhancement.quality_score}/100` : 'Enhance'}
-                        </button>
-                      </div>
-                    );
-                  })}
-                </div>
-              )}
             </div>
             
             <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
