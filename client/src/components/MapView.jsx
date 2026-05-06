@@ -34,7 +34,7 @@ const MapView = ({ properties }) => {
   }
 
   return (
-    <div className="h-[600px] w-full rounded-2xl overflow-hidden shadow-sm border border-gray-200 animate-fade-in relative z-0">
+    <div className="h-[600px] w-full rounded-2xl overflow-hidden shadow-sm border border-gray-200 dark:border-gray-700 animate-fade-in relative z-0">
       <MapContainer center={center} zoom={zoom} style={{ height: '100%', width: '100%' }}>
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -57,8 +57,8 @@ const MapView = ({ properties }) => {
                     ₹{Number(property.price)?.toLocaleString('en-IN')}
                   </div>
                 </div>
-                <h3 className="font-semibold text-gray-900 text-sm line-clamp-2 leading-tight mb-1">{property.title}</h3>
-                <p className="text-xs text-gray-500 line-clamp-1 mb-2">{property.location}</p>
+                <h3 className="font-semibold text-gray-900 dark:text-white text-sm line-clamp-2 leading-tight mb-1">{property.title}</h3>
+                <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mb-2">{property.location}</p>
                 <Link 
                   to={`/property/${property.id}`}
                   className="block w-full text-center bg-indigo-600 hover:bg-indigo-700 text-white text-xs py-1.5 rounded transition-colors"
@@ -72,9 +72,9 @@ const MapView = ({ properties }) => {
       </MapContainer>
       {validProperties.length === 0 && (
         <div className="absolute inset-0 bg-gray-50/80 backdrop-blur-sm flex items-center justify-center z-[1000]">
-          <div className="bg-white p-6 rounded-xl shadow-lg text-center max-w-sm">
-            <h3 className="text-lg font-bold text-gray-900 mb-2">No Map Data</h3>
-            <p className="text-sm text-gray-500">None of the currently filtered properties have location coordinates available.</p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-xl shadow-lg text-center max-w-sm">
+            <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-2">No Map Data</h3>
+            <p className="text-sm text-gray-500 dark:text-gray-400">None of the currently filtered properties have location coordinates available.</p>
           </div>
         </div>
       )}

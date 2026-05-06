@@ -108,7 +108,7 @@ const Navbar = () => {
       className={`font-medium transition-colors ${
         location.pathname === to
           ? 'text-indigo-600'
-          : 'text-gray-600 hover:text-indigo-600'
+          : 'text-gray-600 dark:text-gray-300 hover:text-indigo-600'
       } ${className}`}
     >
       {children}
@@ -116,7 +116,7 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
+    <nav className="bg-white dark:bg-gray-800/80 dark:bg-gray-900/80 backdrop-blur-lg shadow-sm sticky top-0 z-50 border-b border-gray-100 dark:border-gray-800 transition-colors duration-300">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           {/* Logo */}
@@ -147,7 +147,7 @@ const Navbar = () => {
                 <div className="relative flex items-center" ref={notificationRef}>
                   <button 
                     onClick={() => setShowNotificationPopup(!showNotificationPopup)}
-                    className="relative flex items-center text-gray-600 hover:text-indigo-600 transition-colors p-1"
+                    className="relative flex items-center text-gray-600 dark:text-gray-300 hover:text-indigo-600 transition-colors p-1"
                   >
                     <Bell className="w-5 h-5" />
                     {unreadMessages.length > 0 && (
@@ -159,9 +159,9 @@ const Navbar = () => {
 
                   {/* Notification Popover */}
                   {showNotificationPopup && (
-                    <div className="absolute top-full right-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 overflow-hidden">
-                      <div className="p-3 border-b border-gray-100 flex justify-between items-center bg-gray-50">
-                        <h3 className="font-semibold text-gray-800 text-sm">Notifications</h3>
+                    <div className="absolute top-full right-0 mt-2 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl shadow-xl z-50 overflow-hidden">
+                      <div className="p-3 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-gray-50 dark:bg-gray-900">
+                        <h3 className="font-semibold text-gray-800 dark:text-gray-100 text-sm">Notifications</h3>
                         {unreadMessages.length > 0 && (
                           <button 
                             onClick={() => markAsRead('all')}
@@ -173,7 +173,7 @@ const Navbar = () => {
                       </div>
                       <div className="max-h-80 overflow-y-auto">
                         {unreadMessages.length === 0 ? (
-                          <div className="p-6 text-center text-gray-500 flex flex-col items-center gap-2">
+                          <div className="p-6 text-center text-gray-500 dark:text-gray-400 flex flex-col items-center gap-2">
                             <CheckCircle2 className="w-8 h-8 text-green-400" />
                             <p className="text-sm">No unread notifications.</p>
                           </div>
@@ -185,15 +185,15 @@ const Navbar = () => {
                               className="p-3 border-b border-gray-50 hover:bg-indigo-50/50 cursor-pointer transition-colors"
                             >
                               <div className="flex justify-between items-start mb-1">
-                                <span className="font-semibold text-sm text-gray-900 truncate pr-2">{msg.name}</span>
+                                <span className="font-semibold text-sm text-gray-900 dark:text-white truncate pr-2">{msg.name}</span>
                                 <span className="text-[10px] text-indigo-600 font-medium whitespace-nowrap bg-indigo-50 px-1.5 py-0.5 rounded">
                                   {format(new Date(msg.created_at), 'MMM dd')}
                                 </span>
                               </div>
-                              <p className="text-xs text-gray-500 line-clamp-1 mb-1">
-                                Inquired about: <span className="font-medium text-gray-700">{msg.property?.title || 'Unknown Property'}</span>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 line-clamp-1 mb-1">
+                                Inquired about: <span className="font-medium text-gray-700 dark:text-gray-200">{msg.property?.title || 'Unknown Property'}</span>
                               </p>
-                              <p className="text-xs text-gray-600 line-clamp-2">"{msg.message}"</p>
+                              <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2">"{msg.message}"</p>
                             </div>
                           ))
                         )}
@@ -201,7 +201,7 @@ const Navbar = () => {
                       <Link 
                         to="/dashboard?tab=queries" 
                         onClick={() => setShowNotificationPopup(false)}
-                        className="block w-full text-center p-2 text-xs font-semibold text-indigo-600 bg-gray-50 hover:bg-gray-100 transition-colors"
+                        className="block w-full text-center p-2 text-xs font-semibold text-indigo-600 bg-gray-50 dark:bg-gray-900 hover:bg-gray-100 dark:bg-gray-800 transition-colors"
                       >
                         View all queries
                       </Link>
@@ -209,16 +209,16 @@ const Navbar = () => {
                   )}
                 </div>
 
-                <Link to="/profile" className="flex items-center gap-2 pl-2 border-l border-gray-200 hover:text-indigo-600 transition-colors ml-1">
+                <Link to="/profile" className="flex items-center gap-2 pl-2 border-l border-gray-200 dark:border-gray-700 hover:text-indigo-600 transition-colors ml-1">
                   <div className="w-8 h-8 rounded-full bg-indigo-100 flex items-center justify-center">
                     <span className="text-sm font-bold text-indigo-600">{(user.name || user.email || 'U').charAt(0).toUpperCase()}</span>
                   </div>
-                  <span className="text-sm font-semibold text-gray-700">{user.name}</span>
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200">{user.name}</span>
                 </Link>
                 <div className="flex items-center gap-2 pl-2 border-l border-gray-100 dark:border-gray-800 ml-1">
                   <button
                     onClick={toggleTheme}
-                    className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-all border border-gray-100 dark:border-gray-700"
+                    className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-all border border-gray-100 dark:border-gray-700"
                     title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                   >
                     {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
@@ -236,12 +236,12 @@ const Navbar = () => {
               <div className="flex items-center gap-3">
                 <button
                   onClick={toggleTheme}
-                  className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-all border border-gray-100 dark:border-gray-700 mr-2"
+                  className="p-2 rounded-xl bg-gray-50 dark:bg-gray-800 text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-all border border-gray-100 dark:border-gray-700 mr-2"
                   title={theme === 'dark' ? 'Switch to Light Mode' : 'Switch to Dark Mode'}
                 >
                   {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                 </button>
-                <Link to="/login" className="text-gray-600 hover:text-indigo-600 font-medium transition-colors">
+                <Link to="/login" className="text-gray-600 dark:text-gray-300 hover:text-indigo-600 font-medium transition-colors">
                   Login
                 </Link>
                 <Link
@@ -258,7 +258,7 @@ const Navbar = () => {
           <div className="flex md:hidden items-center gap-3">
             <button
               onClick={toggleTheme}
-              className="p-2 rounded-full text-gray-500 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
+              className="p-2 rounded-full text-gray-500 dark:text-gray-400 hover:text-indigo-600 dark:text-gray-400 dark:hover:text-indigo-400 transition-colors"
               aria-label="Toggle Dark Mode"
             >
               {theme === 'dark' ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
@@ -267,7 +267,7 @@ const Navbar = () => {
               <div className="relative" ref={notificationRef}>
                 <button
                   onClick={() => setShowNotificationPopup(!showNotificationPopup)}
-                  className="relative p-1 text-gray-600"
+                  className="relative p-1 text-gray-600 dark:text-gray-300"
                 >
                   <Bell className="w-5 h-5" />
                   {unreadMessages.length > 0 && (
@@ -280,7 +280,7 @@ const Navbar = () => {
             )}
             <button
               onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-              className="p-2 rounded-lg text-gray-600 hover:bg-gray-100 transition-colors"
+              className="p-2 rounded-lg text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-800 transition-colors"
             >
               {mobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
             </button>
@@ -306,31 +306,31 @@ const Navbar = () => {
                     <span className="text-white font-bold">{(user.name || 'U').charAt(0).toUpperCase()}</span>
                   </div>
                   <div>
-                    <p className="font-semibold text-gray-900 text-sm">{user.name}</p>
-                    <p className="text-xs text-gray-500">{user.email}</p>
+                    <p className="font-semibold text-gray-900 dark:text-white text-sm">{user.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{user.email}</p>
                   </div>
                 </div>
               )}
 
-              <NavLink to="/properties" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
+              <NavLink to="/properties" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:bg-gray-900 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
                 <Home className="w-5 h-5" /> Browse Listings
               </NavLink>
 
               {user ? (
                 <>
                   {isAdmin && (
-                    <NavLink to="/admin" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
+                    <NavLink to="/admin" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:bg-gray-900 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
                       <Shield className="w-5 h-5" /> Admin Panel
                     </NavLink>
                   )}
-                  <NavLink to="/dashboard" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
+                  <NavLink to="/dashboard" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:bg-gray-900 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
                     <PlusSquare className="w-5 h-5" /> Dashboard
                   </NavLink>
-                  <NavLink to="/profile" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
+                  <NavLink to="/profile" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:bg-gray-900 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
                     <UserIcon className="w-5 h-5" /> My Profile
                   </NavLink>
 
-                  <hr className="my-3 border-gray-100" />
+                  <hr className="my-3 border-gray-100 dark:border-gray-800" />
 
                   <button
                     onClick={handleLogout}
@@ -341,7 +341,7 @@ const Navbar = () => {
                 </>
               ) : (
                 <>
-                  <NavLink to="/login" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
+                  <NavLink to="/login" className="flex items-center gap-3 px-3 py-3 rounded-xl hover:bg-gray-50 dark:bg-gray-900 w-full text-base" onClick={() => setMobileMenuOpen(false)}>
                     <UserIcon className="w-5 h-5" /> Login
                   </NavLink>
                   <Link

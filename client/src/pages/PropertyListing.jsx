@@ -6,7 +6,7 @@ import MapView from '../components/MapView';
 
 // Skeleton Card Component
 const SkeletonCard = () => (
-  <div className="flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden animate-pulse">
+  <div className="flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden animate-pulse">
     <div className="h-48 w-full bg-gray-200" />
     <div className="p-5 space-y-3">
       <div className="h-5 bg-gray-200 rounded w-3/4" />
@@ -207,22 +207,22 @@ const PropertyListing = () => {
   const activeFilterCount = (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0) + (sortBy !== 'newest' ? 1 : 0);
 
   return (
-    <div className="bg-gray-50 min-h-screen py-8 sm:py-12">
+    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8 sm:py-12">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-8">
           <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
             <div>
-              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 tracking-tight">Available Properties</h1>
-              <p className="mt-1 text-gray-500 text-sm sm:text-base">Explore {properties.length} homes with immersive experiences.</p>
+              <h1 className="text-2xl sm:text-3xl font-extrabold text-gray-900 dark:text-white tracking-tight">Available Properties</h1>
+              <p className="mt-1 text-gray-500 dark:text-gray-400 text-sm sm:text-base">Explore {properties.length} homes with immersive experiences.</p>
             </div>
             
             {/* View Toggle */}
-            <div className="flex bg-gray-100 p-1 rounded-lg w-max">
+            <div className="flex bg-gray-100 dark:bg-gray-800 p-1 rounded-lg w-max">
               <button
                 onClick={() => setViewMode('grid')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  viewMode === 'grid' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  viewMode === 'grid' ? 'bg-white dark:bg-gray-800 text-indigo-600 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
                 }`}
               >
                 <Grid3X3 className="w-4 h-4" /> Grid
@@ -230,7 +230,7 @@ const PropertyListing = () => {
               <button
                 onClick={() => setViewMode('map')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-md text-sm font-medium transition-all ${
-                  viewMode === 'map' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'
+                  viewMode === 'map' ? 'bg-white dark:bg-gray-800 text-indigo-600 shadow-sm' : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'
                 }`}
               >
                 <Map className="w-4 h-4" /> Map
@@ -256,7 +256,7 @@ const PropertyListing = () => {
                 className={`w-full pl-10 pr-4 py-2.5 border rounded-xl focus:outline-none focus:ring-2 transition-all text-sm ${
                   aiSearchEnabled
                     ? 'border-indigo-300 focus:ring-indigo-400 bg-indigo-50/30'
-                    : 'border-gray-200 focus:ring-indigo-400'
+                    : 'border-gray-200 dark:border-gray-700 focus:ring-indigo-400'
                 }`}
               />
               {aiSearchEnabled ? (
@@ -274,7 +274,7 @@ const PropertyListing = () => {
                 </button>
               )}
               {aiResults !== null && !aiSearchEnabled && (
-                <button onClick={clearAiSearch} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600">
+                <button onClick={clearAiSearch} className="absolute right-3 top-3 text-gray-400 hover:text-gray-600 dark:text-gray-300">
                   <X className="w-4 h-4" />
                 </button>
               )}
@@ -290,7 +290,7 @@ const PropertyListing = () => {
                 className={`flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
                   aiSearchEnabled
                     ? 'bg-gradient-to-r from-purple-500 to-indigo-500 text-white shadow-md shadow-indigo-200'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'
+                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-indigo-300'
                 }`}
               >
                 <Sparkles className="w-3.5 h-3.5" />
@@ -301,13 +301,13 @@ const PropertyListing = () => {
                 className={`flex items-center gap-1.5 text-xs font-medium px-4 py-2.5 rounded-xl transition-all whitespace-nowrap ${
                   showFilters
                     ? 'bg-indigo-600 text-white shadow-md shadow-indigo-200'
-                    : 'bg-white border border-gray-200 text-gray-600 hover:border-indigo-300'
+                    : 'bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-indigo-300'
                 }`}
               >
                 <SlidersHorizontal className="w-3.5 h-3.5" />
                 Filters
                 {activeFilterCount > 0 && (
-                  <span className={`ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${showFilters ? 'bg-white/20' : 'bg-indigo-100 text-indigo-600'}`}>
+                  <span className={`ml-1 text-[10px] font-bold px-1.5 py-0.5 rounded-full ${showFilters ? 'bg-white dark:bg-gray-800/20' : 'bg-indigo-100 text-indigo-600'}`}>
                     {activeFilterCount}
                   </span>
                 )}
@@ -317,11 +317,11 @@ const PropertyListing = () => {
 
           {/* Expandable Filter Panel */}
           {showFilters && (
-            <div className="bg-white rounded-xl border border-gray-200 p-4 sm:p-5 space-y-4 shadow-sm animate-in">
+            <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 p-4 sm:p-5 space-y-4 shadow-sm animate-in">
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Price Range */}
                 <div>
-                  <label className="text-xs font-semibold text-gray-700 mb-2 block">
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2 block">
                     Price Range: ₹{priceRange[0].toLocaleString('en-IN')} — ₹{priceRange[1].toLocaleString('en-IN')}
                   </label>
                   <div className="flex items-center gap-3">
@@ -348,12 +348,12 @@ const PropertyListing = () => {
 
                 {/* Sort */}
                 <div>
-                  <label className="text-xs font-semibold text-gray-700 mb-2 block">Sort By</label>
+                  <label className="text-xs font-semibold text-gray-700 dark:text-gray-200 mb-2 block">Sort By</label>
                   <div className="relative">
                     <select
                       value={sortBy}
                       onChange={(e) => setSortBy(e.target.value)}
-                      className="w-full appearance-none bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none pr-8"
+                      className="w-full appearance-none bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-700 rounded-lg px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-400 focus:outline-none pr-8"
                     >
                       <option value="newest">Newest First</option>
                       <option value="oldest">Oldest First</option>
@@ -407,7 +407,7 @@ const PropertyListing = () => {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {displayProperties.map(property => (
-              <Link to={`/property/${property.id}`} key={property.id} className="group flex flex-col bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <Link to={`/property/${property.id}`} key={property.id} className="group flex flex-col bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 overflow-hidden hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative h-48 w-full overflow-hidden bg-gray-200">
                   <img
                     src={property.images && property.images[0] ? property.images[0] : 'https://via.placeholder.com/400x300'}
@@ -417,22 +417,22 @@ const PropertyListing = () => {
                   />
                   <button
                     onClick={(e) => toggleFavorite(e, property.id)}
-                    className="absolute top-3 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all shadow-sm z-10"
+                    className="absolute top-3 right-3 p-2 rounded-full bg-white dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:bg-gray-800 transition-all shadow-sm z-10"
                     title="Toggle Favorite"
                   >
                     <Heart className={`w-4 h-4 transition-colors ${
-                      favorites.includes(property.id) ? 'fill-red-500 text-red-500' : 'text-gray-500'
+                      favorites.includes(property.id) ? 'fill-red-500 text-red-500' : 'text-gray-500 dark:text-gray-400'
                     }`} />
                   </button>
                   <button
                     onClick={(e) => toggleCompare(e, property)}
-                    className="absolute top-14 right-3 p-2 rounded-full bg-white/80 backdrop-blur-sm hover:bg-white transition-all shadow-sm z-10"
+                    className="absolute top-14 right-3 p-2 rounded-full bg-white dark:bg-gray-800/80 backdrop-blur-sm hover:bg-white dark:bg-gray-800 transition-all shadow-sm z-10"
                     title="Add to Compare"
                   >
                     {compareList.some(p => p.id === property.id) ? (
                       <CheckSquare className="w-4 h-4 text-indigo-600" />
                     ) : (
-                      <PlusSquare className="w-4 h-4 text-gray-500" />
+                      <PlusSquare className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
                   </button>
                   {property.ai_model_url && (
@@ -448,7 +448,7 @@ const PropertyListing = () => {
                 </div>
                 <div className="p-4 flex-1 flex flex-col">
                   <div className="flex items-start justify-between gap-2">
-                    <h3 className="text-base font-semibold text-gray-900 line-clamp-1 group-hover:text-indigo-600 transition-colors">
+                    <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1 group-hover:text-indigo-600 transition-colors">
                       {property.title}
                     </h3>
                     {property.is_premium && (
@@ -458,7 +458,7 @@ const PropertyListing = () => {
                       </span>
                     )}
                   </div>
-                  <div className="flex items-center text-sm text-gray-500 mt-1">
+                  <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-1">
                     <MapPin className="flex-shrink-0 mr-1 h-3.5 w-3.5 text-gray-400" />
                     <span className="truncate text-xs">{property.location}</span>
                   </div>
@@ -467,12 +467,12 @@ const PropertyListing = () => {
                   {property.amenities && property.amenities.length > 0 && (
                     <div className="flex flex-wrap gap-1 mt-2.5">
                       {property.amenities.slice(0, 3).map((amenity, idx) => (
-                        <span key={idx} className="bg-gray-100 text-gray-600 text-[10px] px-2 py-0.5 rounded-full font-medium border border-gray-200/50">
+                        <span key={idx} className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 text-[10px] px-2 py-0.5 rounded-full font-medium border border-gray-200 dark:border-gray-700/50">
                           {amenity}
                         </span>
                       ))}
                       {property.amenities.length > 3 && (
-                        <span className="bg-gray-50 text-gray-400 text-[10px] px-1.5 py-0.5 rounded-full font-medium">
+                        <span className="bg-gray-50 dark:bg-gray-900 text-gray-400 text-[10px] px-1.5 py-0.5 rounded-full font-medium">
                           +{property.amenities.length - 3}
                         </span>
                       )}
@@ -480,16 +480,16 @@ const PropertyListing = () => {
                   )}
 
                   <div className="mt-auto pt-3 flex items-center justify-between border-t border-gray-50 mt-3">
-                    <p className="text-lg font-bold text-gray-900">₹{Number(property.price)?.toLocaleString('en-IN')}</p>
+                    <p className="text-lg font-bold text-gray-900 dark:text-white">₹{Number(property.price)?.toLocaleString('en-IN')}</p>
                     <span className="text-[11px] text-gray-400 font-medium">/ month</span>
                   </div>
                 </div>
               </Link>
             ))}
             {displayProperties.length === 0 && (
-              <div className="col-span-full py-16 text-center text-gray-500 bg-white rounded-xl border border-gray-200">
+              <div className="col-span-full py-16 text-center text-gray-500 dark:text-gray-400 bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700">
                 <Search className="w-10 h-10 text-gray-300 mx-auto mb-3" />
-                <p className="font-medium text-gray-700 mb-1">No properties found</p>
+                <p className="font-medium text-gray-700 dark:text-gray-200 mb-1">No properties found</p>
                 <p className="text-sm">
                   {aiResults !== null
                     ? 'Try a different search query.'
@@ -512,16 +512,16 @@ const PropertyListing = () => {
 
         {/* Compare Floating Bar */}
         {compareList.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transform transition-transform duration-300 z-50 animate-fade-in pb-safe">
+          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transform transition-transform duration-300 z-50 animate-fade-in pb-safe">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
               <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
                 <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
-                  <span className="text-sm font-semibold text-gray-700 whitespace-nowrap">
+                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
                     Compare ({compareList.length}/4)
                   </span>
                   <div className="flex items-center gap-2">
                     {compareList.map(item => (
-                      <div key={item.id} className="relative group flex-shrink-0 w-12 h-12 rounded-md overflow-hidden border border-gray-200">
+                      <div key={item.id} className="relative group flex-shrink-0 w-12 h-12 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
                         <img src={item.image || 'https://via.placeholder.com/100'} alt="" className="w-full h-full object-cover" />
                         <button 
                           onClick={() => removeCompareItem(item.id)}
@@ -532,7 +532,7 @@ const PropertyListing = () => {
                       </div>
                     ))}
                     {[...Array(4 - compareList.length)].map((_, i) => (
-                      <div key={`empty-${i}`} className="w-12 h-12 rounded-md border border-dashed border-gray-300 bg-gray-50 flex items-center justify-center flex-shrink-0">
+                      <div key={`empty-${i}`} className="w-12 h-12 rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
                         <span className="text-gray-300 text-xs">+</span>
                       </div>
                     ))}
@@ -541,7 +541,7 @@ const PropertyListing = () => {
                 <div className="flex items-center gap-3 w-full sm:w-auto">
                   <button 
                     onClick={() => setCompareList([])}
-                    className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                    className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
                   >
                     Clear
                   </button>

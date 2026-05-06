@@ -241,7 +241,7 @@ const PropertyDetail = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white">
+      <div className="min-h-screen bg-white dark:bg-gray-800">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="animate-pulse space-y-6">
             <div className="h-5 bg-gray-200 rounded w-32" />
@@ -259,16 +259,16 @@ const PropertyDetail = () => {
 
   if (!property) {
     return (
-      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 gap-4">
+      <div className="flex flex-col justify-center items-center h-screen bg-gray-50 dark:bg-gray-900 gap-4">
         <div className="text-6xl">🏠</div>
-        <div className="text-xl font-semibold text-gray-700">Property not found</div>
+        <div className="text-xl font-semibold text-gray-700 dark:text-gray-200">Property not found</div>
         <Link to="/properties" className="text-indigo-600 hover:text-indigo-500 font-medium text-sm">← Back to listings</Link>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white dark:bg-gray-800">
       {/* Share Toast */}
       {shareToast && (
         <div className="fixed top-20 left-1/2 -translate-x-1/2 z-[100] bg-gray-900 text-white px-4 py-2.5 rounded-xl shadow-lg flex items-center gap-2 text-sm animate-bounce">
@@ -288,13 +288,13 @@ const PropertyDetail = () => {
           {property.images.length > 1 && (
             <>
               <button
-                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+                className="absolute left-2 md:left-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white dark:bg-gray-800/10 hover:bg-white dark:bg-gray-800/20 text-white transition-colors z-50"
                 onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex - 1 + property.images.length) % property.images.length); }}
               >
                 <ChevronLeft className="w-6 h-6 md:w-8 md:h-8" />
               </button>
               <button
-                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors z-50"
+                className="absolute right-2 md:right-4 top-1/2 -translate-y-1/2 p-3 rounded-full bg-white dark:bg-gray-800/10 hover:bg-white dark:bg-gray-800/20 text-white transition-colors z-50"
                 onClick={(e) => { e.stopPropagation(); setLightboxIndex((lightboxIndex + 1) % property.images.length); }}
               >
                 <ChevronRight className="w-6 h-6 md:w-8 md:h-8" />
@@ -328,12 +328,12 @@ const PropertyDetail = () => {
             <button
               onClick={toggleFavorite}
               className={`p-2 rounded-lg border transition-all ${
-                isFavorite ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white border-gray-200 text-gray-400 hover:text-red-500'
+                isFavorite ? 'bg-red-50 border-red-200 text-red-500' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 text-gray-400 hover:text-red-500'
               }`}
             >
               <Heart className={`w-5 h-5 ${isFavorite ? 'fill-current' : ''}`} />
             </button>
-            <button onClick={handleShare} className="p-2 rounded-lg border border-gray-200 text-gray-400 hover:text-indigo-600 bg-white transition-colors">
+            <button onClick={handleShare} className="p-2 rounded-lg border border-gray-200 dark:border-gray-700 text-gray-400 hover:text-indigo-600 bg-white dark:bg-gray-800 transition-colors">
               <Share2 className="w-5 h-5" />
             </button>
           </div>
@@ -343,8 +343,8 @@ const PropertyDetail = () => {
           {/* Main Content Area */}
           <div className="lg:col-span-2 space-y-8">
             <div>
-              <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">{property.title}</h1>
-              <div className="mt-4 flex items-center gap-6 text-gray-500">
+              <h1 className="text-4xl font-extrabold text-gray-900 dark:text-white tracking-tight">{property.title}</h1>
+              <div className="mt-4 flex items-center gap-6 text-gray-500 dark:text-gray-400">
                 <span className="flex items-center text-lg">
                   <MapPin className="mr-1.5 h-5 w-5 text-gray-400" />
                   <div className="flex flex-col">
@@ -375,7 +375,7 @@ const PropertyDetail = () => {
                 )}
                 {property.amenities && property.amenities.length > 0 && (
                   <div>
-                    <h3 className="text-sm font-semibold text-gray-900 mb-2">Amenities</h3>
+                    <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Amenities</h3>
                     <div className="flex flex-wrap gap-2">
                       {property.amenities.map((amenity, idx) => (
                         <span key={idx} className="bg-indigo-50 text-indigo-700 text-xs px-3 py-1 rounded-full font-medium border border-indigo-100">
@@ -417,15 +417,15 @@ const PropertyDetail = () => {
 
             {/* Description */}
             <div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-4">About this home</h2>
-              <div className="prose prose-indigo max-w-none text-gray-600 text-lg">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">About this home</h2>
+              <div className="prose prose-indigo max-w-none text-gray-600 dark:text-gray-300 text-lg">
                 <p className="whitespace-pre-wrap">{property.description}</p>
               </div>
             </div>
 
             {/* AI Neighborhood Insights */}
             <div className="bg-gradient-to-r from-purple-50 to-indigo-50 p-6 rounded-3xl border border-indigo-100 mt-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                 <Sparkles className="w-6 h-6 text-indigo-600" />
                 AI Neighborhood Insights
               </h2>
@@ -436,21 +436,21 @@ const PropertyDetail = () => {
                   <div className="h-4 bg-indigo-200/50 rounded w-4/6"></div>
                 </div>
               ) : neighborhoodInsights ? (
-                <div className="prose prose-indigo max-w-none text-gray-700">
+                <div className="prose prose-indigo max-w-none text-gray-700 dark:text-gray-200">
                   <p className="whitespace-pre-wrap leading-relaxed">{neighborhoodInsights}</p>
                 </div>
               ) : (
-                <p className="text-gray-500 italic">Insights currently unavailable for this location.</p>
+                <p className="text-gray-500 dark:text-gray-400 italic">Insights currently unavailable for this location.</p>
               )}
             </div>
             
             {/* AI-Generated 3D Model (highest priority) */}
             {property.model_3d_url && (
               <div className="bg-gradient-to-br from-violet-50 to-indigo-50 p-6 rounded-3xl border border-indigo-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4 flex items-center gap-2">
                   <span className="bg-gradient-to-r from-violet-600 to-indigo-600 text-transparent bg-clip-text">AI-Generated</span> 3D Model
                 </h2>
-                <div className="relative w-full overflow-hidden rounded-2xl bg-gray-100" style={{ height: '500px' }}>
+                <div className="relative w-full overflow-hidden rounded-2xl bg-gray-100 dark:bg-gray-800" style={{ height: '500px' }}>
                   <model-viewer
                     src={property.model_3d_url}
                     alt="3D Model of property"
@@ -468,8 +468,8 @@ const PropertyDetail = () => {
 
             {/* Embedded 3D Tour (Luma AI / manual embed) */}
             {!property.model_3d_url && property.ai_model_url && (
-              <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">3D Virtual Tour</h2>
+              <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">3D Virtual Tour</h2>
                 <div className="relative w-full overflow-hidden rounded-2xl" style={{ paddingTop: '56.25%' }}>
                    <iframe
                      className="absolute top-0 left-0 w-full h-full border-0"
@@ -483,8 +483,8 @@ const PropertyDetail = () => {
 
             {/* If no 3D model at all, show video(s) */}
             {!property.model_3d_url && !property.ai_model_url && property.video_url && property.video_url.length > 0 && property.video_url.some(v => v) && (
-              <div className="bg-gray-50 p-6 rounded-3xl border border-gray-100">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Property Videos</h2>
+              <div className="bg-gray-50 dark:bg-gray-900 p-6 rounded-3xl border border-gray-100 dark:border-gray-800">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Property Videos</h2>
                 <div className="space-y-4">
                   {property.video_url.filter(v => v).map((vUrl, idx) => {
                     // YouTube detection
@@ -554,9 +554,9 @@ const PropertyDetail = () => {
 
             {/* Map Location */}
             {property.lat && property.lng && (
-              <div className="bg-white p-6 rounded-3xl border border-gray-100 shadow-sm mt-8">
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Location Map</h2>
-                <div className="relative w-full overflow-hidden rounded-2xl h-96 bg-gray-100">
+              <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mt-8">
+                <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">Location Map</h2>
+                <div className="relative w-full overflow-hidden rounded-2xl h-96 bg-gray-100 dark:bg-gray-800">
                    <iframe
                      width="100%"
                      height="100%"
@@ -569,32 +569,32 @@ const PropertyDetail = () => {
               </div>
             )}
             {/* Reviews Section */}
-            <div className="bg-white p-6 sm:p-8 rounded-3xl border border-gray-100 shadow-sm mt-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <div className="bg-white dark:bg-gray-800 p-6 sm:p-8 rounded-3xl border border-gray-100 dark:border-gray-800 shadow-sm mt-8">
+              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-2">
                 <Star className="w-6 h-6 text-yellow-400 fill-current" />
                 Reviews & Ratings
               </h2>
               
               {/* Average Rating Summary */}
               {reviews.length > 0 && (
-                <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 rounded-2xl">
-                  <div className="text-4xl font-bold text-gray-900">
+                <div className="flex items-center gap-4 mb-8 p-4 bg-gray-50 dark:bg-gray-900 rounded-2xl">
+                  <div className="text-4xl font-bold text-gray-900 dark:text-white">
                     {(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length).toFixed(1)}
                   </div>
                   <div>
                     <StarRating rating={Math.round(reviews.reduce((acc, r) => acc + r.rating, 0) / reviews.length)} readOnly size="md" />
-                    <p className="text-sm text-gray-500 mt-1">Based on {reviews.length} reviews</p>
+                    <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Based on {reviews.length} reviews</p>
                   </div>
                 </div>
               )}
 
               {/* Review Form */}
               {user ? (
-                <form onSubmit={handleReviewSubmit} className="mb-10 bg-gray-50 p-5 rounded-2xl border border-gray-100">
-                  <h3 className="text-sm font-semibold text-gray-900 mb-3">Write a Review</h3>
+                <form onSubmit={handleReviewSubmit} className="mb-10 bg-gray-50 dark:bg-gray-900 p-5 rounded-2xl border border-gray-100 dark:border-gray-800">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-3">Write a Review</h3>
                   
                   <div className="mb-4">
-                    <label className="block text-xs font-medium text-gray-600 mb-2">Rating</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Rating</label>
                     <StarRating 
                       rating={reviewForm.rating} 
                       onRatingChange={(val) => setReviewForm(prev => ({ ...prev, rating: val }))} 
@@ -603,12 +603,12 @@ const PropertyDetail = () => {
                   </div>
                   
                   <div className="mb-4">
-                    <label className="block text-xs font-medium text-gray-600 mb-2">Comment</label>
+                    <label className="block text-xs font-medium text-gray-600 dark:text-gray-300 mb-2">Comment</label>
                     <textarea
                       required
                       value={reviewForm.comment}
                       onChange={(e) => setReviewForm(prev => ({ ...prev, comment: e.target.value }))}
-                      className="w-full rounded-xl border-gray-200 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white"
+                      className="w-full rounded-xl border-gray-200 dark:border-gray-700 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 bg-white dark:bg-gray-800"
                       rows="3"
                       placeholder="Share your experience with this property..."
                     ></textarea>
@@ -636,10 +636,10 @@ const PropertyDetail = () => {
               {/* Reviews List */}
               <div className="space-y-6">
                 {reviews.length === 0 ? (
-                  <p className="text-gray-500 text-center italic">No reviews yet. Be the first to review!</p>
+                  <p className="text-gray-500 dark:text-gray-400 text-center italic">No reviews yet. Be the first to review!</p>
                 ) : (
                   reviews.map((review) => (
-                    <div key={review.id} className="border-b border-gray-100 pb-6 last:border-0 last:pb-0">
+                    <div key={review.id} className="border-b border-gray-100 dark:border-gray-800 pb-6 last:border-0 last:pb-0">
                       <div className="flex items-start justify-between mb-2">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-indigo-100 flex items-center justify-center flex-shrink-0">
@@ -648,13 +648,13 @@ const PropertyDetail = () => {
                             </span>
                           </div>
                           <div>
-                            <p className="font-semibold text-gray-900 text-sm">{review.profiles?.name || 'User'}</p>
+                            <p className="font-semibold text-gray-900 dark:text-white text-sm">{review.profiles?.name || 'User'}</p>
                             <p className="text-xs text-gray-400">{format(new Date(review.created_at), 'MMM dd, yyyy')}</p>
                           </div>
                         </div>
                         <StarRating rating={review.rating} readOnly size="sm" />
                       </div>
-                      <p className="text-gray-600 text-sm mt-3 ml-13 leading-relaxed bg-gray-50 p-3 rounded-xl rounded-tl-none">{review.comment}</p>
+                      <p className="text-gray-600 dark:text-gray-300 text-sm mt-3 ml-13 leading-relaxed bg-gray-50 dark:bg-gray-900 p-3 rounded-xl rounded-tl-none">{review.comment}</p>
                     </div>
                   ))
                 )}
@@ -663,15 +663,15 @@ const PropertyDetail = () => {
           </div>
 
           {/* Sidebar Area */}
-          <div className="lg:col-span-1 border-l border-gray-100 lg:pl-10">
+          <div className="lg:col-span-1 border-l border-gray-100 dark:border-gray-800 lg:pl-10">
             <div className="sticky top-24 space-y-8">
               
               {/* QR Code Card */}
-              <div className="bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 p-8 text-center hidden md:block">
-                <h3 className="text-lg font-semibold text-gray-900 mb-2">Scan & Share</h3>
-                <p className="text-sm text-gray-500 mb-6">Scan this QR code natively using a smartphone camera to save and share this property.</p>
+              <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800 p-8 text-center hidden md:block">
+                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Scan & Share</h3>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Scan this QR code natively using a smartphone camera to save and share this property.</p>
                 <div className="flex flex-col items-center">
-                  <div className="flex justify-center p-4 bg-gray-50 rounded-xl mb-4 w-full">
+                  <div className="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-xl mb-4 w-full">
                     <img 
                       src={property.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.href)}`} 
                       alt="Property QR Code" 
@@ -681,7 +681,7 @@ const PropertyDetail = () => {
                   <div className="flex gap-2 w-full mt-4">
                     <button 
                       onClick={handleShare}
-                      className="flex-1 flex items-center justify-center gap-2 bg-white border border-gray-200 text-gray-700 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors shadow-sm"
+                      className="flex-1 flex items-center justify-center gap-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 py-2 rounded-lg font-medium hover:bg-gray-50 dark:bg-gray-900 transition-colors shadow-sm"
                     >
                       <Share2 className="w-4 h-4" /> Share
                     </button>
@@ -703,34 +703,34 @@ const PropertyDetail = () => {
                   onClick={() => setIsMaximized(false)}
                 >
                   <div 
-                    className="bg-white rounded-3xl shadow-2xl border border-gray-100 overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col animate-in fade-in zoom-in duration-300"
+                    className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl border border-gray-100 dark:border-gray-800 overflow-hidden w-full max-w-5xl h-[85vh] flex flex-col animate-in fade-in zoom-in duration-300"
                     onClick={(e) => e.stopPropagation()}
                   >
                     {/* Header */}
-                    <div className="flex items-center justify-between p-6 md:p-8 border-b border-gray-100 bg-white">
+                    <div className="flex items-center justify-between p-6 md:p-8 border-b border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800">
                       <div className="flex items-center gap-5">
                         <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center shadow-lg shadow-indigo-200">
                           <Sparkles className="w-6 h-6 text-white" />
                         </div>
                         <div>
-                          <h3 className="text-xl font-bold text-gray-900">AI Property Assistant</h3>
+                          <h3 className="text-xl font-bold text-gray-900 dark:text-white">AI Property Assistant</h3>
                           <div className="flex items-center gap-2">
                             <span className="flex h-2 w-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <p className="text-sm text-gray-500 font-medium">Online & ready to help</p>
+                            <p className="text-sm text-gray-500 dark:text-gray-400 font-medium">Online & ready to help</p>
                           </div>
                         </div>
                       </div>
                       <div className="flex items-center gap-3">
                         <button 
                           onClick={() => setIsMaximized(false)}
-                          className="p-3 hover:bg-gray-100 rounded-xl transition-all text-gray-400 hover:text-gray-600 hover:scale-105"
+                          className="p-3 hover:bg-gray-100 dark:bg-gray-800 rounded-xl transition-all text-gray-400 hover:text-gray-600 dark:text-gray-300 hover:scale-105"
                           title="Minimize"
                         >
                           <Minimize2 className="w-6 h-6" />
                         </button>
                         <button 
                           onClick={() => { setIsMaximized(false); setChatOpen(false); }}
-                          className="p-3 hover:bg-gray-100 rounded-xl transition-all text-gray-400 hover:text-gray-600 hover:scale-105"
+                          className="p-3 hover:bg-gray-100 dark:bg-gray-800 rounded-xl transition-all text-gray-400 hover:text-gray-600 dark:text-gray-300 hover:scale-105"
                           title="Close"
                         >
                           <X className="w-6 h-6" />
@@ -747,8 +747,8 @@ const PropertyDetail = () => {
                               <Sparkles className="w-10 h-10 text-indigo-500" />
                             </div>
                             <div className="space-y-2">
-                              <h4 className="text-2xl font-bold text-gray-900">How can I help you today?</h4>
-                              <p className="text-gray-500">I have analyzed this property and can answer questions about the neighborhood, pricing, amenities, and more.</p>
+                              <h4 className="text-2xl font-bold text-gray-900 dark:text-white">How can I help you today?</h4>
+                              <p className="text-gray-500 dark:text-gray-400">I have analyzed this property and can answer questions about the neighborhood, pricing, amenities, and more.</p>
                             </div>
                             <div className="grid grid-cols-2 gap-3 w-full">
                               {['Is there parking?', "What's nearby?", 'Pet policy?', 'Furnishing details?'].map(q => (
@@ -761,7 +761,7 @@ const PropertyDetail = () => {
                                       if (btn) btn.click();
                                     }, 100);
                                   }}
-                                  className="text-sm px-5 py-3 rounded-2xl bg-white border border-gray-200 text-gray-600 hover:border-indigo-400 hover:text-indigo-600 hover:shadow-md transition-all text-left flex items-center justify-between group"
+                                  className="text-sm px-5 py-3 rounded-2xl bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-indigo-400 hover:text-indigo-600 hover:shadow-md transition-all text-left flex items-center justify-between group"
                                 >
                                   {q}
                                   <ChevronRight className="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity" />
@@ -776,7 +776,7 @@ const PropertyDetail = () => {
                                 <div className={`max-w-[80%] px-6 py-4 rounded-3xl text-lg leading-relaxed shadow-sm ${
                                   msg.role === 'user'
                                     ? 'bg-indigo-600 text-white rounded-br-none'
-                                    : 'bg-white text-gray-800 border border-gray-100 rounded-bl-none'
+                                    : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-100 dark:border-gray-800 rounded-bl-none'
                                 }`}>
                                   {msg.text}
                                 </div>
@@ -784,7 +784,7 @@ const PropertyDetail = () => {
                             ))}
                             {chatLoading && (
                               <div className="flex justify-start">
-                                <div className="bg-white border border-gray-100 rounded-3xl rounded-bl-none px-6 py-4 shadow-sm flex items-center gap-2">
+                                <div className="bg-white dark:bg-gray-800 border border-gray-100 dark:border-gray-800 rounded-3xl rounded-bl-none px-6 py-4 shadow-sm flex items-center gap-2">
                                   <Loader2 className="w-5 h-5 text-indigo-500 animate-spin" />
                                   <span className="text-sm text-gray-400 font-medium tracking-wide uppercase">AI is thinking...</span>
                                 </div>
@@ -796,7 +796,7 @@ const PropertyDetail = () => {
                       </div>
                       
                       {/* Input Section */}
-                      <div className="p-6 md:p-8 bg-white border-t border-gray-100">
+                      <div className="p-6 md:p-8 bg-white dark:bg-gray-800 border-t border-gray-100 dark:border-gray-800">
                         <form onSubmit={async (e) => {
                           e.preventDefault();
                           if (!chatInput.trim() || chatLoading) return;
@@ -823,13 +823,13 @@ const PropertyDetail = () => {
                             setChatLoading(false);
                           }
                         }} className="max-w-4xl mx-auto">
-                          <div className="relative flex items-center gap-4 bg-gray-50 p-2 rounded-2xl border border-gray-100 focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-500/5 transition-all">
+                          <div className="relative flex items-center gap-4 bg-gray-50 dark:bg-gray-900 p-2 rounded-2xl border border-gray-100 dark:border-gray-800 focus-within:border-indigo-300 focus-within:ring-4 focus-within:ring-indigo-500/5 transition-all">
                             <input
                               type="text"
                               value={chatInput}
                               onChange={(e) => setChatInput(e.target.value)}
                               placeholder="Type your message here..."
-                              className="flex-1 px-4 py-3 bg-transparent border-none focus:ring-0 text-gray-700 text-lg placeholder:text-gray-400"
+                              className="flex-1 px-4 py-3 bg-transparent border-none focus:ring-0 text-gray-700 dark:text-gray-200 text-lg placeholder:text-gray-400"
                             />
                             <button
                               id="send-btn-max"
@@ -848,18 +848,18 @@ const PropertyDetail = () => {
                 document.body
               )}
 
-              <div className={`bg-white rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 overflow-hidden ${isMaximized ? 'hidden' : ''}`}>
+              <div className={`bg-white dark:bg-gray-800 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-gray-100 dark:border-gray-800 overflow-hidden ${isMaximized ? 'hidden' : ''}`}>
                 <button
                   onClick={() => !isMaximized && setChatOpen(!chatOpen)}
-                  className={`w-full flex items-center justify-between p-5 hover:bg-gray-50 transition-colors ${isMaximized ? 'cursor-default' : 'cursor-pointer'}`}
+                  className={`w-full flex items-center justify-between p-5 hover:bg-gray-50 dark:bg-gray-900 transition-colors ${isMaximized ? 'cursor-default' : 'cursor-pointer'}`}
                 >
                   <div className="flex items-center gap-3">
                     <div className="w-9 h-9 rounded-full bg-gradient-to-br from-purple-500 to-indigo-600 flex items-center justify-center">
                       <Sparkles className="w-4 h-4 text-white" />
                     </div>
                     <div className="text-left">
-                      <h3 className="text-sm font-semibold text-gray-900">Ask AI about this property</h3>
-                      <p className="text-xs text-gray-500">Get instant answers</p>
+                      <h3 className="text-sm font-semibold text-gray-900 dark:text-white">Ask AI about this property</h3>
+                      <p className="text-xs text-gray-500 dark:text-gray-400">Get instant answers</p>
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
@@ -868,7 +868,7 @@ const PropertyDetail = () => {
                         onClick={(e) => { e.stopPropagation(); setIsMaximized(!isMaximized); }} 
                         className="p-1.5 hover:bg-gray-200 rounded cursor-pointer transition-colors"
                       >
-                        {isMaximized ? <Minimize2 className="w-5 h-5 text-gray-600" /> : <Maximize2 className="w-5 h-5 text-gray-600" />}
+                        {isMaximized ? <Minimize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" /> : <Maximize2 className="w-5 h-5 text-gray-600 dark:text-gray-300" />}
                       </div>
                     )}
                     <MessageCircle className={`w-5 h-5 text-gray-400 transition-transform ${chatOpen && !isMaximized ? 'rotate-180' : ''}`} />
@@ -876,13 +876,13 @@ const PropertyDetail = () => {
                 </button>
 
                 {chatOpen && (
-                  <div className={`border-t border-gray-100 flex flex-col ${isMaximized ? 'flex-1 overflow-hidden' : ''}`}>
+                  <div className={`border-t border-gray-100 dark:border-gray-800 flex flex-col ${isMaximized ? 'flex-1 overflow-hidden' : ''}`}>
                     {/* Chat Messages */}
-                    <div className={`overflow-y-auto p-4 space-y-3 bg-gray-50 ${isMaximized ? 'flex-1 h-full' : 'h-64'}`}>
+                    <div className={`overflow-y-auto p-4 space-y-3 bg-gray-50 dark:bg-gray-900 ${isMaximized ? 'flex-1 h-full' : 'h-64'}`}>
                       {chatMessages.length === 0 && (
                         <div className="text-center py-6">
                           <Sparkles className="w-8 h-8 text-indigo-300 mx-auto mb-2" />
-                          <p className="text-xs text-gray-500 mb-3">Ask me anything about this property!</p>
+                          <p className="text-xs text-gray-500 dark:text-gray-400 mb-3">Ask me anything about this property!</p>
                           <div className="flex flex-wrap gap-1.5 justify-center">
                             {['Is there parking?', "What's nearby?", 'Pet policy?', 'Furnishing details?'].map(q => (
                               <button
@@ -916,7 +916,7 @@ const PropertyDetail = () => {
                                   };
                                   sendQ();
                                 }}
-                                className="text-[11px] px-2.5 py-1 rounded-full bg-white border border-gray-200 text-gray-600 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
+                                className="text-[11px] px-2.5 py-1 rounded-full bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-600 dark:text-gray-300 hover:border-indigo-300 hover:text-indigo-600 transition-colors"
                               >
                                 {q}
                               </button>
@@ -929,7 +929,7 @@ const PropertyDetail = () => {
                           <div className={`max-w-[85%] px-3 py-2 rounded-2xl text-sm ${
                             msg.role === 'user'
                               ? 'bg-indigo-600 text-white rounded-br-md'
-                              : 'bg-white text-gray-800 border border-gray-200 rounded-bl-md shadow-sm'
+                              : 'bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-100 border border-gray-200 dark:border-gray-700 rounded-bl-md shadow-sm'
                           }`}>
                             {msg.text}
                           </div>
@@ -937,7 +937,7 @@ const PropertyDetail = () => {
                       ))}
                       {chatLoading && (
                         <div className="flex justify-start">
-                          <div className="bg-white border border-gray-200 rounded-2xl rounded-bl-md px-4 py-2 shadow-sm">
+                          <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-2xl rounded-bl-md px-4 py-2 shadow-sm">
                             <div className="flex gap-1">
                               <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '0ms' }} />
                               <div className="w-2 h-2 bg-gray-300 rounded-full animate-bounce" style={{ animationDelay: '150ms' }} />
@@ -988,14 +988,14 @@ const PropertyDetail = () => {
                           setChatLoading(false);
                         }
                       }}
-                      className="flex items-center gap-2 p-3 border-t border-gray-100 bg-white"
+                      className="flex items-center gap-2 p-3 border-t border-gray-100 dark:border-gray-800 bg-white dark:bg-gray-800"
                     >
                       <input
                         type="text"
                         value={chatInput}
                         onChange={(e) => setChatInput(e.target.value)}
                         placeholder="Ask about this property..."
-                        className="flex-1 text-sm px-3 py-2 rounded-lg border border-gray-200 focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none"
+                        className="flex-1 text-sm px-3 py-2 rounded-lg border border-gray-200 dark:border-gray-700 focus:ring-1 focus:ring-indigo-400 focus:border-indigo-400 outline-none"
                         disabled={chatLoading}
                       />
                       <button
@@ -1013,25 +1013,25 @@ const PropertyDetail = () => {
               {/* Contact/Owner Card */}
               {property.owner_id && (
                 <div className="bg-gradient-to-br from-indigo-50 to-white rounded-2xl p-6 border border-indigo-100">
-                   <h3 className="text-lg font-semibold text-gray-900 mb-2">Listed by Host</h3>
+                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Listed by Host</h3>
                    <div className="flex items-center gap-4 mt-4">
                      <div className="h-12 w-12 rounded-full bg-indigo-600 text-white flex items-center justify-center text-xl font-bold">
                        {(property.owner_name || (property.owner_id && property.owner_id.name) || 'H').charAt(0).toUpperCase()}
                      </div>
                      <div>
-                       <p className="text-sm font-medium text-gray-900">{property.owner_name || (property.owner_id && property.owner_id.name) || 'Host'}</p>
-                       <p className="text-sm text-gray-500">{property.email || (property.owner_id && property.owner_id.email)}</p>
+                       <p className="text-sm font-medium text-gray-900 dark:text-white">{property.owner_name || (property.owner_id && property.owner_id.name) || 'Host'}</p>
+                       <p className="text-sm text-gray-500 dark:text-gray-400">{property.email || (property.owner_id && property.owner_id.email)}</p>
                      </div>
                    </div>
                    
                    <div className="mt-6 flex flex-col gap-3">
                      {property.phone_number && (
-                       <a href={`tel:${property.phone_number}`} className="w-full flex items-center justify-center bg-white border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
+                       <a href={`tel:${property.phone_number}`} className="w-full flex items-center justify-center bg-white dark:bg-gray-800 border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
                          Call Now
                        </a>
                      )}
                      {(property.email || (property.owner_id && property.owner_id.email)) && (
-                       <a href={`mailto:${property.email || (property.owner_id && property.owner_id.email)}`} className="w-full flex items-center justify-center bg-white border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
+                       <a href={`mailto:${property.email || (property.owner_id && property.owner_id.email)}`} className="w-full flex items-center justify-center bg-white dark:bg-gray-800 border border-indigo-200 text-indigo-700 py-2 rounded-xl font-medium hover:bg-indigo-50 transition-colors shadow-sm">
                          Email Host
                        </a>
                      )}
@@ -1039,15 +1039,15 @@ const PropertyDetail = () => {
 
                    <hr className="my-6 border-indigo-100" />
                    
-                   <h4 className="text-md font-semibold text-gray-900 mb-4">Send a Message</h4>
+                   <h4 className="text-md font-semibold text-gray-900 dark:text-white mb-4">Send a Message</h4>
                    {contactStatus.success && <div className="p-3 bg-green-50 text-green-700 rounded-lg text-sm mb-4">Message sent successfully!</div>}
                    {contactStatus.error && <div className="p-3 bg-red-50 text-red-700 rounded-lg text-sm mb-4">{contactStatus.error}</div>}
                    
                    <form onSubmit={handleContactSubmit} className="space-y-3">
-                     <input required type="text" placeholder="Your Name" value={contactForm.name} onChange={(e) => setContactForm({...contactForm, name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
-                     <input required type="email" placeholder="Your Email" value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
-                     <input type="tel" placeholder="Your Phone Number (optional)" value={contactForm.phone_number} onChange={(e) => setContactForm({...contactForm, phone_number: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
-                     <textarea required placeholder="I'm interested in this property..." rows="3" value={contactForm.message} onChange={(e) => setContactForm({...contactForm, message: e.target.value})} className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"></textarea>
+                     <input required type="text" placeholder="Your Name" value={contactForm.name} onChange={(e) => setContactForm({...contactForm, name: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
+                     <input required type="email" placeholder="Your Email" value={contactForm.email} onChange={(e) => setContactForm({...contactForm, email: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
+                     <input type="tel" placeholder="Your Phone Number (optional)" value={contactForm.phone_number} onChange={(e) => setContactForm({...contactForm, phone_number: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm" />
+                     <textarea required placeholder="I'm interested in this property..." rows="3" value={contactForm.message} onChange={(e) => setContactForm({...contactForm, message: e.target.value})} className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg focus:ring-indigo-500 focus:border-indigo-500 text-sm"></textarea>
                      <button disabled={contactStatus.loading} type="submit" className="w-full bg-indigo-600 text-white py-2.5 px-4 rounded-xl font-medium hover:bg-indigo-700 transition-colors shadow-sm disabled:opacity-50">
                        {contactStatus.loading ? 'Sending...' : 'Send Message'}
                      </button>

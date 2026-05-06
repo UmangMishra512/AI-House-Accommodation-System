@@ -159,7 +159,7 @@ const Profile = () => {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh]">
         <Loader2 className="h-10 w-10 text-indigo-600 animate-spin mb-4" />
-        <p className="text-gray-500 font-medium">Loading your profile...</p>
+        <p className="text-gray-500 dark:text-gray-400 font-medium">Loading your profile...</p>
       </div>
     );
   }
@@ -167,7 +167,7 @@ const Profile = () => {
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
       {/* Profile Header */}
-      <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-8 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-100 dark:border-gray-800 p-8 mb-8">
         <div className="flex flex-col md:flex-row items-center gap-8">
           <div className="relative">
             <div className="h-28 w-28 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-full flex items-center justify-center shadow-lg">
@@ -175,7 +175,7 @@ const Profile = () => {
             </div>
             <button 
               onClick={() => setEditingProfile(true)}
-              className="absolute -bottom-1 -right-1 bg-white p-2 rounded-full shadow-md border border-gray-100 hover:text-indigo-600 transition-colors"
+              className="absolute -bottom-1 -right-1 bg-white dark:bg-gray-800 p-2 rounded-full shadow-md border border-gray-100 dark:border-gray-800 hover:text-indigo-600 transition-colors"
             >
               <Edit className="h-4 w-4" />
             </button>
@@ -185,12 +185,12 @@ const Profile = () => {
             {editingProfile ? (
               <form onSubmit={handleUpdateProfile} className="space-y-4 max-w-md">
                 <div>
-                  <label className="block text-sm font-semibold text-gray-700 mb-1">Full Name</label>
+                  <label className="block text-sm font-semibold text-gray-700 dark:text-gray-200 mb-1">Full Name</label>
                   <input
                     type="text"
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
-                    className="w-full px-4 py-2 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
+                    className="w-full px-4 py-2 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none"
                     required
                   />
                 </div>
@@ -206,7 +206,7 @@ const Profile = () => {
                   <button
                     type="button"
                     onClick={() => setEditingProfile(false)}
-                    className="bg-gray-100 text-gray-600 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-all"
+                    className="bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 px-4 py-2 rounded-lg font-medium hover:bg-gray-200 transition-all"
                   >
                     Cancel
                   </button>
@@ -214,8 +214,8 @@ const Profile = () => {
               </form>
             ) : (
               <>
-                <h1 className="text-3xl font-bold text-gray-900 mb-1">{user?.user_metadata?.name || 'User'}</h1>
-                <p className="text-gray-500 text-lg mb-4">{user?.email}</p>
+                <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-1">{user?.user_metadata?.name || 'User'}</h1>
+                <p className="text-gray-500 dark:text-gray-400 text-lg mb-4">{user?.email}</p>
                 <div className="flex flex-wrap justify-center md:justify-start gap-4">
                   <div className="bg-indigo-50 px-4 py-2 rounded-xl border border-indigo-100">
                     <p className="text-xs text-indigo-600 font-bold uppercase tracking-wider">Total Listings</p>
@@ -233,16 +233,16 @@ const Profile = () => {
       </div>
 
       <div className="flex items-center justify-between mb-6">
-        <div className="flex border-b border-gray-200 gap-8">
+        <div className="flex border-b border-gray-200 dark:border-gray-700 gap-8">
           <button 
             onClick={() => setActiveTab('properties')}
-            className={`pb-4 text-lg font-bold border-b-2 transition-colors ${activeTab === 'properties' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            className={`pb-4 text-lg font-bold border-b-2 transition-colors ${activeTab === 'properties' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'}`}
           >
             My Properties
           </button>
           <button 
             onClick={() => setActiveTab('chats')}
-            className={`pb-4 text-lg font-bold border-b-2 transition-colors ${activeTab === 'chats' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+            className={`pb-4 text-lg font-bold border-b-2 transition-colors ${activeTab === 'chats' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'}`}
           >
             My AI Chats
           </button>
@@ -260,20 +260,20 @@ const Profile = () => {
 
       {activeTab === 'properties' ? (
         properties.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-            <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <div className="text-center py-20 bg-gray-50 dark:bg-gray-900 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+            <div className="bg-white dark:bg-gray-800 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
               <Home className="h-8 w-8 text-gray-400" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">No properties listed yet</h3>
-            <p className="text-gray-500 mb-8 max-w-sm mx-auto">Start by adding your first property to reach thousands of potential customers.</p>
-            <Link to="/dashboard" className="bg-white border border-gray-200 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm">
+            <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No properties listed yet</h3>
+            <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">Start by adding your first property to reach thousands of potential customers.</p>
+            <Link to="/dashboard" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 dark:bg-gray-900 transition-all shadow-sm">
               Go to Dashboard
             </Link>
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
             {properties.map(property => (
-              <div key={property.id} className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+              <div key={property.id} className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden flex flex-col group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
                 <div className="relative h-56 overflow-hidden">
                   <img 
                     src={property.images && property.images[0] ? property.images[0] : 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=800'} 
@@ -286,8 +286,8 @@ const Profile = () => {
                 </div>
                 <div className="p-6 flex-1 flex flex-col justify-between">
                   <div>
-                    <h3 className="text-xl font-bold text-gray-900 line-clamp-1 mb-2">{property.title}</h3>
-                    <p className="text-gray-500 flex items-center gap-2 text-sm mb-4">
+                    <h3 className="text-xl font-bold text-gray-900 dark:text-white line-clamp-1 mb-2">{property.title}</h3>
+                    <p className="text-gray-500 dark:text-gray-400 flex items-center gap-2 text-sm mb-4">
                       <MapPin className="w-4 h-4 text-indigo-500"/> {property.location}
                     </p>
                     <div className="flex items-center gap-1 text-2xl font-black text-indigo-600">
@@ -297,10 +297,10 @@ const Profile = () => {
                     </div>
                   </div>
                   
-                  <div className="mt-8 flex items-center justify-between border-t border-gray-100 pt-5">
+                  <div className="mt-8 flex items-center justify-between border-t border-gray-100 dark:border-gray-800 pt-5">
                     <button 
                       onClick={() => toggleStatus(property.id, property.status)}
-                      className={`text-sm font-bold flex items-center gap-2 transition-colors ${property.status === 'available' ? 'text-gray-500 hover:text-red-600' : 'text-gray-500 hover:text-green-600'}`}
+                      className={`text-sm font-bold flex items-center gap-2 transition-colors ${property.status === 'available' ? 'text-gray-500 dark:text-gray-400 hover:text-red-600' : 'text-gray-500 dark:text-gray-400 hover:text-green-600'}`}
                     >
                       {property.status === 'available' ? <><XCircle className="w-4 h-4"/> Mark Rented</> : <><CheckCircle className="w-4 h-4"/> Mark Available</>}
                     </button>
@@ -328,13 +328,13 @@ const Profile = () => {
         )
       ) : (
         chatSessions.length === 0 ? (
-          <div className="text-center py-20 bg-gray-50 rounded-3xl border-2 border-dashed border-gray-200">
-             <div className="bg-white p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
+          <div className="text-center py-20 bg-gray-50 dark:bg-gray-900 rounded-3xl border-2 border-dashed border-gray-200 dark:border-gray-700">
+             <div className="bg-white dark:bg-gray-800 p-4 rounded-full w-16 h-16 flex items-center justify-center mx-auto mb-4 shadow-sm">
                <MessageCircle className="h-8 w-8 text-indigo-400" />
              </div>
-             <h3 className="text-xl font-bold text-gray-900 mb-2">No chat history</h3>
-             <p className="text-gray-500 mb-8 max-w-sm mx-auto">You haven't chatted with the AI about any properties yet.</p>
-             <Link to="/properties" className="bg-white border border-gray-200 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 transition-all shadow-sm">
+             <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-2">No chat history</h3>
+             <p className="text-gray-500 dark:text-gray-400 mb-8 max-w-sm mx-auto">You haven't chatted with the AI about any properties yet.</p>
+             <Link to="/properties" className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-indigo-600 px-6 py-3 rounded-xl font-bold hover:bg-gray-50 dark:bg-gray-900 transition-all shadow-sm">
                Explore Properties
              </Link>
           </div>
@@ -345,21 +345,21 @@ const Profile = () => {
                 key={session.id} 
                 to={`/property/${session.property_id}`} 
                 state={{ openChat: true, maximizeChat: true }}
-                className="bg-white rounded-2xl shadow-sm border border-gray-200 p-5 hover:shadow-lg transition-all flex flex-col transform hover:-translate-y-1"
+                className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 p-5 hover:shadow-lg transition-all flex flex-col transform hover:-translate-y-1"
               >
                 <div className="flex items-center gap-4 mb-4">
                   <img src={session.properties?.images?.[0] || 'https://images.unsplash.com/photo-1564013799919-ab600027ffc6?auto=format&fit=crop&q=80&w=150'} alt="Property" className="w-16 h-16 rounded-xl object-cover" />
                   <div>
-                    <h4 className="font-bold text-gray-900 line-clamp-1">{session.properties?.title || 'Unknown Property'}</h4>
-                    <p className="text-xs text-gray-500 mt-1">Last active: {new Date(session.updated_at).toLocaleDateString()}</p>
+                    <h4 className="font-bold text-gray-900 dark:text-white line-clamp-1">{session.properties?.title || 'Unknown Property'}</h4>
+                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Last active: {new Date(session.updated_at).toLocaleDateString()}</p>
                   </div>
                 </div>
-                <div className="bg-indigo-50/50 rounded-xl p-4 flex-1 text-sm text-gray-700 italic line-clamp-3">
+                <div className="bg-indigo-50/50 rounded-xl p-4 flex-1 text-sm text-gray-700 dark:text-gray-200 italic line-clamp-3">
                    {session.messages && session.messages.length > 0 
                      ? `"${session.messages[session.messages.length - 1].text}"` 
                      : 'No messages yet.'}
                 </div>
-                <div className="mt-4 pt-4 border-t border-gray-100 text-indigo-600 font-semibold text-sm flex items-center justify-between">
+                <div className="mt-4 pt-4 border-t border-gray-100 dark:border-gray-800 text-indigo-600 font-semibold text-sm flex items-center justify-between">
                   <span className="bg-indigo-50 px-2.5 py-1 rounded-md">{session.messages?.length || 0} messages</span>
                   <span className="flex items-center gap-1 hover:text-indigo-800">Continue Chat <ArrowLeft className="w-4 h-4 rotate-180" /></span>
                 </div>
@@ -372,8 +372,8 @@ const Profile = () => {
       {/* Edit Property Modal */}
       {editingProperty && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
-            <div className="px-8 py-6 border-b border-gray-100 flex justify-between items-center bg-indigo-600">
+          <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-2xl w-full max-w-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div className="px-8 py-6 border-b border-gray-100 dark:border-gray-800 flex justify-between items-center bg-indigo-600">
               <h3 className="text-xl font-bold text-white">Edit Property</h3>
               <button onClick={() => setEditingProperty(null)} className="text-white/80 hover:text-white transition-colors">
                 <X className="h-6 w-6" />
@@ -381,41 +381,41 @@ const Profile = () => {
             </div>
             <form onSubmit={handleUpdateProperty} className="p-8 space-y-5">
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Property Title</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1.5">Property Title</label>
                 <input
                   type="text"
                   value={editFormData.title}
                   onChange={(e) => setEditFormData({...editFormData, title: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Location</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1.5">Location</label>
                 <input
                   type="text"
                   value={editFormData.location}
                   onChange={(e) => setEditFormData({...editFormData, location: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Monthly Rent (₹)</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1.5">Monthly Rent (₹)</label>
                 <input
                   type="number"
                   value={editFormData.price}
                   onChange={(e) => setEditFormData({...editFormData, price: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all"
                   required
                 />
               </div>
               <div>
-                <label className="block text-sm font-bold text-gray-700 mb-1.5">Description</label>
+                <label className="block text-sm font-bold text-gray-700 dark:text-gray-200 mb-1.5">Description</label>
                 <textarea
                   value={editFormData.description}
                   onChange={(e) => setEditFormData({...editFormData, description: e.target.value})}
-                  className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all h-32 resize-none"
+                  className="w-full px-4 py-3 rounded-xl border border-gray-200 dark:border-gray-700 focus:ring-2 focus:ring-indigo-500 focus:border-transparent outline-none transition-all h-32 resize-none"
                   required
                 ></textarea>
               </div>
@@ -431,7 +431,7 @@ const Profile = () => {
                 <button
                   type="button"
                   onClick={() => setEditingProperty(null)}
-                  className="flex-1 bg-gray-100 text-gray-600 py-3.5 rounded-2xl font-bold hover:bg-gray-200 transition-all"
+                  className="flex-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-300 py-3.5 rounded-2xl font-bold hover:bg-gray-200 transition-all"
                 >
                   Cancel
                 </button>

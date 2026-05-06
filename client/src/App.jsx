@@ -29,7 +29,7 @@ const ProtectedRoute = ({ children }) => {
 const App = () => {
   const location = useLocation();
   return (
-    <div className="font-sans antialiased text-gray-900 bg-white dark:bg-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
+    <div className="font-sans antialiased text-gray-900 dark:text-white bg-white dark:bg-gray-900 dark:text-gray-100 min-h-screen flex flex-col transition-colors duration-300">
       <Navbar />
       <main key={location.pathname} className="flex-grow animate-fade-in">
         <Suspense fallback={<div className="flex items-center justify-center h-[50vh]"><div className="animate-spin rounded-full h-8 w-8 border-b-2 border-indigo-600"></div></div>}>

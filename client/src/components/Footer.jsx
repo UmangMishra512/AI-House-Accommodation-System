@@ -146,7 +146,7 @@ const Footer = () => {
         </div>
 
         {/* Bottom Bar */}
-        <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 font-medium">
+        <div className="pt-8 border-t border-gray-800 flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-gray-500 dark:text-gray-400 font-medium">
           <p>© {new Date().getFullYear()} AI Accommodate. All rights reserved.</p>
           <div className="flex items-center gap-1">
             Made with <Heart className="h-4 w-4 text-red-500 fill-red-500 mx-0.5" /> in India

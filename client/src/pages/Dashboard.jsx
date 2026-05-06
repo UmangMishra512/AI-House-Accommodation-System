@@ -443,14 +443,14 @@ const Dashboard = () => {
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-      <h1 className="text-3xl font-bold text-gray-900 mb-8 flex items-center gap-2">
+      <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-8 flex items-center gap-2">
         <Settings className="w-8 h-8 text-indigo-600" />
         Host Dashboard
       </h1>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Form Section */}
-        <div className="lg:col-span-1 border border-gray-200 bg-white p-6 rounded-xl shadow-sm h-fit max-h-[80vh] overflow-y-auto">
+        <div className="lg:col-span-1 border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-6 rounded-xl shadow-sm h-fit max-h-[80vh] overflow-y-auto">
           <h2 className="text-xl font-semibold mb-4 flex items-center gap-2">
             <Plus className="w-5 h-5 text-indigo-500" /> Add New Property
           </h2>
@@ -461,12 +461,12 @@ const Dashboard = () => {
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm font-medium text-gray-700">Title</label>
-              <input type="text" name="title" required value={formData.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Title</label>
+              <input type="text" name="title" required value={formData.title} onChange={handleChange} className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
             </div>
             <div>
               <div className="flex justify-between items-end mb-1">
-                <label className="block text-sm font-medium text-gray-700">Description</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Description</label>
                 {imagePreviews.length > 0 && (
                   <button
                     type="button"
@@ -511,11 +511,11 @@ const Dashboard = () => {
                   </button>
                 )}
               </div>
-              <textarea name="description" required value={formData.description} onChange={handleChange} rows="3" className="mt-1 block w-full border border-gray-300 rounded-md p-2" placeholder={imagePreviews.length > 0 ? 'Upload photos and click "AI Describe" to auto-generate, or type manually...' : 'Describe your property...'} />
+              <textarea name="description" required value={formData.description} onChange={handleChange} rows="3" className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" placeholder={imagePreviews.length > 0 ? 'Upload photos and click "AI Describe" to auto-generate, or type manually...' : 'Describe your property...'} />
             </div>
             <div>
               <div className="flex justify-between items-end mb-1">
-                <label className="block text-sm font-medium text-gray-700">Price (₹)</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Price (₹)</label>
                 {formData.price && formData.lat && formData.location && (
                   <button
                     type="button"
@@ -547,14 +547,14 @@ const Dashboard = () => {
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <IndianRupee className="h-4 w-4 text-gray-400" />
                 </div>
-                <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
+                <input type="number" name="price" required value={formData.price} onChange={handleChange} className="block w-full pl-9 border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" />
               </div>
               {/* Price Benchmark Card */}
               {priceBenchmark && (
                 <div className="mt-2 p-3 rounded-lg bg-gradient-to-r from-emerald-50 to-teal-50 border border-emerald-100">
                   {priceBenchmark.avg ? (
                     <>
-                      <div className="flex items-center justify-between text-xs text-gray-600 mb-2">
+                      <div className="flex items-center justify-between text-xs text-gray-600 dark:text-gray-300 mb-2">
                         <span>₹{priceBenchmark.min?.toLocaleString('en-IN')}</span>
                         <span className="font-semibold text-emerald-700">Avg: ₹{priceBenchmark.avg?.toLocaleString('en-IN')}</span>
                         <span>₹{priceBenchmark.max?.toLocaleString('en-IN')}</span>
@@ -565,7 +565,7 @@ const Dashboard = () => {
                           style={{ width: `${Math.min(priceBenchmark.percentile, 100)}%` }}
                         />
                       </div>
-                      <p className="text-xs text-gray-500 mt-1">{priceBenchmark.count} nearby listings • Your price is in the {priceBenchmark.percentile}th percentile</p>
+                      <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">{priceBenchmark.count} nearby listings • Your price is in the {priceBenchmark.percentile}th percentile</p>
                     </>
                   ) : null}
                   <p className="text-xs font-medium text-emerald-800 mt-1 flex items-center gap-1">
@@ -576,7 +576,7 @@ const Dashboard = () => {
             </div>
             <div className="relative" ref={searchRef}>
               <div className="flex justify-between items-end mb-1">
-                <label className="block text-sm font-medium text-gray-700">Location Name</label>
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">Location Name</label>
                 <button 
                   type="button" 
                   onClick={handleCurrentLocation}
@@ -596,16 +596,16 @@ const Dashboard = () => {
                   onChange={handleLocationSearch}
                   onFocus={() => {if(locationSuggestions.length > 0) setShowSuggestions(true)}}
                   placeholder="Search location..."
-                  className="block w-full pl-9 border border-gray-300 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
+                  className="block w-full pl-9 border border-gray-300 dark:border-gray-600 rounded-md p-2 focus:ring-indigo-500 focus:border-indigo-500 transition-colors" 
                 />
               </div>
               {/* Autocomplete Dropdown */}
               {showSuggestions && locationSuggestions.length > 0 && (
-                <ul className="absolute z-10 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-y-auto">
+                <ul className="absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-md shadow-lg max-h-60 overflow-y-auto">
                   {locationSuggestions.map((result, index) => (
                     <li 
                       key={index} 
-                      className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700 border-b border-gray-100 last:border-b-0"
+                      className="px-4 py-2 hover:bg-indigo-50 cursor-pointer text-sm text-gray-700 dark:text-gray-200 border-b border-gray-100 dark:border-gray-800 last:border-b-0"
                       onClick={() => selectLocation(result)}
                     >
                       {result.label}
@@ -626,7 +626,7 @@ const Dashboard = () => {
             </div>
             
             <div>
-              <label className="block text-xs font-medium text-gray-500 mb-1">Or paste a Google Maps link (with @ in URL works best)</label>
+              <label className="block text-xs font-medium text-gray-500 dark:text-gray-400 mb-1">Or paste a Google Maps link (with @ in URL works best)</label>
               <div className="relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Link2 className="h-4 w-4 text-gray-400" />
@@ -635,15 +635,15 @@ const Dashboard = () => {
                   type="text" 
                   placeholder="https://www.google.com/maps/place/...@lat,lng..." 
                   onChange={handleGoogleMapsLinkPaste}
-                  className="block w-full pl-9 border border-gray-300 rounded-md py-1.5 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
+                  className="block w-full pl-9 border border-gray-300 dark:border-gray-600 rounded-md py-1.5 focus:ring-indigo-500 focus:border-indigo-500 text-sm transition-colors"
                 />
               </div>
             </div>
             
-            <div className="pt-4 border-t border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Pin Location on Map</h3>
-              <p className="text-xs text-gray-500 mb-2">Auto-filled via search or click map to adjust.</p>
-              <div className="h-48 w-full rounded-md border border-gray-300 overflow-hidden mb-2 z-0">
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Pin Location on Map</h3>
+              <p className="text-xs text-gray-500 dark:text-gray-400 mb-2">Auto-filled via search or click map to adjust.</p>
+              <div className="h-48 w-full rounded-md border border-gray-300 dark:border-gray-600 overflow-hidden mb-2 z-0">
                 <MapContainer center={[formData.lat, formData.lng]} zoom={4} style={{ height: '100%', width: '100%' }}>
                   <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" />
                   <LocationMarker 
@@ -653,39 +653,39 @@ const Dashboard = () => {
                   />
                 </MapContainer>
               </div>
-              <div className="flex gap-4 text-xs text-gray-500">
+              <div className="flex gap-4 text-xs text-gray-500 dark:text-gray-400">
                 <div>Lat: {formData.lat.toFixed(4)}</div>
                 <div>Lng: {formData.lng.toFixed(4)}</div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
-              <h3 className="text-sm font-semibold text-gray-900 mb-2">Contact Details</h3>
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <h3 className="text-sm font-semibold text-gray-900 dark:text-white mb-2">Contact Details</h3>
               <div className="space-y-3">
-                <input type="text" name="owner_name" value={formData.owner_name} onChange={handleChange} placeholder="Owner Name" className="block w-full border border-gray-300 rounded-md p-2" />
-                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" className="block w-full border border-gray-300 rounded-md p-2" />
+                <input type="text" name="owner_name" value={formData.owner_name} onChange={handleChange} placeholder="Owner Name" className="block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
+                <input type="email" name="email" value={formData.email} onChange={handleChange} placeholder="Email Address" className="block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
                 <div className="flex gap-2">
-                  <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} className="border border-gray-300 rounded-md p-2 text-sm w-24">
+                  <select value={phoneCode} onChange={(e) => setPhoneCode(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded-md p-2 text-sm w-24">
                     <option value="+91">🇮🇳 +91</option>
                     <option value="+1">🇺🇸 +1</option>
                     <option value="+44">🇬🇧 +44</option>
                   </select>
-                  <input type="tel" name="phone_number" required value={formData.phone_number} onChange={handlePhoneChange} placeholder="10-digit Phone Number" className="block w-full border border-gray-300 rounded-md p-2" />
+                  <input type="tel" name="phone_number" required value={formData.phone_number} onChange={handlePhoneChange} placeholder="10-digit Phone Number" className="block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
                 </div>
                 <div className="flex gap-2">
-                  <select value={altPhoneCode} onChange={(e) => setAltPhoneCode(e.target.value)} className="border border-gray-300 rounded-md p-2 text-sm w-24">
+                  <select value={altPhoneCode} onChange={(e) => setAltPhoneCode(e.target.value)} className="border border-gray-300 dark:border-gray-600 rounded-md p-2 text-sm w-24">
                     <option value="+91">🇮🇳 +91</option>
                     <option value="+1">🇺🇸 +1</option>
                     <option value="+44">🇬🇧 +44</option>
                   </select>
-                  <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handlePhoneChange} placeholder="10-digit Alt Phone (optional)" className="block w-full border border-gray-300 rounded-md p-2" />
+                  <input type="tel" name="alternate_phone" value={formData.alternate_phone} onChange={handlePhoneChange} placeholder="10-digit Alt Phone (optional)" className="block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
                 </div>
               </div>
             </div>
 
-            <div className="pt-4 border-t border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Property Images</label>
-              <input type="file" multiple accept="image/jpeg, image/png, image/jpg" onChange={handleImageChange} className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Property Images</label>
+              <input type="file" multiple accept="image/jpeg, image/png, image/jpg" onChange={handleImageChange} className="block w-full text-sm text-gray-500 dark:text-gray-400 file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100" />
               {imagePreviews.length > 0 && (
                 <div className="mt-4 grid grid-cols-3 gap-2">
                   {imagePreviews.map((src, idx) => {
@@ -720,7 +720,7 @@ const Dashboard = () => {
                               setEnhancingImage(null);
                             }
                           }}
-                          className="absolute bottom-1 right-1 bg-white/90 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 disabled:opacity-50"
+                          className="absolute bottom-1 right-1 bg-white dark:bg-gray-800/90 text-purple-600 text-[10px] px-1.5 py-0.5 rounded font-medium opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 disabled:opacity-50"
                           title="AI Enhance"
                         >
                           {enhancingImage === idx ? <Loader2 className="w-2.5 h-2.5 animate-spin" /> : <Zap className="w-2.5 h-2.5" />}
@@ -733,8 +733,8 @@ const Dashboard = () => {
               )}
             </div>
             
-            <div className="pt-4 border-t border-gray-100">
-              <label className="block text-sm font-medium text-gray-700 mb-2">Video URLs <span className="text-xs text-gray-400 font-normal">(YouTube, Google Drive, or direct links)</span></label>
+            <div className="pt-4 border-t border-gray-100 dark:border-gray-800">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200 mb-2">Video URLs <span className="text-xs text-gray-400 font-normal">(YouTube, Google Drive, or direct links)</span></label>
               <div className="space-y-2">
                 {videoUrls.map((url, idx) => (
                   <div key={idx} className="flex gap-2">
@@ -747,7 +747,7 @@ const Dashboard = () => {
                         setVideoUrls(updated);
                       }} 
                       placeholder={idx === 0 ? "https://www.youtube.com/watch?v=... or Drive link" : `Video URL ${idx + 1}`}
-                      className="block w-full border border-gray-300 rounded-md p-2" 
+                      className="block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" 
                     />
                     {videoUrls.length > 1 && (
                       <button type="button" onClick={() => setVideoUrls(videoUrls.filter((_, i) => i !== idx))} className="text-red-500 hover:text-red-700 px-2">
@@ -762,8 +762,8 @@ const Dashboard = () => {
               </div>
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700">3D Models Embed URL (e.g. Luma AI)</label>
-              <input type="url" name="ai_model_url" value={formData.ai_model_url} onChange={handleChange} className="mt-1 block w-full border border-gray-300 rounded-md p-2" />
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">3D Models Embed URL (e.g. Luma AI)</label>
+              <input type="url" name="ai_model_url" value={formData.ai_model_url} onChange={handleChange} className="mt-1 block w-full border border-gray-300 dark:border-gray-600 rounded-md p-2" />
             </div>
             <button
               type="submit"
@@ -779,17 +779,17 @@ const Dashboard = () => {
         <div className="lg:col-span-2 space-y-4">
           
           {/* Tabs Navigation */}
-          <div className="flex gap-4 border-b border-gray-200">
+          <div className="flex gap-4 border-b border-gray-200 dark:border-gray-700">
             <button 
               onClick={() => setTab('properties')}
-              className={`pb-3 font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'properties' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              className={`pb-3 font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'properties' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'}`}
             >
               <Home className="w-5 h-5" />
               My Properties
             </button>
             <button 
               onClick={() => setTab('queries')}
-              className={`pb-3 font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'queries' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 hover:text-gray-700'}`}
+              className={`pb-3 font-medium flex items-center gap-2 transition-colors border-b-2 ${activeTab === 'queries' ? 'border-indigo-600 text-indigo-600' : 'border-transparent text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:text-gray-200'}`}
             >
               <Mail className="w-5 h-5" />
               My Queries
@@ -802,9 +802,9 @@ const Dashboard = () => {
           {activeTab === 'properties' && (
             <div className="space-y-4 pt-4 animate-in fade-in duration-300">
               {properties.length === 0 ? (
-                <div className="text-gray-500 p-12 border border-dashed border-gray-300 rounded-xl text-center bg-white flex flex-col items-center">
+                <div className="text-gray-500 dark:text-gray-400 p-12 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-center bg-white dark:bg-gray-800 flex flex-col items-center">
                   <Home className="w-12 h-12 text-gray-300 mb-3" />
-                  <p className="font-medium text-gray-700">No properties listed yet.</p>
+                  <p className="font-medium text-gray-700 dark:text-gray-200">No properties listed yet.</p>
                   <p className="text-sm">Use the form on the left to add your first property.</p>
                 </div>
               ) : (
@@ -812,8 +812,8 @@ const Dashboard = () => {
                   const propertyUrl = `${window.location.origin}/property/${property.id}`;
                   
                   return (
-                  <div key={property.id} className="flex flex-col xl:flex-row bg-white shadow-sm border border-gray-200 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
-                    <div className="w-full xl:w-56 h-56 xl:h-auto relative bg-gray-100 flex-shrink-0">
+                  <div key={property.id} className="flex flex-col xl:flex-row bg-white dark:bg-gray-800 shadow-sm border border-gray-200 dark:border-gray-700 rounded-xl overflow-hidden hover:shadow-md transition-shadow">
+                    <div className="w-full xl:w-56 h-56 xl:h-auto relative bg-gray-100 dark:bg-gray-800 flex-shrink-0">
                       {property.ai_model_url ? (
                         <model-viewer 
                           src={property.ai_model_url} 
@@ -828,12 +828,12 @@ const Dashboard = () => {
                     <div className="p-5 flex-1 flex flex-col justify-between">
                       <div>
                         <div className="flex justify-between items-start">
-                          <h3 className="text-lg font-bold text-gray-900 line-clamp-1">{property.title}</h3>
+                          <h3 className="text-lg font-bold text-gray-900 dark:text-white line-clamp-1">{property.title}</h3>
                           <button onClick={() => handleDelete(property.id)} className="text-red-500 hover:text-red-700 p-1 bg-red-50 rounded transition-colors">
                             <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
-                        <p className="text-gray-500 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
+                        <p className="text-gray-500 dark:text-gray-400 mt-1 flex items-center gap-1 text-sm"><MapPin className="w-4 h-4"/> {property.location}</p>
                         <a 
                           href={`https://www.google.com/maps/search/?api=1&query=${property.lat},${property.lng}`}
                           target="_blank"
@@ -851,7 +851,7 @@ const Dashboard = () => {
                         
                         <div className="flex flex-wrap items-center gap-3">
                           {/* INCREASED QR CODE SIZE */}
-                          <div className="bg-gray-50 p-2 rounded-xl border border-gray-200" title="Scan to view on mobile">
+                          <div className="bg-gray-50 dark:bg-gray-900 p-2 rounded-xl border border-gray-200 dark:border-gray-700" title="Scan to view on mobile">
                             <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} style={{ width: '80px', height: '80px' }} />
                           </div>
                           
@@ -886,44 +886,44 @@ const Dashboard = () => {
           {activeTab === 'queries' && (
             <div className="space-y-4 pt-4 animate-in fade-in duration-300">
               {messages.length === 0 ? (
-                <div className="text-gray-500 p-12 border border-dashed border-gray-300 rounded-xl text-center bg-white flex flex-col items-center">
+                <div className="text-gray-500 dark:text-gray-400 p-12 border border-dashed border-gray-300 dark:border-gray-600 rounded-xl text-center bg-white dark:bg-gray-800 flex flex-col items-center">
                   <CheckCircle className="w-12 h-12 text-green-400 mb-3" />
-                  <p className="font-medium text-gray-700">You're all caught up!</p>
+                  <p className="font-medium text-gray-700 dark:text-gray-200">You're all caught up!</p>
                   <p className="text-sm">No new inquiries for your properties.</p>
                 </div>
               ) : (
                 messages.map(msg => (
-                  <div key={msg.id} className="bg-white p-5 rounded-xl border border-gray-200 shadow-sm flex flex-col gap-3">
-                    <div className="flex justify-between items-start border-b border-gray-100 pb-3">
+                  <div key={msg.id} className="bg-white dark:bg-gray-800 p-5 rounded-xl border border-gray-200 dark:border-gray-700 shadow-sm flex flex-col gap-3">
+                    <div className="flex justify-between items-start border-b border-gray-100 dark:border-gray-800 pb-3">
                       <div>
-                        <h4 className="font-bold text-gray-900">{msg.name}</h4>
+                        <h4 className="font-bold text-gray-900 dark:text-white">{msg.name}</h4>
                         <div className="flex gap-2 items-center flex-wrap">
                           <a href={`mailto:${msg.email}`} className="text-sm text-indigo-600 hover:underline">{msg.email}</a>
                           {msg.phone_number && (
-                            <a href={`tel:${msg.phone_number}`} className="text-sm text-indigo-600 hover:underline border-l border-gray-300 pl-2">
+                            <a href={`tel:${msg.phone_number}`} className="text-sm text-indigo-600 hover:underline border-l border-gray-300 dark:border-gray-600 pl-2">
                               {msg.phone_number}
                             </a>
                           )}
                         </div>
                       </div>
-                      <span className="text-xs text-gray-500 bg-gray-100 px-2 py-1 rounded-md font-medium">
+                      <span className="text-xs text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-800 px-2 py-1 rounded-md font-medium">
                         {format(new Date(msg.created_at), 'MMM dd, h:mm a')}
                       </span>
                     </div>
                     <div>
-                      <p className="text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1">Inquiry Regarding</p>
-                      <p className="text-sm font-medium text-gray-800 bg-gray-50 p-2 rounded-md border border-gray-100">{msg.property?.title || 'Deleted Property'}</p>
+                      <p className="text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-1">Inquiry Regarding</p>
+                      <p className="text-sm font-medium text-gray-800 dark:text-gray-100 bg-gray-50 dark:bg-gray-900 p-2 rounded-md border border-gray-100 dark:border-gray-800">{msg.property?.title || 'Deleted Property'}</p>
                     </div>
                     <div className="mt-2">
-                      <p className="text-sm text-gray-700 whitespace-pre-wrap">{msg.message}</p>
+                      <p className="text-sm text-gray-700 dark:text-gray-200 whitespace-pre-wrap">{msg.message}</p>
                     </div>
-                    <div className="mt-3 pt-3 border-t border-gray-100 flex flex-wrap justify-end gap-2">
+                    <div className="mt-3 pt-3 border-t border-gray-100 dark:border-gray-800 flex flex-wrap justify-end gap-2">
                       {msg.phone_number && (
                         <>
-                          <a href={`tel:${msg.phone_number}`} className="text-sm bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                          <a href={`tel:${msg.phone_number}`} className="text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 dark:bg-gray-900 transition-colors">
                             Call
                           </a>
-                          <a href={`sms:${msg.phone_number}`} className="text-sm bg-white border border-gray-200 text-gray-700 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 transition-colors">
+                          <a href={`sms:${msg.phone_number}`} className="text-sm bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 text-gray-700 dark:text-gray-200 px-4 py-2 rounded-lg font-medium hover:bg-gray-50 dark:bg-gray-900 transition-colors">
                             Text Message
                           </a>
                         </>

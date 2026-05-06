@@ -4,18 +4,18 @@ import { Building, Globe, QrCode, Sparkles, MessageCircle, BarChart3, Search, Wa
 
 const Home = () => {
   return (
-    <div className="bg-gray-50">
+    <div className="bg-gray-50 dark:bg-gray-900">
       {/* Hero Section */}
-      <section className="relative bg-white overflow-hidden">
+      <section className="relative bg-white dark:bg-gray-800 overflow-hidden">
         <div className="max-w-7xl mx-auto">
-          <div className="relative z-10 pb-8 bg-white sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-20">
+          <div className="relative z-10 pb-8 bg-white dark:bg-gray-800 sm:pb-16 md:pb-20 lg:max-w-2xl lg:w-full lg:pb-28 xl:pb-32 pt-20">
             <main className="mt-10 mx-auto max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
               <div className="sm:text-center lg:text-left">
-                <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+                <h1 className="text-4xl tracking-tight font-extrabold text-gray-900 dark:text-white sm:text-5xl md:text-6xl">
                   <span className="block xl:inline">Experience homes in</span>{' '}
                   <span className="block text-indigo-600 xl:inline">stunning 3D</span>
                 </h1>
-                <p className="mt-3 text-base text-gray-500 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
+                <p className="mt-3 text-base text-gray-500 dark:text-gray-400 sm:mt-5 sm:text-lg sm:max-w-xl sm:mx-auto md:mt-5 md:text-xl lg:mx-0">
                   List your property with interactive 3D virtual tours, AI-powered descriptions, and smart search. The future of property discovery — powered by artificial intelligence.
                 </p>
                 <div className="mt-5 sm:mt-8 sm:flex sm:justify-center lg:justify-start">
@@ -50,66 +50,66 @@ const Home = () => {
       </section>
 
       {/* AI-Powered Features Section */}
-      <section className="py-16 bg-gray-50">
+      <section className="py-16 bg-gray-50 dark:bg-gray-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
             <h2 className="text-base text-indigo-600 font-semibold tracking-wide uppercase">AI-Powered Platform</h2>
-            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 sm:text-4xl">
+            <p className="mt-2 text-3xl leading-8 font-extrabold tracking-tight text-gray-900 dark:text-white sm:text-4xl">
               The smartest way to list & discover real estate
             </p>
-            <p className="mt-4 max-w-2xl text-xl text-gray-500 mx-auto">
+            <p className="mt-4 max-w-2xl text-xl text-gray-500 dark:text-gray-400 mx-auto">
               Six powerful features, all powered by artificial intelligence.
             </p>
           </div>
 
           <div className="mt-12">
             <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-3">
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow group">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow group">
                 <div className="w-12 h-12 bg-gradient-to-br from-purple-100 to-indigo-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Wand2 className="h-6 w-6 text-purple-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">AI Magic Describer</h3>
-                <p className="mt-2 text-gray-500">Upload photos and let AI write a professional property description automatically. No more writer's block.</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">AI Magic Describer</h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">Upload photos and let AI write a professional property description automatically. No more writer's block.</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow group">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow group">
                 <div className="w-12 h-12 bg-gradient-to-br from-blue-100 to-cyan-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <MessageCircle className="h-6 w-6 text-blue-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">Chat with the House</h3>
-                <p className="mt-2 text-gray-500">Every listing has an AI chatbot that answers tenant questions instantly — "Is there parking?", "What's nearby?"</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Chat with the House</h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">Every listing has an AI chatbot that answers tenant questions instantly — "Is there parking?", "What's nearby?"</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow group">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow group">
                 <div className="w-12 h-12 bg-gradient-to-br from-emerald-100 to-teal-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <BarChart3 className="h-6 w-6 text-emerald-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">AI Price Benchmark</h3>
-                <p className="mt-2 text-gray-500">Compare your rent against nearby listings. Get AI-powered pricing advice to stay competitive.</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">AI Price Benchmark</h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">Compare your rent against nearby listings. Get AI-powered pricing advice to stay competitive.</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow group">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow group">
                 <div className="w-12 h-12 bg-gradient-to-br from-amber-100 to-orange-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Search className="h-6 w-6 text-amber-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">Lifestyle Search</h3>
-                <p className="mt-2 text-gray-500">Search naturally — "quiet 2BHK near metro in Koramangala" — and find what you actually want.</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Lifestyle Search</h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">Search naturally — "quiet 2BHK near metro in Koramangala" — and find what you actually want.</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow group">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow group">
                 <div className="w-12 h-12 bg-gradient-to-br from-rose-100 to-pink-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Zap className="h-6 w-6 text-rose-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">Smart Photo Enhance</h3>
-                <p className="mt-2 text-gray-500">AI analyzes your property photos and automatically enhances brightness, contrast, and warmth for professional results.</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">Smart Photo Enhance</h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">AI analyzes your property photos and automatically enhances brightness, contrast, and warmth for professional results.</p>
               </div>
 
-              <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100 hover:shadow-md transition-shadow group">
+              <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm p-6 border border-gray-100 dark:border-gray-800 hover:shadow-md transition-shadow group">
                 <div className="w-12 h-12 bg-indigo-100 rounded-lg flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
                   <Globe className="h-6 w-6 text-indigo-600" />
                 </div>
-                <h3 className="text-lg font-medium text-gray-900">3D Virtual Tours</h3>
-                <p className="mt-2 text-gray-500">Embed Luma AI or Matterport 3D tours, making every listing an interactive, immersive experience.</p>
+                <h3 className="text-lg font-medium text-gray-900 dark:text-white">3D Virtual Tours</h3>
+                <p className="mt-2 text-gray-500 dark:text-gray-400">Embed Luma AI or Matterport 3D tours, making every listing an interactive, immersive experience.</p>
               </div>
             </div>
           </div>
