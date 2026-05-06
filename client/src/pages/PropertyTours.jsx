@@ -45,13 +45,21 @@ const PropertyTours = () => {
           <Link to="/" className="inline-flex items-center gap-1 text-indigo-200 hover:text-white text-sm font-medium mb-6 transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Home
           </Link>
-          <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight mb-4">
-            3D Property Tours
-          </h1>
-          <p className="text-lg sm:text-xl text-indigo-100 max-w-2xl leading-relaxed">
+          <div className="flex items-center gap-4 flex-wrap">
+            <h1 className="text-4xl sm:text-5xl font-extrabold tracking-tight">
+              3D Property Tours
+            </h1>
+            <span className="bg-amber-400 text-amber-900 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wider shadow-lg animate-pulse">
+              Coming Soon
+            </span>
+          </div>
+          <p className="text-lg sm:text-xl text-indigo-100 max-w-2xl leading-relaxed mt-4">
             Step inside your next home without stepping outside yours. Our AI-powered 3D tours bring properties to life with photorealistic detail, interactive walkthroughs, and immersive panoramic views.
           </p>
-          <div className="mt-8 flex gap-4">
+          <div className="mt-8 flex items-center gap-4 flex-wrap">
+            <div className="bg-white/10 backdrop-blur-sm border border-white/20 text-white px-6 py-3 rounded-xl font-semibold flex items-center gap-2">
+              🚧 This feature is under active development
+            </div>
             <Link to="/properties" className="bg-white text-indigo-700 px-6 py-3 rounded-xl font-semibold hover:bg-indigo-50 transition-colors shadow-lg">
               Explore Properties
             </Link>
