@@ -86,8 +86,8 @@ const AdminDashboard = () => {
     return (
       <div className="flex flex-col items-center justify-center mt-20 text-center px-4">
         <Shield className="w-16 h-16 text-red-500 mb-4" />
-        <h2 className="text-2xl font-bold text-gray-900 mb-2">Access Denied</h2>
-        <p className="text-gray-500 max-w-md">You do not have administrative privileges. Please ensure you have run the Supabase SQL migration script to assign your email as an admin.</p>
+        <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Access Denied</h2>
+        <p className="text-gray-500 dark:text-gray-400 max-w-md">You do not have administrative privileges. Please ensure you have run the Supabase SQL migration script to assign your email as an admin.</p>
       </div>
     );
   }
@@ -106,7 +106,7 @@ const AdminDashboard = () => {
   }).reverse();
 
   return (
-    <div className="min-h-screen bg-gray-50/50">
+    <div className="min-h-screen bg-gray-50/50 dark:bg-gray-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
         {/* Header Section */}
@@ -116,11 +116,11 @@ const AdminDashboard = () => {
               <Shield className="w-8 h-8 text-indigo-600" />
             </div>
             <div>
-              <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Admin Console</h1>
-              <p className="text-sm text-gray-500 font-medium mt-1">Manage users, listings, and platform communications</p>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">Admin Console</h1>
+              <p className="text-sm text-gray-500 dark:text-gray-400 font-medium mt-1">Manage users, listings, and platform communications</p>
             </div>
           </div>
-          <button onClick={fetchData} className="px-4 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors shadow-sm">
+          <button onClick={fetchData} className="px-4 py-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-200 hover:bg-gray-50 dark:bg-gray-800 transition-colors shadow-sm">
             Refresh Data
           </button>
         </div>
@@ -133,7 +133,7 @@ const AdminDashboard = () => {
         )}
 
         {/* Navigation Tabs */}
-        <div className="flex gap-2 overflow-x-auto pb-4 mb-6 border-b border-gray-200 scrollbar-hide">
+        <div className="flex gap-2 overflow-x-auto pb-4 mb-6 border-b border-gray-200 dark:border-gray-700 scrollbar-hide">
           <TabButton active={activeTab === 'overview'} onClick={() => setActiveTab('overview')} icon={LayoutDashboard} label="Overview" />
           <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} icon={Users} label={`Users (${users.length})`} />
           <TabButton active={activeTab === 'properties'} onClick={() => setActiveTab('properties')} icon={Home} label={`Properties (${properties.length})`} />
@@ -152,8 +152,8 @@ const AdminDashboard = () => {
             </div>
 
             {/* Charts Section */}
-            <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm">
-              <h2 className="text-lg font-bold text-gray-900 mb-6">Listing Growth (Last 7 Days)</h2>
+            <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm">
+              <h2 className="text-lg font-bold text-gray-900 dark:text-white mb-6">Listing Growth (Last 7 Days)</h2>
               <div className="h-[300px] w-full">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={last7DaysProperties}>
@@ -170,19 +170,19 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'users' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in duration-300">
             <DataTable 
               columns={['Name', 'Email', 'Role', 'Joined', 'Actions']}
               data={users.map(u => (
-                <tr key={u.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">{u.name || 'Anonymous'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{u.email}</td>
+                <tr key={u.id} className="hover:bg-gray-50/50 dark:bg-gray-900 transition-colors">
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">{u.name || 'Anonymous'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{u.email}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm">
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 text-gray-800'}`}>
+                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${u.role === 'admin' ? 'bg-purple-100 text-purple-800' : 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-100'}`}>
                       {u.role}
                     </span>
                   </td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{format(new Date(u.created_at), 'MMM dd, yyyy')}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{format(new Date(u.created_at), 'MMM dd, yyyy')}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onClick={() => handleDeleteUser(u.id)} disabled={u.id === user?.id} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
                       <Trash2 className="w-4 h-4"/>
@@ -195,15 +195,15 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'properties' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in duration-300">
              <DataTable 
               columns={['Property', 'Host', 'Location', 'Price', 'Actions']}
               data={properties.map(p => (
-                <tr key={p.id} className="hover:bg-gray-50/50 transition-colors">
-                  <td className="px-6 py-4 text-sm font-medium text-gray-900 max-w-[200px] truncate">{p.title}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.owner?.name || p.owner_name || 'Unknown'}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{p.location}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">₹{p.price?.toLocaleString('en-IN') || p.price}</td>
+                <tr key={p.id} className="hover:bg-gray-50/50 dark:bg-gray-900 transition-colors">
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900 dark:text-white max-w-[200px] truncate">{p.title}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{p.owner?.name || p.owner_name || 'Unknown'}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{p.location}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900 dark:text-white">₹{p.price?.toLocaleString('en-IN') || p.price}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onClick={() => handleDeleteProperty(p.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4"/>
@@ -216,19 +216,19 @@ const AdminDashboard = () => {
         )}
 
         {activeTab === 'messages' && (
-          <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden animate-in fade-in duration-300">
+          <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden animate-in fade-in duration-300">
              <DataTable 
               columns={['Sender', 'Property', 'Message', 'Date', 'Actions']}
               data={messages.map(m => (
-                <tr key={m.id} className="hover:bg-gray-50/50 transition-colors">
+                <tr key={m.id} className="hover:bg-gray-50/50 dark:bg-gray-900 transition-colors">
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <p className="text-sm font-medium text-gray-900">{m.name}</p>
-                    <p className="text-xs text-gray-500">{m.email}</p>
-                    {m.phone_number && <p className="text-xs text-gray-500">{m.phone_number}</p>}
+                    <p className="text-sm font-medium text-gray-900 dark:text-white">{m.name}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{m.email}</p>
+                    {m.phone_number && <p className="text-xs text-gray-500 dark:text-gray-400">{m.phone_number}</p>}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-indigo-600 font-medium">{m.property?.title || 'Deleted Property'}</td>
-                  <td className="px-6 py-4 text-sm text-gray-500 max-w-[300px] truncate">{m.message}</td>
-                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{format(new Date(m.created_at), 'MMM dd, HH:mm')}</td>
+                  <td className="px-6 py-4 text-sm text-gray-500 dark:text-gray-400 max-w-[300px] truncate">{m.message}</td>
+                  <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">{format(new Date(m.created_at), 'MMM dd, HH:mm')}</td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                     <button onClick={() => handleDeleteMessage(m.id)} className="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors">
                       <Trash2 className="w-4 h-4"/>
@@ -252,10 +252,10 @@ const TabButton = ({ active, onClick, icon: Icon, label }) => (
     className={`flex items-center gap-2 px-4 py-2.5 rounded-lg font-medium text-sm transition-all whitespace-nowrap ${
       active 
         ? 'bg-indigo-50 text-indigo-700 shadow-sm ring-1 ring-indigo-200' 
-        : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+        : 'text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:bg-gray-700 hover:text-gray-900 dark:text-white'
     }`}
   >
-    <Icon className={`w-4 h-4 ${active ? 'text-indigo-600' : 'text-gray-500'}`} />
+    <Icon className={`w-4 h-4 ${active ? 'text-indigo-600' : 'text-gray-500 dark:text-gray-400'}`} />
     {label}
   </button>
 );
@@ -269,10 +269,10 @@ const StatCard = ({ title, value, icon: Icon, color }) => {
   };
   
   return (
-    <div className="bg-white p-6 rounded-2xl border border-gray-200 shadow-sm flex items-center justify-between group hover:border-gray-300 transition-colors">
+    <div className="bg-white dark:bg-gray-800 p-6 rounded-2xl border border-gray-200 dark:border-gray-700 shadow-sm flex items-center justify-between group hover:border-gray-300 dark:border-gray-600 transition-colors">
       <div>
-        <p className="text-sm font-semibold text-gray-500 mb-1">{title}</p>
-        <p className="text-3xl font-bold text-gray-900 tracking-tight">{value}</p>
+        <p className="text-sm font-semibold text-gray-500 dark:text-gray-400 mb-1">{title}</p>
+        <p className="text-3xl font-bold text-gray-900 dark:text-white tracking-tight">{value}</p>
       </div>
       <div className={`p-4 rounded-2xl border ${colorMap[color]} transition-transform group-hover:scale-105`}>
         <Icon className="w-6 h-6" />
@@ -283,20 +283,20 @@ const StatCard = ({ title, value, icon: Icon, color }) => {
 
 const DataTable = ({ columns, data }) => (
   <div className="overflow-x-auto">
-    <table className="min-w-full divide-y divide-gray-200">
-      <thead className="bg-gray-50/50">
+    <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+      <thead className="bg-gray-50/50 dark:bg-gray-900">
         <tr>
           {columns.map((col, i) => (
-            <th key={i} className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 uppercase tracking-wider ${i === columns.length - 1 ? 'text-right' : ''}`}>
+            <th key={i} className={`px-6 py-4 text-left text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider ${i === columns.length - 1 ? 'text-right' : ''}`}>
               {col}
             </th>
           ))}
         </tr>
       </thead>
-      <tbody className="bg-white divide-y divide-gray-100">
+      <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-100 dark:divide-gray-800">
         {data.length > 0 ? data : (
           <tr>
-            <td colSpan={columns.length} className="px-6 py-12 text-center text-sm text-gray-500">
+            <td colSpan={columns.length} className="px-6 py-12 text-center text-sm text-gray-500 dark:text-gray-400">
               No data available
             </td>
           </tr>
