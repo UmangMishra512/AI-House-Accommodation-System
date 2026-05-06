@@ -94,10 +94,10 @@ const Footer = () => {
           <div>
             <h4 className="text-lg font-bold mb-6 text-white border-l-4 border-indigo-600 pl-3">Platform</h4>
             <ul className="space-y-4">
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">3D Property Tours</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">AI Interior Design</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Instant Inquiries</a></li>
-              <li><a href="#" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</a></li>
+              <li><Link to="/3d-tours" className="text-gray-400 hover:text-white transition-colors">3D Property Tours</Link></li>
+              <li><Link to="/interior-design" className="text-gray-400 hover:text-white transition-colors">AI Interior Design</Link></li>
+              <li><Link to="/instant-inquiries" className="text-gray-400 hover:text-white transition-colors">Instant Inquiries</Link></li>
+              <li><Link to="/privacy-policy" className="text-gray-400 hover:text-white transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
 
@@ -153,7 +153,7 @@ const Footer = () => {
           </div>
           <div className="flex gap-6">
             <a href="#" className="hover:text-white transition-colors">Terms</a>
-            <a href="#" className="hover:text-white transition-colors">Privacy</a>
+            <Link to="/privacy-policy" className="hover:text-white transition-colors">Privacy</Link>
             <a href="#" className="hover:text-white transition-colors">Cookies</a>
           </div>
         </div>

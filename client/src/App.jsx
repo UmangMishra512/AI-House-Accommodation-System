@@ -15,6 +15,10 @@ const Profile = lazy(() => import('./pages/Profile'));
 const AdminDashboard = lazy(() => import('./pages/AdminDashboard'));
 const ResetPassword = lazy(() => import('./pages/ResetPassword'));
 const Compare = lazy(() => import('./pages/Compare'));
+const PropertyTours = lazy(() => import('./pages/PropertyTours'));
+const InteriorDesign = lazy(() => import('./pages/InteriorDesign'));
+const InstantInquiries = lazy(() => import('./pages/InstantInquiries'));
+const PrivacyPolicy = lazy(() => import('./pages/PrivacyPolicy'));
 
 // Protected Route Component
 const ProtectedRoute = ({ children }) => {
@@ -41,6 +45,10 @@ const App = () => {
             <Route path="/properties" element={<PropertyListing />} />
             <Route path="/property/:id" element={<PropertyDetail />} />
             <Route path="/compare" element={<Compare />} />
+            <Route path="/3d-tours" element={<PropertyTours />} />
+            <Route path="/interior-design" element={<InteriorDesign />} />
+            <Route path="/instant-inquiries" element={<InstantInquiries />} />
+            <Route path="/privacy-policy" element={<PrivacyPolicy />} />
             <Route 
               path="/dashboard" 
               element={
