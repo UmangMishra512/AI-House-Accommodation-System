@@ -671,11 +671,11 @@ const PropertyDetail = () => {
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Scan & Share</h3>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mb-6">Scan this QR code natively using a smartphone camera to save and share this property.</p>
                 <div className="flex flex-col items-center">
-                  <div className="flex justify-center p-4 bg-gray-50 dark:bg-gray-900 rounded-xl mb-4 w-full">
+                  <div className="flex justify-center p-4 bg-white rounded-xl mb-4 w-full">
                     <img 
                       src={property.qr_code_url || `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(window.location.href)}`} 
                       alt="Property QR Code" 
-                      className="w-48 h-48 mix-blend-multiply" 
+                      className="w-48 h-48" 
                     />
                   </div>
                   <div className="flex gap-2 w-full mt-4">

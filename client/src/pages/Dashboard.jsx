@@ -851,7 +851,7 @@ const Dashboard = () => {
                         
                         <div className="flex flex-wrap items-center gap-3">
                           {/* INCREASED QR CODE SIZE */}
-                          <div className="bg-gray-50 dark:bg-gray-900 p-2 rounded-xl border border-gray-200 dark:border-gray-700" title="Scan to view on mobile">
+                          <div className="bg-white p-2 rounded-xl border border-gray-200 dark:border-gray-700" title="Scan to view on mobile">
                             <QRCodeCanvas id={`qr-${property.id}`} value={propertyUrl} size={1024} level={"H"} style={{ width: '80px', height: '80px' }} />
                           </div>
                           
