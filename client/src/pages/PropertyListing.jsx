@@ -207,7 +207,8 @@ const PropertyListing = () => {
   const activeFilterCount = (priceRange[0] > 0 || priceRange[1] < maxPrice ? 1 : 0) + (sortBy !== 'newest' ? 1 : 0);
 
   return (
-    <div className="bg-gray-50 dark:bg-gray-900 min-h-screen py-8 sm:py-12">
+    <>
+    <div className={`bg-gray-50 dark:bg-gray-900 min-h-screen py-8 sm:py-12 ${compareList.length > 0 ? 'pb-28' : ''}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Header */}
         <div className="flex flex-col gap-4 mb-8">
@@ -510,57 +511,59 @@ const PropertyListing = () => {
           </p>
         )}
 
-        {/* Compare Floating Bar */}
-        {compareList.length > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transform transition-transform duration-300 z-50 animate-fade-in pb-safe">
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-              <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-                <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
-                  <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
-                    Compare ({compareList.length}/4)
-                  </span>
-                  <div className="flex items-center gap-2">
-                    {compareList.map(item => (
-                      <div key={item.id} className="relative group flex-shrink-0 w-12 h-12 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
-                        <img src={item.image || 'https://via.placeholder.com/100'} alt="" className="w-full h-full object-cover" />
-                        <button 
-                          onClick={() => removeCompareItem(item.id)}
-                          className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all"
-                        >
-                          <X className="w-4 h-4 text-white" />
-                        </button>
-                      </div>
-                    ))}
-                    {[...Array(4 - compareList.length)].map((_, i) => (
-                      <div key={`empty-${i}`} className="w-12 h-12 rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
-                        <span className="text-gray-300 text-xs">+</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-                <div className="flex items-center gap-3 w-full sm:w-auto">
-                  <button 
-                    onClick={() => setCompareList([])}
-                    className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
-                  >
-                    Clear
-                  </button>
-                  <Link 
-                    to="/compare"
-                    className={`flex-1 sm:flex-none px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors text-center ${
-                      compareList.length > 1 ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-400 cursor-not-allowed'
-                    }`}
-                    onClick={e => compareList.length < 2 && e.preventDefault()}
-                  >
-                    Compare Now
-                  </Link>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
+
+    {/* Compare Floating Bar — outside content wrappers for true fixed positioning */}
+    {compareList.length > 0 && (
+      <div className="fixed bottom-0 left-0 right-0 bg-white dark:bg-gray-800 border-t border-gray-200 dark:border-gray-700 shadow-[0_-10px_40px_-15px_rgba(0,0,0,0.1)] transform transition-transform duration-300 z-50 animate-fade-in pb-safe">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+          <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex items-center gap-3 w-full sm:w-auto overflow-x-auto pb-2 sm:pb-0 scrollbar-hide">
+              <span className="text-sm font-semibold text-gray-700 dark:text-gray-200 whitespace-nowrap">
+                Compare ({compareList.length}/4)
+              </span>
+              <div className="flex items-center gap-2">
+                {compareList.map(item => (
+                  <div key={item.id} className="relative group flex-shrink-0 w-12 h-12 rounded-md overflow-hidden border border-gray-200 dark:border-gray-700">
+                    <img src={item.image || 'https://via.placeholder.com/100'} alt="" className="w-full h-full object-cover" />
+                    <button 
+                      onClick={() => removeCompareItem(item.id)}
+                      className="absolute inset-0 bg-black/40 hidden group-hover:flex items-center justify-center transition-all"
+                    >
+                      <X className="w-4 h-4 text-white" />
+                    </button>
+                  </div>
+                ))}
+                {[...Array(4 - compareList.length)].map((_, i) => (
+                  <div key={`empty-${i}`} className="w-12 h-12 rounded-md border border-dashed border-gray-300 dark:border-gray-600 bg-gray-50 dark:bg-gray-900 flex items-center justify-center flex-shrink-0">
+                    <span className="text-gray-300 text-xs">+</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+            <div className="flex items-center gap-3 w-full sm:w-auto">
+              <button 
+                onClick={() => setCompareList([])}
+                className="flex-1 sm:flex-none px-4 py-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:text-white bg-gray-100 dark:bg-gray-800 hover:bg-gray-200 rounded-lg transition-colors"
+              >
+                Clear
+              </button>
+              <Link 
+                to="/compare"
+                className={`flex-1 sm:flex-none px-6 py-2 text-sm font-medium text-white rounded-lg transition-colors text-center ${
+                  compareList.length > 1 ? 'bg-indigo-600 hover:bg-indigo-700' : 'bg-indigo-400 cursor-not-allowed'
+                }`}
+                onClick={e => compareList.length < 2 && e.preventDefault()}
+              >
+                Compare Now
+              </Link>
+            </div>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
